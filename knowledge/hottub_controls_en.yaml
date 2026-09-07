@@ -77,7 +77,7 @@ nodes:
   - id: nordic.panel
     type: product
     name: Nordic Hot Tub Panel
-    aliases: [Nordic, 074102, 074112, 070046]
+    aliases: ["Nordic", "074102", "074112", "070046"]
     text: "Nordic control panels. Check your Nordic model number. We carry all 4-button and 5-button panels."
 
   - id: del.serial
