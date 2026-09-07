@@ -1,0 +1,36 @@
+{
+  "name": "Norwegian Balcony Door Hardware",
+  "version": "1.0.0",
+  "entities": [
+    {"id": "oem.gu", "type": "OEM", "name": "GU", "country": "DE"},
+    {"id": "oem.assa", "type": "OEM", "name": "ASSA", "country": "SE"},
+    {"id": "family.gu_espagnolette", "type": "ASSET_FAMILY", "name": "GU Espagnolette", "oem_id": "oem.gu", "aliases": ["GU lås", "espagnolette"], "category": "lock"},
+    {"id": "family.gu_gearbox", "type": "ASSET_FAMILY", "name": "GU Gearbox", "oem_id": "oem.gu", "aliases": ["GU gear"], "category": "mechanism"},
+    {"id": "family.assa_lock", "type": "ASSET_FAMILY", "name": "ASSA Lock", "oem_id": "oem.assa", "aliases": ["ASSA", "dørlås"], "category": "lock"},
+    {"id": "gen.gu_old", "type": "GENERATION", "model_id": "family.gu_espagnolette", "year_from": 1970, "year_to": 1990},
+    {"id": "gen.gu_mid", "type": "GENERATION", "model_id": "family.gu_espagnolette", "year_from": 1990, "year_to": 2004},
+    {"id": "gen.gu_new", "type": "GENERATION", "model_id": "family.gu_espagnolette", "year_from": 2004, "year_to": 2020},
+    {"id": "part.gu_923x", "type": "PART", "name": "GU Espagnolette 923X", "sku": "GU-923X", "mpn": "6-28740"},
+    {"id": "part.gu_new_gearbox", "type": "PART", "name": "GU New Gearbox", "sku": "GU-934K", "mpn": "934K"},
+    {"id": "part.assa_cylinder_60mm", "type": "PART", "name": "ASSA Cylinder 60mm", "sku": "ASSA-60"},
+    {"id": "supplier.systemlaas", "type": "SUPPLIER", "name": "SystemLaaS", "country": "NO", "website": "systemlaas.no"},
+    {"id": "supplier.ellefsen", "type": "SUPPLIER", "name": "Ellefsensikkerhet", "country": "NO", "website": "ellefsensikkerhet.no"},
+    {"id": "sku.gu_923x_systemlaas", "type": "SKU", "part_id": "part.gu_923x", "supplier_id": "supplier.systemlaas", "price": 1246, "currency": "NOK"},
+    {"id": "sku.gu_new_gearbox_systemlaas", "type": "SKU", "part_id": "part.gu_new_gearbox", "supplier_id": "supplier.systemlaas", "price": 850, "currency": "NOK"},
+    {"id": "sku.assa_cylinder_ellefsen", "type": "SKU", "part_id": "part.assa_cylinder_60mm", "supplier_id": "supplier.ellefsen", "price": 800, "currency": "NOK"},
+    {"id": "service.identify", "type": "SERVICE", "name": "Part Identification", "description": "Send photo + 3 measurements"},
+    {"id": "service.install", "type": "SERVICE", "name": "Installation", "description": "Book a certified installer"}
+  ],
+  "edges": [
+    {"from": "family.gu_espagnolette", "to": "gen.gu_old", "relation": "HAS_GENERATION"},
+    {"from": "family.gu_espagnolette", "to": "gen.gu_mid", "relation": "HAS_GENERATION"},
+    {"from": "family.gu_espagnolette", "to": "gen.gu_new", "relation": "HAS_GENERATION"},
+    {"from": "part.gu_923x", "to": "part.gu_new_gearbox", "relation": "SUPERSEDES"},
+    {"from": "sku.gu_923x_systemlaas", "to": "part.gu_923x", "relation": "SOLD_BY"},
+    {"from": "sku.gu_923x_systemlaas", "to": "supplier.systemlaas", "relation": "IN_STOCK_AT"},
+    {"from": "sku.gu_new_gearbox_systemlaas", "to": "part.gu_new_gearbox", "relation": "SOLD_BY"},
+    {"from": "sku.assa_cylinder_ellefsen", "to": "part.assa_cylinder_60mm", "relation": "SOLD_BY"},
+    {"from": "service.identify", "to": "part.gu_923x", "relation": "CAN_IDENTIFY"},
+    {"from": "service.install", "to": "part.gu_new_gearbox", "relation": "CAN_INSTALL"}
+  ]
+}

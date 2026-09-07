@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Drop Subgraph Schema v1",
+  
+  "entities": {
+    "OEM": {"properties": ["id", "name", "aliases", "country", "website"]},
+    "ASSET_FAMILY": {"properties": ["id", "name", "oem_id", "aliases", "category"]},
+    "MODEL": {"properties": ["id", "name", "family_id", "aliases"]},
+    "GENERATION": {"properties": ["id", "model_id", "year_from", "year_to", "serial_prefix"]},
+    "COMPONENT": {"properties": ["id", "name", "family_id", "type"]},
+    "PART": {"properties": ["id", "name", "component_id", "sku", "mpn"]},
+    "SKU": {"properties": ["id", "part_id", "supplier_id", "price", "currency", "stock"]},
+    "SUPPLIER": {"properties": ["id", "name", "type", "country", "website"]},
+    "DOCUMENT": {"properties": ["id", "type", "url", "title", "rights_status"]},
+    "QUESTION": {"properties": ["id", "question", "answer", "category"]},
+    "SERVICE": {"properties": ["id", "name", "type", "description"]}
+  },
+
+  "edges": {
+    "HAS_GENERATION": {"from": "ASSET_FAMILY", "to": "GENERATION"},
+    "HAS_COMPONENT": {"from": "ASSET_FAMILY", "to": "COMPONENT"},
+    "FITS": {"from": "PART", "to": "COMPONENT", "qualifiers": ["backset_mm", "centres_mm", "spindle_mm"]},
+    "DOES_NOT_FIT": {"from": "PART", "to": "COMPONENT", "qualifiers": ["reason"]},
+    "SUPERSEDES": {"from": "PART", "to": "PART"},
+    "REPLACED_BY": {"from": "PART", "to": "PART"},
+    "REQUIRES_PART": {"from": "COMPONENT", "to": "PART"},
+    "SOLD_BY": {"from": "SKU", "to": "SUPPLIER"},
+    "IN_STOCK_AT": {"from": "SKU", "to": "SUPPLIER"},
+    "DOCUMENTED_BY": {"from": "PART", "to": "DOCUMENT"},
+    "IDENTIFIED_BY": {"from": "COMPONENT", "to": "DOCUMENT"}
+  }
+}
