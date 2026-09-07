@@ -1,0 +1,107 @@
+business:
+  name: "SpaParts Suomi"
+  locale: "fi-FI"
+  phone: "+358 800 000 000"
+  hours:
+    maanantai-perjantai: "09:00-17:00"
+    lauantai: "10:00-14:00"
+    sunnuntai: "kiinni"
+agent:
+  system_prompt: |
+    Olet SpaParts Suomen asiakaspalvelu. Erikoistumme kuumailtay-ohjauspaneelien,
+    piirilevyjen ja varaosien Balboan, Geckon ja Nordicin jarjestelmille.
+    Kayta vain graafin todistetietoja. Jos et tieda, sano se.
+    Eskaloi epävarmuus hinnoista, yhteensopivuudesta tai turvallisuudesta.
+voice:
+  edge_voice: "fi-FI-SelmaNeural"
+nodes:
+  - id: business.main
+    type: business
+    name: SpaParts Suomi
+    text: "Erikoistunut kuumailtay-ohjauspaneelien ja varaosien kauppaan."
+
+  - id: policy.yhteensopivuus
+    type: policy
+    name: Yhteensopivuuspolitiiikka
+    aliases: [sopii, yhteensopiva, korvaava, passaako]
+    text: "Voimme vahvistaa yhteensopivuuden mallinumeron ja sarjanumeron perusteella. Emme takaa yhteensopivuutta ilman valokuvaa ja mittauksia."
+
+  - id: policy.palautus
+    type: policy
+    name: Palautuspolitiiikka
+    aliases: [palauta, takaisin, hyvitys, reklamaatio]
+    text: "Käyttämättömät osat voidaan palauttaa 30 päivän kuluessa. Asennetut tai räätälöidyt osat tarvitsevat inhimillisen arvion."
+
+  - id: policy.hinnat
+    type: policy
+    name: Hintapolitiikka
+    hints: [hinta, kustannus, tarjous, arvio]
+    text: "Hinnat riippuvat työn laajuudesta. Agentti voi selittää julistettuja hintaluokkia mutta ei voi keksia tai takata lopullista tarjousta."
+
+  - id: service.tunnistus
+    type: service
+    name: Osan tunnistus
+    aliases: [mikä tämä on, tunnista, etsi osa, auta minua]
+    text: "Lähetä kuva mekanismista ja kolme mittaa: takakappale, keskipisteeseen ja ruuvien väliin."
+
+  - id: service.asennus
+    type: service
+    name: Asennuspalvelu
+    aliases: [asenna, asennus, aika, varaa aika]
+    text: "Tarjoamme asennuspalveluja. Varaa aika puhelimella tai verkossa."
+
+  - id: service.korjaus
+    type: service
+    name: Korjauspalvelu
+    aliases: [korjaa, korjaa, rikkinäinen, hajonnut]
+    text: "Korjaamme vanhoja mekanismeja. Lähetä kuvat ja kuvaile ongelmaa."
+
+  - id: balboa.vl
+    type: product
+    name: Balboa VL sarja
+    aliases: [Balboa, VL260, VL404, ohjauspaneeli]
+    text: "Balboa VL sarjan ohjauspaneelit. Tarkista kuumailtay-merkki ja malli vuosi yhteensopivuuden varmistamiseksi. Hinta: 150-500 EUR."
+
+  - id: gecko.k500
+    type: product
+    name: Gecko IN.K500
+    aliases: [Gecko, IN.K500, Gecko-paneeli]
+    text: "Gecko IN.K500 ohjauspaneeli. Tarkista Gecko-jarjestelmasi malli."
+
+  - id: nordic.panel
+    type: product
+    name: Nordic kuumailtay-paneeli
+    aliases: ["Nordic", "074102", "074112", "070046"]
+    text: "Nordic ohjauspaneelit. Tarkista Nordic-mallinumerosi. Meillä on kaikki 4- ja 5-painikkeiset paneelit."
+
+  - id: faq.toimitus
+    type: faq
+    name: Toimitusaika
+    aliases: [toimitus, toimitusaika, kuinka kauan]
+    text: "Suomi: 1-3 arkipäivää. Express saatavilla."
+
+  - id: faq.takuu
+    type: faq
+    name: Takuu
+    aliases: [takuu, takuu, palautus]
+    text: "Kaikilla osilla on valmistajan takuu. 30 päivän palautusoikeus käyttämättömille osille."
+
+edges:
+  - source: service.tunnistus
+    target: balboa.vl
+    relation: voi_tunnistaa
+  - source: service.tunnistus
+    target: gecko.k500
+    relation: voi_tunnistaa
+  - source: service.tunnistus
+    target: nordic.panel
+    relation: voi_tunnistaa
+  - source: balboa.vl
+    target: policy.yhteensopivuus
+    relation: vaatii
+  - source: gecko.k500
+    target: policy.yhteensopivuus
+    relation: vaatii
+  - source: service.asennus
+    target: policy.hinnat
+    relation: vaatii
