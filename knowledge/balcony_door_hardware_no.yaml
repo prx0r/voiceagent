@@ -18,34 +18,144 @@ nodes:
   - id: business.main
     type: business
     name: Norsk Dør og Vindu AS
-    text: "Spesialisert på gamle dør- og vindusmekanismer."
+    text: "Spesialisert på gamle dør- og vindusmekanismer fra 1970-2000-tallet."
+
   - id: policy.kompatibilitet
     type: policy
     name: Kompatibilitetspolicy
-    aliases: [passer, kompatibel, erstatning]
+    aliases: [passer, kompatibel, erstatning, passer det]
     text: "Vi kan bekrefte kompatibilitet basert på mål og bilder. Vi garanterer ikke kompatibilitet uten foto og mål."
+
+  - id: policy.retur
+    type: policy
+    name: Returpolicy
+    aliases: [returnere, refund, sende tilbake, reklamasjon]
+    text: "Ubrukte deler kan returneres innen 30 dager. Spesialbestilte eller installerte deler krever menneskelig vurdering."
+
+  - id: policy.pris
+    type: policy
+    name: Prispolitikk
+    aliases: [pris, kostnad, tilbud, estimate]
+    text: "Priser avhenger av jobbomfang. Agenten kan forklare publiserte prisklasser men kan ikke oppfinne eller garantere endelig tilbud."
+
   - id: service.identifikasjon
     type: service
     name: Delidentifikasjon
-    aliases: [hva er dette, identifiser, finn del]
+    aliases: [hva er dette, identifiser, finn del, hjelp meg finne]
     text: "Send ett bilde av mekanismen og tre mål: bakstykke, sentrum-til-sentrum, og skrueavstand."
+
+  - id: service.montering
+    type: service
+    name: Monteringstjeneste
+    aliases: [montere, installere, time, bestille time]
+    text: "Vi tilbyr monteringstjenester. Bestill time via telefon eller nett."
+
+  - id: service.reparasjon
+    type: service
+    name: Reparasjonstjeneste
+    aliases: [reparere, fikse, ødelagt, knekt]
+    text: "Vi reparerer gamle mekanismer. Send bilder og beskriv problemet."
+
   - id: gu.espagnolette
     type: product
     name: GU Espagnolette
-    aliases: [GU lås, espagnolette, skyvedørslås]
-    text: "GU espagnolette mekanismer fra 1970-2000-tallet. Krever nøyaktige mål for erstatning."
-  - id: assa.lås
+    aliases: [GU lås, espagnolette, skyvedørslås, GU mekanisme]
+    text: "GU espagnolette mekanismer fra 1970-2000-tallet. Krever nøyaktige mål for erstatning. Pris: 500-1500 kr."
+
+  - id: gu.las
+    type: product
+    name: GU Lås
+    aliases: [GU dørlås, GU låsemekanisme]
+    text: "GU låser i flere generasjoner. Sjekk sylinderdiameter og grepelengde."
+
+  - id: assa.las
     type: product
     name: ASSA Lås
-    aliases: [ASSA, cylinderlås, dørlås]
-    text: "ASSA låser i flere generasjoner. Sjekk sylinderdiameter og grepelengde."
+    aliases: [ASSA, cylinderlås, dørlås, ASSA lås]
+    text: "ASSA låser i flere generasjoner. Sjekk sylinderdiameter og grepelengde. Pris: 400-1200 kr."
+
+  - id: assa.sylinder
+    type: product
+    name: ASSA Sylinder
+    aliases: [sylinder, nøkkel, sylinderinnsats]
+    text: "ASSA sylindere i forskjellige størrelser. Mål diameter før bestilling."
+
+  - id: grorud.mekanisme
+    type: product
+    name: Grorud Mekanisme
+    aliases: [Grorud, Grorud lås]
+    text: "Grorud mekanismer for eldre norske dører. Utgått men vi har deler på lager."
+
+  - id: fix.las
+    type: product
+    name: Fix Lås
+    aliases: [Fix, Fix lås]
+    text: "Fix låser for skandinaviske dører. Sjekk modellnummer."
+
+  - id: trioving.las
+    type: product
+    name: TrioVing Lås
+    aliases: [TrioVing, TrioVing lås]
+    text: "TrioVing låser i flere generasjoner."
+
+  - id: del.mal
+    type: product
+    name: Måleinstruksjon
+    aliases: [mål, målinger, hvordan måle]
+    text: "For å identifisere riktig del trenger du: 1) Bakstykke (mm), 2) Sentrum-til-sentrum (mm), 3) Skrueavstand (mm)."
+
+  - id: del.bilde
+    type: product
+    name: Bildekrav
+    aliases: [bilde, foto, bilde av delen]
+    text: "Send tydelig bilde av mekanismen. Vis: front, bak, eventuelle merking og nummer."
+
+  - id: faq.tid
+    type: faq
+    name: Leveringstid
+    aliases: [hvor lang tid, levering, frakt]
+    text: "Standard levering: 2-5 virkedager. Express: 1-2 virkedager."
+
+  - id: faq.garanti
+    type: faq
+    name: Garanti
+    aliases: [garanti, reklamasjon, klage]
+    text: "Alle deler har 2 års garanti. Reklamasjon innen 30 dager."
+
+  - id: escalation.sikkerhet
+    type: escalation
+    name: SikkerhetseSKalering
+    aliases: [sikkerhet, brann, lekkasjer]
+    text: "Ved sikkerhetsproblemer (brann, gasslekkasje, elektrisk) - eskaler umiddelbart til menneske."
+
 edges:
   - source: service.identifikasjon
     target: gu.espagnolette
-    relation: "kan_identifisere"
+    relation: kan_identifisere
   - source: service.identifikasjon
-    target: assa.lås
-    relation: "kan_identifisere"
+    target: assa.las
+    relation: kan_identifisere
+  - source: service.identifikasjon
+    target: grorud.mekanisme
+    relation: kan_identifisere
+  - source: service.identifikasjon
+    target: del.mal
+    relation: krever
+  - source: service.identifikasjon
+    target: del.bilde
+    relation: krever
   - source: gu.espagnolette
     target: policy.kompatibilitet
-    relation: "krever"
+    relation: krever
+  - source: assa.las
+    target: policy.kompatibilitet
+    relation: krever
+  - source: service.montering
+    target: policy.pris
+    relation: krever
+  - source: service.reparasjon
+    target: del.bilde
+    relation: krever
+  - source: service.reparasjon
+    target: policy.retur
+    relation: kan_utløse

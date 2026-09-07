@@ -13,9 +13,8 @@ from typing import Any
 
 # Language detection patterns — order matters (most specific first)
 LANG_PATTERNS = {
-    "no": [r"\b(hei|hallo|hva\s+er|hvordan|takk\s+for|ja\s+|nei\s+|dørlås|vindu|espagnolette|mekanisme|bestille\s+time|montering)\b"],
-    "nb": [r"\b(hei|hallo|hva\s+er|hvordan|takk\s+for|ja\s+|nei\s+|dørlås|vindu|espagnolette|mekanisme)\b"],
-    "sv": [r"\b(hej|hallå|vad\s+är|hur|tack\s+för|ja\s+|nej\s+|dörr|fönster|lås|mekanism)\b"],
+    "no": [r"\b(hei|hallo|hva\s+er|hvor\s+mye|kan\s+jeg|jeg\s+har|jeg\s+trenger|takk\s+for|dørlås|vindu|espagnolette|mekanisme|bestille\s+time|montering|lås\s+som|reservdel|skyvedør|hvilke\s+mål|returnere|åpne\s+i)\b"],
+    "sv": [r"\b(hej|hallå|vad\s+är|hur\s+mycket|jag\s+har|jag\s+behöver|tack\s+för|dörr|fönster|lås|mekanism)\b"],
     "fi": [r"\b(moi|hei|mikä|miten|kiitos|kyllä|ei|ovi|ikkuna|lukko|mekanismi)\b"],
     "da": [r"\b(hej|hej|hvad|hvordan|tak\s+for|ja\s+|nej\s+|dør|vindue|lås|mekanisme)\b"],
     "de": [r"\b(hallo|wie\s+geht|was\s+kostet|danke|ja\s+|nein\s+|tür|fenster|schloss)\b"],
