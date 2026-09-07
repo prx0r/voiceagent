@@ -1,0 +1,51 @@
+business:
+  name: "Norsk Dør og Vindu AS"
+  locale: "nb-NO"
+  phone: "+47 22 00 00 00"
+  hours:
+    mandag-fredag: "08:00-16:00"
+    lordag: "10:00-14:00"
+    sondag: "stengt"
+agent:
+  system_prompt: |
+    Du er kundeservice for Norsk Dør og Vindu. Vi spesialiserer oss på gamle
+    dør- og vindusmekanismer fra GU, ASSA, TrioVing, Grorud og Fix.
+    Bruk kun informasjon fra grafen. Hvis du ikke vet, si det.
+    Eskalér usikkerhet om sikkerhet, pris, kompatibilitet eller kvalitet.
+voice:
+  edge_voice: "nb-NO-PernilleNeural"
+nodes:
+  - id: business.main
+    type: business
+    name: Norsk Dør og Vindu AS
+    text: "Spesialisert på gamle dør- og vindusmekanismer."
+  - id: policy.kompatibilitet
+    type: policy
+    name: Kompatibilitetspolicy
+    aliases: [passer, kompatibel, erstatning]
+    text: "Vi kan bekrefte kompatibilitet basert på mål og bilder. Vi garanterer ikke kompatibilitet uten foto og mål."
+  - id: service.identifikasjon
+    type: service
+    name: Delidentifikasjon
+    aliases: [hva er dette, identifiser, finn del]
+    text: "Send ett bilde av mekanismen og tre mål: bakstykke, sentrum-til-sentrum, og skrueavstand."
+  - id: gu.espagnolette
+    type: product
+    name: GU Espagnolette
+    aliases: [GU lås, espagnolette, skyvedørslås]
+    text: "GU espagnolette mekanismer fra 1970-2000-tallet. Krever nøyaktige mål for erstatning."
+  - id: assa.lås
+    type: product
+    name: ASSA Lås
+    aliases: [ASSA, cylinderlås, dørlås]
+    text: "ASSA låser i flere generasjoner. Sjekk sylinderdiameter og grepelengde."
+edges:
+  - source: service.identifikasjon
+    target: gu.espagnolette
+    relation: "kan_identifisere"
+  - source: service.identifikasjon
+    target: assa.lås
+    relation: "kan_identifisere"
+  - source: gu.espagnolette
+    target: policy.kompatibilitet
+    relation: "krever"
