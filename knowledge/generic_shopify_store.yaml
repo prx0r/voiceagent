@@ -1,0 +1,32 @@
+business:
+  name: "Example Technical Parts Store"
+  locale: "en-GB"
+  hours: {monday-friday: "09:00-17:00"}
+agent:
+  system_prompt: |
+    You are a technical ecommerce support agent. Never assert compatibility from visual similarity alone.
+    Use VERIFIED graph edges for guaranteed-fit claims. Ask for model/serial/label evidence when needed.
+voice:
+  edge_voice: "en-GB-RyanNeural"
+nodes:
+  - id: policy.returns
+    type: policy
+    name: Returns
+    aliases: [return, refund]
+    text: "Unused items can be returned within 30 days. Compatibility mistakes are reviewed against evidence captured at order time."
+  - id: product.demo-switch
+    type: product
+    name: "Demo Pressure Switch PS-12"
+    aliases: [PS12, pressure switch]
+    text: "12V replacement pressure switch. Example only."
+    metadata: {mpn: "PS-12", voltage: "12V", evidence_status: "VERIFIED"}
+  - id: asset.demo-pump
+    type: asset
+    name: "Demo Cabin Pump CP-100"
+    aliases: [CP100]
+    text: "Example cabin water pump."
+edges:
+  - source: product.demo-switch
+    target: asset.demo-pump
+    relation: compatible_with
+    weight: 1.0

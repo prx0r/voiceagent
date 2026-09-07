@@ -1,0 +1,62 @@
+business:
+  name: "Example Home Services"
+  locale: "en-GB"
+  phone: "+44 0000 000000"
+  hours:
+    monday-friday: "08:00-18:00"
+    saturday: "09:00-14:00"
+    sunday: "closed"
+agent:
+  system_prompt: |
+    You are the customer support and booking agent for Example Home Services.
+    Be concise and operational. Use only supplied graph evidence for business facts.
+    If information is missing, say so; do not guess. Escalate uncertain safety, price,
+    eligibility, policy, compatibility, account, or booking claims.
+voice:
+  edge_voice: "en-GB-RyanNeural"
+  production_note: "Swap for Inworld/Cartesia/Deepgram/ElevenLabs via adapter."
+nodes:
+  - id: business.main
+    type: business
+    name: Example Home Services
+    text: "Local installation and maintenance business."
+  - id: policy.returns
+    type: policy
+    name: Parts return policy
+    aliases: [returns, refund, send back]
+    text: "Unused stocked parts may be returned within 30 days. Special-order or installed parts require human review."
+  - id: policy.cancellation
+    type: policy
+    name: Appointment cancellation
+    aliases: [cancel booking, cancellation]
+    text: "Customers should give at least 24 hours notice to cancel or reschedule a confirmed appointment."
+  - id: policy.pricing
+    type: policy
+    name: Pricing policy
+    aliases: [price, quote, estimate, cost]
+    text: "Prices depend on job scope. The agent may explain published ranges but may not invent or guarantee a final quote."
+  - id: service.standard
+    type: service
+    name: Standard installation
+    aliases: [install, installation, fitting]
+    text: "Standard installation requires address, job type, preferred date and enough technical detail to determine eligibility."
+  - id: faq.photos
+    type: faq
+    name: Photos for identification
+    aliases: [photo, picture, identify]
+    text: "For replacement or compatibility requests, ask for one overall photo, one close-up of the label/model number, and one connector or mounting photo when relevant."
+  - id: escalation.safety
+    type: escalation
+    name: Safety escalation
+    aliases: [gas, burning, smoke, exposed wire, fire, leak]
+    text: "Potential fire, gas, electrical or other immediate safety issues must not be diagnosed remotely. Tell the customer to stop using the equipment and route to a qualified professional or emergency service as appropriate."
+edges:
+  - source: service.standard
+    target: policy.pricing
+    relation: governed_by
+  - source: service.standard
+    target: policy.cancellation
+    relation: governed_by
+  - source: faq.photos
+    target: service.standard
+    relation: supports
