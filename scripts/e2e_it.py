@@ -26,16 +26,21 @@ def log(msg):
         f.write(line + "\n")
 
 
-def post(path, body, timeout=90):
+def post(path, body, timeout=90, retries=1):
     t0 = time.time()
-    r = urllib.request.Request(BASE + path, data=json.dumps(body).encode(),
-                               headers={"Content-Type": "application/json"},
-                               method="POST")
-    try:
-        with urllib.request.urlopen(r, timeout=timeout) as resp:
-            return resp.status, json.loads(resp.read().decode()), time.time() - t0
-    except Exception as e:
-        return -1, str(e), time.time() - t0
+    for attempt in range(retries + 1):
+        r = urllib.request.Request(BASE + path, data=json.dumps(body).encode(),
+                                   headers={"Content-Type": "application/json"},
+                                   method="POST")
+        try:
+            with urllib.request.urlopen(r, timeout=timeout) as resp:
+                return resp.status, json.loads(resp.read().decode()), time.time() - t0
+        except Exception as e:
+            err = str(e)
+            if attempt < retries:
+                time.sleep(3)
+                continue
+            return -1, err, time.time() - t0
 
 
 def check(name, cond, detail=""):
