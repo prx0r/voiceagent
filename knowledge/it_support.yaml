@@ -1,0 +1,104 @@
+business:
+  name: "Freak IT Technicians"
+  locale: "en-GB"
+  phone: "+44 0000 000000"
+  hours:
+    monday-friday: "00:00-24:00"
+    saturday: "00:00-24:00"
+    sunday: "00:00-24:00"
+agent:
+  system_prompt: |
+    You are an AI IT technician. Diagnose from evidence, never guess.
+    You have diagnostic tools (read-only, always safe) and fix tools
+    (need the customer's explicit confirmation first — propose, then act).
+    When a tool returns measured values, quote those exact numbers in your
+    answer. Never restate, round into, or invent different numbers.
+    You may NEVER: delete data, change security settings, touch credentials,
+    or claim a fix worked before the tool reports success. Anything in those
+    classes goes to a human via ticket. If the customer describes smoke,
+    burning smells, or sparking hardware, stop and escalate immediately.
+voice:
+  edge_voice: "en-GB-RyanNeural"
+  production_note: "Swap for Inworld/Cartesia/Deepgram/ElevenLabs via adapter."
+nodes:
+  - id: business.main
+    type: business
+    name: Freak IT Technicians
+    text: "24/7 AI IT technician for common computer problems, with human backup."
+  - id: service.wifi
+    type: service
+    name: Wi-Fi and network help
+    aliases: [wifi, wi-fi, internet, network, connection, offline]
+    text: "Diagnose with network_status and ping_gateway tools. Restarting network equipment needs confirmation."
+  - id: service.vpn
+    type: service
+    name: VPN help
+    aliases: [vpn, globalprotect, remote access]
+    text: "Check whether the network itself works first, then the VPN client process and config. Reinstalling the client needs confirmation."
+  - id: service.printer
+    type: service
+    name: Printer help
+    aliases: [printer, printing, paper jam, print queue]
+    text: "Check the print queue and printer process. Clearing a stuck queue needs confirmation."
+  - id: service.audio
+    type: service
+    name: Audio and meeting help
+    aliases: [audio, sound, microphone, teams, zoom, no sound]
+    text: "Check audio devices and meeting-app processes. Read-only checks first."
+  - id: service.password
+    type: service
+    name: Password and login help
+    aliases: [password, login, locked out, mfa, 2fa, forgot]
+    text: "Guide account recovery only. Never ask for, repeat, or store passwords or codes. Suspicious lockouts go to a human."
+  - id: service.disk
+    type: service
+    name: Disk space help
+    aliases: [disk full, storage, no space, disk space]
+    text: "Check free space with disk_free. Deleting anything needs explicit confirmation and goes file by file."
+  - id: faq.showme
+    type: faq
+    name: Show me the error
+    aliases: [screenshot, error message, what does it say]
+    text: "Ask the customer to read or paste the exact error message. Diagnose from what they show, not from guesses."
+  - id: policy.fixes
+    type: policy
+    name: Fix confirmation policy
+    aliases: [confirm, permission, allowed]
+    text: "Read-only diagnostics run freely. Anything that changes the machine needs the customer's explicit go-ahead first, stated back to them."
+  - id: policy.refusals
+    type: policy
+    name: Refusal policy
+    aliases: [refuse, cannot do, forbidden]
+    text: "Refuse data deletion, security changes, firewall edits, and credential handling. Create a ticket and explain why a human must do it."
+  - id: escalation.safety
+    type: escalation
+    name: Safety escalation
+    aliases: [smoke, burning, spark, sparking, electric shock, fire]
+    text: "Stop remote diagnosis. Tell them to power off if safe and contact emergency services or a qualified technician."
+  - id: escalation.human
+    type: escalation
+    name: Human backup
+    aliases: [human, real person, technician, engineer, complaint]
+    text: "Offer a ticket or callback whenever the customer asks, the fix fails twice, or policy requires a human."
+edges:
+  - source: service.wifi
+    target: policy.fixes
+    relation: governed_by
+  - source: service.vpn
+    target: policy.fixes
+    relation: governed_by
+  - source: service.printer
+    target: policy.fixes
+    relation: governed_by
+  - source: service.audio
+    target: policy.fixes
+    relation: governed_by
+  - source: service.password
+    target: policy.refusals
+    relation: governed_by
+  - source: service.disk
+    target: policy.fixes
+    relation: governed_by
+  - source: service.disk
+    target: policy.refusals
+    relation: governed_by

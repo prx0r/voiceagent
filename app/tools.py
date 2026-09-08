@@ -1,21 +1,38 @@
 from __future__ import annotations
 from datetime import datetime
 
+from . import ittools
+
 class ToolRegistry:
     def __init__(self, business: dict, store):
         self.business = business
         self.store = store
 
     def descriptions(self):
-        return {
+        base = {
             "create_support_ticket": "Create a support ticket when the customer needs a human or unresolved action. args: reason, summary",
             "request_callback": "Record a callback request. args: name, phone, reason",
             "check_business_hours": "Return configured business hours. args: none",
             "get_order_status": "Demo order lookup. args: order_id. Replace with Shopify/ERP adapter.",
             "book_slot": "Demo booking request. args: date, time, service. Replace with calendar/FSM adapter.",
         }
+        base.update(ittools.DESCRIPTIONS)
+        return base
 
     def call(self, name: str, args: dict, session_id: str):
+        if name in ittools.DESCRIPTIONS:
+            if name in ittools.SAFE:
+                res = ittools.diagnose(name, args)
+            elif name == "propose_fix":
+                res = ittools.propose(session_id, args.get("action", ""),
+                                      {k: v for k, v in args.items() if k != "action"})
+            elif name == "execute_fix":
+                res = ittools.execute(session_id, args.get("confirm_token", ""))
+            else:
+                res = {"ok": False, "error": f"unknown tool: {name}"}
+            ittools.audit(session_id, name,
+                          res.get("tier", "safe"), args, res)
+            return res
         if name == "create_support_ticket":
             tid = self.store.create_ticket(session_id, "support", args)
             return {"ok": True, "ticket_id": tid}

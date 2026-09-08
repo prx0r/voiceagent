@@ -47,9 +47,18 @@ async def chat(inp: ChatIn):
     tool_result = None
     if result.get("tool"):
         tool_result = tools.call(result["tool"], result.get("tool_args") or {}, sid)
-        # Never pretend success. Give the model one deterministic summary for MVP.
+        # Never pretend success. Second pass: the model summarizes the
+        # MEASURED result, so it can't hallucinate numbers it wrote blind.
         if tool_result.get("ok"):
-            result["answer"] = result.get("answer", "") + f"\n\nAction result: {tool_result}"
+            if llm.enabled:
+                summary = await llm.respond(
+                    sys + " Reply in two sentences max. Quote measured values exactly.",
+                    hist, inp.message,
+                    f"Measured tool result (ground truth, quote exactly): {tool_result}",
+                    {})
+                result["answer"] = summary.get("answer", result.get("answer", ""))
+            else:
+                result["answer"] = result.get("answer", "") + f"\n\nAction result: {tool_result}"
         else:
             result["answer"] = result.get("answer", "") + "\n\nI couldn't complete that action; a human should take over."
     store.add_message(sid, "assistant", result.get("answer", ""), {"evidence": evidence, "tool_result": tool_result})
