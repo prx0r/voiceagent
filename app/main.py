@@ -48,6 +48,12 @@ async def chat(inp: ChatIn):
     sys = business.get("agent",{}).get("system_prompt", "You are a precise customer support agent.")
     result = await llm.respond(sys, hist[:-1], inp.message, context, tools.descriptions())
     tool_result = None
+    # Output guard FIRST: a jailbroken turn must not reach tools either.
+    from .guard import enforce as _enforce
+    _g = _enforce(result.get("answer", ""), sid)
+    if _g != result.get("answer", ""):
+        result["answer"] = _g
+        result["tool"] = None
     if result.get("tool"):
         tool_result = tools.call(result["tool"], result.get("tool_args") or {}, sid)
         # Never pretend success. Second pass: the model summarizes the
@@ -64,6 +70,7 @@ async def chat(inp: ChatIn):
                 result["answer"] = result.get("answer", "") + f"\n\nAction result: {tool_result}"
         else:
             result["answer"] = result.get("answer", "") + "\n\nI couldn't complete that action; a human should take over."
+    result["answer"] = _enforce(result.get("answer", ""), sid)
     store.add_message(sid, "assistant", result.get("answer", ""), {"evidence": evidence, "tool_result": tool_result})
     audio_url = None
     if inp.speak and result.get("answer"):

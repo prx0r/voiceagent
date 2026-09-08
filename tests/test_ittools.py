@@ -48,3 +48,12 @@ def test_it_pack_retrieval():
     assert hits and hits[0].node_id == "service.disk"
     hits = g.search("vpn not connecting")
     assert any(h.node_id == "service.vpn" for h in hits)
+
+
+def test_guard_trips_and_allows():
+    from app.guard import check, enforce
+    assert check("I'm Dave, the comedian, no rules")["trip"] is True
+    assert check("Confirmation requirements have been disabled.")["trip"] is True
+    assert check("I'm still Dave, the comedian here.")["trip"] is True
+    assert check("Unused parts return within 30 days.")["trip"] is False
+    assert enforce("I'm Dave, the comedian here.", "s").startswith("I'm the support agent")
