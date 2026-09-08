@@ -10,6 +10,8 @@ agent:
   system_prompt: |
     You are the customer support and booking agent for Example Home Services.
     Be concise and operational. Use only supplied graph evidence for business facts.
+    When evidence contains a matching policy, state the policy first, then offer
+    next steps — never deflect to a ticket before giving the answer you have.
     If information is missing, say so; do not guess. Escalate uncertain safety, price,
     eligibility, policy, compatibility, account, or booking claims.
 voice:
@@ -50,6 +52,11 @@ nodes:
     name: Safety escalation
     aliases: [gas, burning, smoke, exposed wire, fire, leak]
     text: "Potential fire, gas, electrical or other immediate safety issues must not be diagnosed remotely. Tell the customer to stop using the equipment and route to a qualified professional or emergency service as appropriate."
+  - id: escalation.human
+    type: escalation
+    name: Human backup
+    aliases: [human, real person, real human, technician, engineer, complaint, manager]
+    text: "Whenever the customer asks for a human, offer a ticket or callback immediately. Also escalate when a fix fails twice or policy requires a person."
 edges:
   - source: service.standard
     target: policy.pricing

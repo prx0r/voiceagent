@@ -15,6 +15,7 @@ from pathlib import Path
 
 AUDIT = Path(__file__).parent.parent / "var" / "it_audit.jsonl"
 OUTSTANDING: dict[str, dict] = {}  # token -> {action, args, session, expires}
+SEEN_KEYS: dict[str, dict] = {}  # idempotency_key -> result (receipt replay)
 
 SAFE = {"disk_free", "network_status", "ping_gateway",
         "list_processes", "read_logs"}
@@ -55,8 +56,15 @@ def propose(session_id: str, action: str, args: dict) -> dict:
             "message": f"Proposed {action}. Customer must confirm with: {tok}"}
 
 
-def execute(session_id: str, confirm_token: str) -> dict:
-    """Step 2: run a previously proposed fix. Token single-use, 10 min."""
+def execute(session_id: str, confirm_token: str,
+            idempotency_key: str = "") -> dict:
+    """Step 2: run a previously proposed fix. Token single-use, 10 min.
+    Repeat callers pass the same idempotency_key and get the original
+    receipt instead of a second execution."""
+    if idempotency_key and idempotency_key in SEEN_KEYS:
+        old = dict(SEEN_KEYS[idempotency_key])
+        old["replayed"] = True
+        return old
     job = OUTSTANDING.pop(confirm_token, None)
     if job is None or job["session"] != session_id or job["expires"] < time.time():
         return {"ok": False, "error": "bad or expired confirm token — propose again."}
@@ -66,24 +74,38 @@ def execute(session_id: str, confirm_token: str) -> dict:
         if not name:
             return {"ok": False, "error": "process required"}
         out = _run(["pkill", "-f", name]) or "signal sent"
-        return {"ok": True, "tier": "moderate", "action": action, "result": out[:200]}
+        return _receipt(idempotency_key,
+                        {"ok": True, "tier": "moderate", "action": action,
+                         "result": out[:200]})
     if action == "clear_dns_cache":
         if shutil.which("resolvectl"):
             out = _run(["resolvectl", "flush-caches"])
             ok = "unavailable" not in out
-            return {"ok": ok, "tier": "moderate", "action": action,
-                    "result": (out[:200] or "flushed") if ok else out[:200]}
+            return _receipt(idempotency_key,
+                            {"ok": ok, "tier": "moderate", "action": action,
+                             "result": (out[:200] or "flushed") if ok else out[:200]})
         if shutil.which("systemd-resolve"):
             out = _run(["systemd-resolve", "--flush-caches"])
             ok = "unavailable" not in out
-            return {"ok": ok, "tier": "moderate", "action": action,
-                    "result": (out[:200] or "flushed") if ok else out[:200]}
+            return _receipt(idempotency_key,
+                            {"ok": ok, "tier": "moderate", "action": action,
+                             "result": (out[:200] or "flushed") if ok else out[:200]})
         return {"ok": False, "tier": "moderate", "action": action,
                 "result": "no DNS flush tool on this machine — ticket it."}
     if action == "clear_print_queue":
         out = _run(["cancel", "-a"]) or "queue cleared"
-        return {"ok": True, "tier": "moderate", "action": action, "result": out[:200]}
+        return _receipt(idempotency_key,
+                        {"ok": True, "tier": "moderate", "action": action,
+                         "result": out[:200]})
     return {"ok": False, "error": f"unknown fix action: {action}"}
+
+
+def _receipt(idempotency_key: str, result: dict) -> dict:
+    """Stamp + store the receipt so retries replay instead of re-executing."""
+    result["idempotency_key"] = idempotency_key
+    if idempotency_key:
+        SEEN_KEYS[idempotency_key] = dict(result)
+    return result
 
 
 def diagnose(tool: str, args: dict) -> dict:
@@ -128,5 +150,5 @@ DESCRIPTIONS = {
     "list_processes": "List processes, optional name filter. args: name?",
     "read_logs": "Recent error logs, optional systemd unit. args: unit?",
     "propose_fix": "STEP 1: propose a fix, get confirm token. args: action (restart_process|clear_dns_cache|clear_print_queue), plus action args. Refusals (delete/security/credentials) come back critical.",
-    "execute_fix": "STEP 2: run a proposed fix. args: confirm_token (customer must echo it).",
+    "execute_fix": "STEP 2: run a proposed fix. args: confirm_token (customer must echo it), idempotency_key? (repeat callers get the original receipt).",
 }

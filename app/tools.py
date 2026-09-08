@@ -27,7 +27,8 @@ class ToolRegistry:
                 res = ittools.propose(session_id, args.get("action", ""),
                                       {k: v for k, v in args.items() if k != "action"})
             elif name == "execute_fix":
-                res = ittools.execute(session_id, args.get("confirm_token", ""))
+                res = ittools.execute(session_id, args.get("confirm_token", ""),
+                                      args.get("idempotency_key", ""))
             else:
                 res = {"ok": False, "error": f"unknown tool: {name}"}
             ittools.audit(session_id, name,

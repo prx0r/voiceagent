@@ -1,0 +1,8 @@
+{
+ "schema": "support.pack/v1",
+ "name": "Example Home Services",
+ "pack_id": "pack_3d7426675b2f",
+ "nodes": 7,
+ "edges": 3,
+ "source": "generic_service_business.yaml"
+}

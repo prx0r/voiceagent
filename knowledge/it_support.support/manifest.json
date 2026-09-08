@@ -1,0 +1,8 @@
+{
+ "schema": "support.pack/v1",
+ "name": "Freak IT Technicians",
+ "pack_id": "pack_8b95fa301681",
+ "nodes": 12,
+ "edges": 7,
+ "source": "it_support.yaml"
+}

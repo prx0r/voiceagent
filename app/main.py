@@ -11,9 +11,12 @@ from .graph import KnowledgeGraph
 from .store import Store
 from .tools import ToolRegistry
 from .llm import LLM
+from . import cases as casekit
+from . import session as livesession
 
 settings = Settings()
 business = Settings.load_business(settings.business_config)
+case_store = casekit.CaseStore("runtime/cases")
 graph = KnowledgeGraph(business)
 store = Store(settings.support_db)
 tools = ToolRegistry(business, store)
@@ -84,3 +87,64 @@ def tts(filename: str):
 @app.get("/graph/search")
 def graph_search(q: str):
     return [h.__dict__ for h in graph.search(q, 10)]
+
+
+class CaseIn(BaseModel):
+    customer_id: str = ""
+    channel: str = "web"
+
+
+@app.post("/cases")
+async def case_open(inp: CaseIn):
+    """Open a case + its LiveKit room. The room is best-effort until
+    a server is configured; the case itself always works."""
+    case = casekit.new_case(inp.customer_id, inp.channel)
+    case_store.save(case)
+    room = livesession.room_name(case["case_id"])
+    live = await livesession.ensure_room(room)
+    return {"case_id": case["case_id"], "room": room, "livekit": live}
+
+
+@app.get("/cases/{case_id}")
+def case_get(case_id: str):
+    case = case_store.load(case_id)
+    if not case:
+        raise HTTPException(404)
+    return case
+
+
+class JoinIn(BaseModel):
+    identity: str
+    role: str = "caller"
+
+
+@app.post("/cases/{case_id}/join")
+def case_join(case_id: str, inp: JoinIn):
+    if not case_store.load(case_id):
+        raise HTTPException(404)
+    try:
+        return livesession.mint_token(inp.identity,
+                                      livesession.room_name(case_id), inp.role)
+    except RuntimeError as e:
+        raise HTTPException(503, str(e))
+
+
+class EventIn(BaseModel):
+    type: str
+    payload: dict = {}
+
+
+@app.post("/cases/{case_id}/events")
+def case_event(case_id: str, inp: EventIn):
+    """Resolver/agents/humans feed the case here. Conversation is not state."""
+    case = case_store.load(case_id)
+    if not case:
+        raise HTTPException(404)
+    casekit.apply(case, {"type": inp.type, "payload": inp.payload})
+    case_store.save(case)
+    return {"ok": True, "events": len(case["events"])}
+
+
+@app.get("/cases/{case_id}/brief")
+def case_brief(case_id: str):
+    return {"brief": case_store.brief(case_id)}
