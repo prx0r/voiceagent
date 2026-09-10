@@ -84,6 +84,25 @@ def test_triage_word_boundaries_no_substring_fires():
     assert t("sparking outlet", hour=2)["level"] == "wake_now"
 
 
+def test_free_checks_and_powercut_retrieval():
+    import yaml
+    from app.graph import KnowledgeGraph
+    g = KnowledgeGraph(yaml.safe_load(open("knowledge/ev_charger_install_en.yaml")))
+    assert any(h.node_id == "faq.free_checks"
+               for h in g.search("charger won't start, no lights, worked yesterday"))
+    assert any(h.node_id == "faq.powercut"
+               for h in g.search("whole house no power, street is dark too"))
+
+
+def test_network_outage_triage_advises_105():
+    from app.evtools import triage_urgency as t
+    r = t("no power at all, neighbours on the whole street are out too", hour=1)
+    assert r["level"] == "routine" and "105" in r["reason"]
+    # safety still wins over network mention
+    r2 = t("street is out and my socket is sparking", hour=1)
+    assert r2["level"] == "wake_now"
+
+
 def test_api_key_gating_and_close_case(monkeypatch):
     monkeypatch.setenv("SPARKY_API_KEYS", "secret1")
     from fastapi.testclient import TestClient

@@ -70,6 +70,14 @@ def intake_call(transcript: str, meta: dict, case_store, profile: dict,
     draft = tradiekit.draft_quote(
         profile, {**job, "proposed_slots": slots},
         parts_total=float(meta.get("parts_total", 0) or 0))
+    draft_text = draft["text"]
+    if evtools.network_suspected(transcript):
+        draft_text += (" If the whole street is out, that's the network not your "
+                       "wiring — free call 105 and they'll tell you.")
+        casekit.apply(case, {"type": "observation.added",
+                             "payload": {"otype": "network",
+                                         "value": "suspected network outage, 105 advised",
+                                         "confidence": 0.7}})
     parts_info: dict[str, Any] = {}
     if meta.get("parts"):
         chk = partskit.check(meta["parts"])
@@ -102,7 +110,7 @@ def intake_call(transcript: str, meta: dict, case_store, profile: dict,
     return {"case_id": case["case_id"], "level": level,
             "reason": tri.get("reason", ""), "transcript": transcript[:500],
             "wake": alert, "proposed_slots": slots,
-            "draft_response": draft["text"], "quote_range": draft["range"],
+            "draft_response": draft_text, "quote_range": draft["range"],
             "worth_it": worth, "parts": parts_info, "actions": actions,
             "t": time.time()}
 

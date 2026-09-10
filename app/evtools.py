@@ -70,6 +70,18 @@ URGENT_RE = re.compile(
 NOT_CHARGING_RE = re.compile(
     r"not charg|won't charge|wont charge|tripp|no power|dead|stopped", re.I)
 
+# Network outage: whole street / neighbours out = DNO territory, not sparky's.
+# Verified: GB free call 105 → local distribution network operator (not supplier,
+# not National Grid); NI 03457 643643. Check neighbours first; damaged lines → 105.
+NETWORK_RE = re.compile(
+    r"neighbor|neighbour|whole street|entire street|everyone(?:'s| is)? out|"
+    r"street(?:'s| is| has)? (out|dark|down)|power cut|powercut|area (out|outage)",
+    re.I)
+
+
+def network_suspected(message: str) -> bool:
+    return bool(NETWORK_RE.search(message or ""))
+
 # Negation guard: "nothing hot" / "no burning smell" must not read as danger.
 # A safety hit only counts if NOT negated within the 3 preceding words. Mixed
 # (one denied, one asserted) still wakes — fail-closed toward safety.
@@ -98,6 +110,11 @@ def triage_urgency(message: str, hour: int | None = None,
     if _asserted_safety(m):
         return {"ok": True, "tier": "safe", "level": "wake_now",
                 "reason": "safety signal — power off if safe, engineer now"}
+    if network_suspected(m):
+        return {"ok": True, "tier": "safe", "level": "routine",
+                "reason": "likely network outage, not house wiring — advise free "
+                          "call 105 (GB) for the local network operator; ticket "
+                          "for morning follow-up, no wake"}
     if NOT_CHARGING_RE.search(m) and vulnerable:
         return {"ok": True, "tier": "safe", "level": "wake_now",
                 "reason": "total loss of charge + vulnerable customer"}

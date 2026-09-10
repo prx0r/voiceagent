@@ -125,6 +125,18 @@ nodes:
     aliases: [suitable, eligible, can I have, driveway, off-street, consumer unit, fuse, wifi]
     text: "Needs: off-street parking, consumer unit with spare ways (or room for mini board), 60A+ main fuse, cable route, WiFi/mobile signal at charger. No driveway = council/permissions path, ticket it."
 
+  - id: faq.free_checks
+    type: faq
+    name: Free checks before a callout
+    aliases: [wont start, not working, no lights, stopped, schedule, app, reset, power cycle, fault light, red light]
+    text: "Free checks first (fix most 'dead charger' calls): 1) schedules OFF in BOTH car app and charger app, 2) reseat cable till latch clicks, 3) breaker OFF 60s then on (clears transient faults), 4) charger WiFi/signal check, 5) try car on another charger to isolate car vs home. Note exact fault-light colour/code. Repeated trips, heat, smell, or scorch = stop, leave breaker OFF, engineer."
+
+  - id: faq.powercut
+    type: faq
+    name: Power cut — network or your house
+    aliases: [power cut, powercut, whole house no power, street out, neighbours out, outage, no electricity]
+    text: "Neighbours out too = network fault, not ours: free call 105 (GB; NI 03457 643643) to reach your local distribution network operator; check on elderly neighbours; switch off cookers/irons. Only you out = check consumer unit trip switch first. Damaged lines/substations = 105; immediate danger = 999. Never the electricity supplier for faults."
+
   - id: escalation.safety
     type: escalation
     name: Electrical safety escalation
@@ -162,6 +174,12 @@ edges:
   - source: service.fault_urgent
     target: escalation.human
     relation: can_trigger
+  - source: service.fault_urgent
+    target: faq.free_checks
+    relation: try_first
+  - source: service.fault_urgent
+    target: faq.powercut
+    relation: try_first
   - source: product.ohme
     target: faq.eligibility
     relation: requires
