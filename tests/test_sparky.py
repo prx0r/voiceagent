@@ -79,6 +79,23 @@ def test_calendar_mornings_first_and_clash(tmp_path):
     assert cal.book(path, "Clash", "2026-09-11T08:30", 60)["ok"] is False
     slots = cal.free_slots(path, "2026-09-11", mornings_first=True)
     assert slots and int(slots[0][11:13]) < 12
+    props = cal.propose_slots(path, "2026-09-11")
+    assert props and set(props[0]) >= {"start", "end", "label", "minutes"}
+    assert props[0]["label"] in ("morning", "afternoon")
+
+
+def test_calendar_concurrent_double_book(tmp_path):
+    import threading
+    path = str(tmp_path / "cal.json")
+    results = []
+
+    def grab():
+        results.append(cal.book(path, "Race", "2026-09-11T10:00", 60)["ok"])
+
+    threads = [threading.Thread(target=grab) for _ in range(8)]
+    [t.start() for t in threads]
+    [t.join() for t in threads]
+    assert results.count(True) == 1  # exactly one winner, no double-book
 
 
 def test_missed_only_routing_and_catch_report(tmp_path):

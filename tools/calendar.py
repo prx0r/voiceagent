@@ -5,12 +5,28 @@ File shape: {"events": [{"id","title","start":"2026-09-11T08:00","end":...,
 All naive-local ISO. No deps.
 """
 from __future__ import annotations
+import fcntl
 import json
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from pathlib import Path
 
 _FMT = "%Y-%m-%dT%H:%M"
+
+
+@contextmanager
+def _locked(path: str):
+    """Cross-process exclusive lock so concurrent bookings can't double-book
+    (check-then-insert race). Lock file lives beside the calendar."""
+    lock = Path(str(path) + ".lock")
+    lock.parent.mkdir(parents=True, exist_ok=True)
+    with open(lock, "w") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
 
 
 def _load(path: str) -> dict:
@@ -67,17 +83,36 @@ def free_slots(path: str, day: str, mornings_first: bool = True,
     return slots[:6]
 
 
+def propose_slots(path: str, day: str, mornings_first: bool = True,
+                  slot_min: int = 60, buffer_min: int = 30,
+                  work_start: int = 8, work_end: int = 17,
+                  limit: int = 6) -> list[dict]:
+    """Rich proposals: {start, end, label, minutes}. free_slots() is the
+    string view over this (stable contract for callers/UI)."""
+    out = []
+    for s in free_slots(path, day, mornings_first, slot_min, buffer_min,
+                        work_start, work_end)[:limit]:
+        start = datetime.strptime(s, _FMT)
+        out.append({"start": s,
+                    "end": (start + timedelta(minutes=slot_min)).strftime(_FMT),
+                    "label": "morning" if start.hour < 12 else "afternoon",
+                    "minutes": slot_min})
+    return out
+
+
 def book(path: str, title: str, start: str, minutes: int,
          postcode: str = "", etype: str = "job") -> dict:
     s = datetime.strptime(start[:16], _FMT)
     e = s + timedelta(minutes=minutes)
-    for b_s, b_e in _busy(path):
-        if s < b_e and e > b_s:
-            return {"ok": False, "error": "clashes with existing event"}
-    ev = {"id": f"ev_{uuid.uuid4().hex[:6]}", "title": title,
-          "start": s.strftime(_FMT), "end": e.strftime(_FMT),
-          "postcode": postcode, "type": etype}
-    d = _load(path)
-    d["events"].append(ev)
-    _save(path, d)
-    return {"ok": True, "event": ev}
+    with _locked(path):
+        # Re-validate INSIDE the lock: the proposal may be stale.
+        for b_s, b_e in _busy(path):
+            if s < b_e and e > b_s:
+                return {"ok": False, "error": "clashes with existing event"}
+        ev = {"id": f"ev_{uuid.uuid4().hex[:6]}", "title": title,
+              "start": s.strftime(_FMT), "end": e.strftime(_FMT),
+              "postcode": postcode, "type": etype}
+        d = _load(path)
+        d["events"].append(ev)
+        _save(path, d)
+        return {"ok": True, "event": ev}
