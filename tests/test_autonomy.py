@@ -76,6 +76,14 @@ def test_triage_negation_and_arcing():
     assert t("it is not burning", hour=2)["level"] == "routine"
 
 
+def test_triage_word_boundaries_no_substring_fires():
+    from app.evtools import triage_urgency as t
+    assert t("shot the window with a BB gun", hour=2)["level"] == "routine"
+    assert t("send a couple of photos", hour=2)["level"] == "routine"
+    assert t("socket feels hot", hour=2)["level"] == "wake_now"
+    assert t("sparking outlet", hour=2)["level"] == "wake_now"
+
+
 def test_api_key_gating_and_close_case(monkeypatch):
     monkeypatch.setenv("SPARKY_API_KEYS", "secret1")
     from fastapi.testclient import TestClient

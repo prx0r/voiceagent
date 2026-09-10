@@ -61,9 +61,11 @@ def qualify_lead(payload: dict) -> dict:
             "next": next_step}
 
 
+# Word-boundary matched: bare substrings false-fired ("hot" in "shot"/"photos").
 URGENT_RE = re.compile(
-    r"burning|smoke|shock|spark|hot|melt|smell.*burn|fire|exposed.?wire"
-    r"|buzzing|crackling|arcing|sizzling",
+    r"\b(burning|burnt|smoke|smoking|shocks?|electric shock|sparks?|sparking"
+    r"|hot|melts?|melting|fire|buzzing|crackling|arcing|sizzling)\b"
+    r"|smell[\w ]{0,20}burn|exposed.?wire",
     re.I)
 NOT_CHARGING_RE = re.compile(
     r"not charg|won't charge|wont charge|tripp|no power|dead|stopped", re.I)
