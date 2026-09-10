@@ -1,0 +1,6 @@
+livekit-agents
+livekit-plugins-openai
+livekit-plugins-silero
+httpx
+pyyaml
+telnyx-livekit-plugin @ git+https://github.com/team-telnyx/telnyx-livekit-plugin.git#subdirectory=telnyx-livekit-plugin
