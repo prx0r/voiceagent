@@ -1,0 +1,26 @@
+{
+  "name": "VoltLine Electrical agent profile",
+  "version": "1.0.0",
+  "description": "Domestic EV charger installer (VoltLine). Other agents: qualify leads, book surveys, check job feed. Prices are ranges; booking needs name+phone+postcode.",
+  "base_url": "https://voltline.example.com",
+  "auth": {"type": "api_key", "header": "X-VoltLine-Key", "how": "per-sparky key from the engineer; rate-limited; read ask/write confirm"},
+  "capabilities": ["lead.qualify", "survey.book", "jobs.feed", "call6828.intake"],
+  "endpoints": [
+    {"capability": "lead.qualify", "method": "POST", "path": "/funnel/qualify_json",
+     "body": {"postcode": "E2 8AA", "charger": "Ohme", "parking_photo": 1, "consumer_unit_photo": 1, "meter_photo": 1},
+     "returns": "score 0-100, ready_to_book, missing[], next"},
+    {"capability": "survey.book", "method": "POST", "path": "/funnel/book",
+     "body": {"name": "", "phone": "", "postcode": "", "slot": "next-available", "idempotency_key": "uuid"},
+     "returns": "booking_id SURV-XXXX, case_id; same idempotency_key replays same receipt"},
+    {"capability": "jobs.feed", "method": "GET", "path": "/jobs/feed",
+     "returns": "area jobs scored per this engineer (worth, verdict, drive_min)"},
+    {"capability": "call6828.intake", "method": "POST", "path": "/calls/intake",
+     "body": {"transcript": "", "phone": "", "postcode": "", "hour": 23},
+     "returns": "level wake_now|same_day|routine, draft_response, proposed_slots, worth_it"}
+  ],
+  "rules": [
+    "Never invent prices, grant eligibility, dates, or certification.",
+    "Safety signals (burning/smoke/shock/sparking) escalate immediately.",
+    "Writes (book/intake) need explicit user confirmation first."
+  ]
+}

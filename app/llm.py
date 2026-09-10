@@ -4,13 +4,30 @@ import httpx
 
 JSON_RE = re.compile(r"\{.*\}", re.S)
 
+# Provider presets: LLM_PROVIDER picks defaults; explicit LLM_BASE_URL always wins.
+# - meta: Meta Model API (Muse Spark), OpenAI-compatible Chat Completions.
+# - openai: OpenAI platform. - custom/auto: whatever LLM_BASE_URL says.
+PRESETS = {
+    "meta": "https://api.meta.ai/v1",
+    "openai": "https://api.openai.com/v1",
+}
+
+
+def resolve_endpoint(settings) -> str:
+    """Pure: base URL -> full chat-completions URL. Unit-testable, no network."""
+    base = (settings.llm_base_url or "").strip()
+    if not base:
+        preset = PRESETS.get((settings.llm_provider or "auto").lower(), "")
+        base = preset
+    return base.rstrip("/") + "/chat/completions" if base else ""
+
 class LLM:
     def __init__(self, settings):
         self.s = settings
 
     @property
     def enabled(self):
-        return bool(self.s.llm_base_url and self.s.llm_api_key and self.s.llm_model)
+        return bool(resolve_endpoint(self.s) and self.s.llm_api_key and self.s.llm_model)
 
     async def respond(self, system: str, history: list[dict], message: str, context: str, tools: dict):
         if not self.enabled:
@@ -38,7 +55,7 @@ Rules:
 - Match the customer's language unless business policy requires otherwise.
 """
         msgs = [{"role":"system","content":instruction}] + history[-8:] + [{"role":"user","content":message}]
-        url = self.s.llm_base_url.rstrip("/") + "/chat/completions"
+        url = resolve_endpoint(self.s)
         async with httpx.AsyncClient(timeout=30) as client:
             r = await client.post(url, headers={"Authorization": f"Bearer {self.s.llm_api_key}", "Content-Type":"application/json"}, json={"model":self.s.llm_model,"messages":msgs,"temperature":0.2})
             r.raise_for_status()

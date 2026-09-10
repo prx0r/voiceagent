@@ -1,0 +1,50 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sparky — Morning Queue</title>
+<style>
+body{font-family:system-ui;max-width:720px;margin:20px auto;padding:0 14px}
+.card{border:1px solid #ddd;border-radius:12px;padding:14px;margin:10px 0}
+.urg{border-left:6px solid #c00}.mut{color:#666;font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+button{padding:10px 14px;cursor:pointer}input{padding:10px;width:100%;box-sizing:border-box;margin:4px 0}
+pre{white-space:pre-wrap;background:#f7f7f7;padding:8px;border-radius:8px;font-size:12px}
+</style></head><body>
+<h1>Overnight queue</h1>
+<p class="mut">Transcript + triage + draft reply + worth-it + parts. One click acts. Nothing sends or orders without your tap.</p>
+<div id="q"></div>
+<h2>Job feed (scored for you)</h2><div id="feed"></div>
+<script>
+async function load(){
+  const d=await (await fetch('/sparky/digest')).json();
+  document.querySelector('#q').innerHTML=d.items.length?d.items.map(c=>`
+   <div class="card ${c.escalated?'urg':''}">
+    <b>${c.case_id}</b> <span class="mut">${c.channel} ${c.escalated?'· ESCALATED':''}</span>
+    <div>${c.transcript||''}</div><div class="mut">${c.triage||''}</div>
+    <pre>${c.brief||''}</pre>
+    <div class="row">
+      <button onclick="act('${c.case_id}','send_response')">Send draft reply</button>
+      <button onclick="quickBook('${c.case_id}')">Book first slot</button>
+      <button onclick="logJob('${c.case_id}')">Log 90 min EV job</button>
+    </div></div>`).join(''):'<p class="mut">No overnight calls. Quiet night.</p>';
+  const f=await (await fetch('/jobs/feed')).json();
+  document.querySelector('#feed').innerHTML=f.jobs.map(j=>`
+   <div class="card"><b>${j.id}</b> — ${j.summary}
+    <div class="mut">£${j.value_gbp} · ${j.drive_min} min · worth ${j.worth} (${j.verdict}) · parts £${j.parts_total}</div>
+    <div class="mut">${j.reasons.join(' · ')}</div></div>`).join('');
+}
+async function act(case_id, action){
+  const to=prompt('Customer phone (WhatsApp)? e.g. +447700900000'); if(!to) return;
+  const text=prompt('Reply text (prefilled draft in digest brief):','Hi — Dan, VoltLine. Free tomorrow morning for a survey?');
+  const r=await fetch('/sparky/act',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({case_id,action,to,text})});
+  alert(JSON.stringify(await r.json()).slice(0,300));
+}
+async function quickBook(case_id){
+  const start=prompt('Slot start? e.g. 2026-09-11T08:00'); if(!start) return;
+  const r=await fetch('/sparky/act',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({case_id,action:'book_slot',start,minutes:90})});
+  alert(JSON.stringify(await r.json()).slice(0,300));
+}
+async function logJob(case_id){
+  const r=await fetch('/sparky/act',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({case_id,action:'log_job',job_type:'ev_charger',minutes:95})});
+  alert(JSON.stringify(await r.json()).slice(0,200));
+}
+load();
+</script></body></html>

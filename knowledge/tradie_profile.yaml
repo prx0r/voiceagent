@@ -1,0 +1,41 @@
+# Tradie kernel — everything the agent knows about THIS electrician.
+# One file per sparky. The agent reads this before drafting any reply/quote.
+# Times are 24h local. Money in GBP.
+tradie:
+  name: "Dan"
+  business: "VoltLine Electrical"
+  base_postcode: "E2 8AA"
+  phone: "+44 7700 900000"
+  scheme: "NICEIC"   # Part P sign-off identity; never invent another
+
+preferences:
+  mornings_first: true        # offer 08:00-12:00 before afternoons
+  workdays: [mon, tue, wed, thu, fri]
+  saturday_ok: true           # mornings only, +£40 callout
+  max_drive_min: 35           # beyond this, worth-it score tanks
+  enjoys: [ev_charger, consumer_unit, fault_find]
+  dislikes: [plaster_chasing, loft_in_august, tiny_cupboard_boards]
+
+prices:                       # RANGES the agent may quote; final = after survey/visit
+  callout_weekday: 65
+  callout_saturday: 105
+  hourly: 65
+  ev_7kw_standard: [950, 1400]   # charger + circuit + cert + DNO notify
+  consumer_unit_10way: [550, 850]
+  eicr_2bed: [160, 240]
+  fault_find_first_hour: [65, 95]
+
+quotes:
+  flexibility: "Can move ±£50 to win a morning-fill job within 15 min drive."
+  validity_days: 14
+  deposit: "25% on acceptance for jobs >£500, balance on cert."
+
+calendar:
+  file: "runtime/calendar_dan.json"   # local JSON; swap for Google/Jobber later
+  slot_min: 60                        # minutes
+  buffer_min: 30                      # travel/packdown between jobs
+
+messages:
+  tone: "short, plain, no jargon. Two sentences max on voice/WhatsApp."
+  signoff: "— Dan, VoltLine"
+  on_my_way: "On my way, ~{eta_min} min. Need parking + clear access to the {access_point}."

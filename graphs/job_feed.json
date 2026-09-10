@@ -1,0 +1,9 @@
+{
+  "jobs": [
+    {"id": "job_ev_e2", "summary": "Ohme install, driveway + new board space", "postcode": "E2 9AA", "value_gbp": 1150, "ease": "easy", "charger": "Ohme", "parts": [{"sku": "ohme_home_pro", "qty": 1}, {"sku": "rcbo_32a_typeA", "qty": 1}]},
+    {"id": "job_board_e5", "summary": "10-way consumer unit swap, photos look tight", "postcode": "E5 8AB", "value_gbp": 700, "ease": "hard", "charger": "", "parts": [{"sku": "mini_consumer_unit", "qty": 1}]},
+    {"id": "job_fault_n1", "summary": "Charger tripping, fault find first visit", "postcode": "N1 4AA", "value_gbp": 95, "ease": "medium", "charger": "", "parts": []},
+    {"id": "job_ev_rm13", "summary": "zappi + solar, long drive", "postcode": "RM13 8AA", "value_gbp": 1400, "ease": "medium", "charger": "zappi", "parts": [{"sku": "zappi_v2", "qty": 1}, {"sku": "ct_clamp_equaliser", "qty": 1}]},
+    {"id": "job_eicr_e8", "summary": "EICR 2-bed landlord cert", "postcode": "E8 3AA", "value_gbp": 200, "ease": "easy", "charger": "", "parts": []}
+  ]
+}

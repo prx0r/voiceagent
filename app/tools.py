@@ -2,6 +2,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from . import ittools
+from . import evtools
 
 class ToolRegistry:
     def __init__(self, business: dict, store):
@@ -17,9 +18,25 @@ class ToolRegistry:
             "book_slot": "Demo booking request. args: date, time, service. Replace with calendar/FSM adapter.",
         }
         base.update(ittools.DESCRIPTIONS)
+        base.update(evtools.DESCRIPTIONS)
         return base
 
     def call(self, name: str, args: dict, session_id: str):
+        if name in evtools.DESCRIPTIONS:
+            if name == "qualify_lead":
+                res = evtools.qualify_lead(args)
+            elif name == "triage_urgency":
+                res = evtools.triage_urgency(
+                    args.get("message", ""),
+                    args.get("hour"),
+                    bool(args.get("vulnerable", False)))
+            elif name == "book_survey":
+                res = evtools.book_survey(args)
+            else:
+                res = {"ok": False, "error": f"unknown tool: {name}"}
+            ittools.audit(session_id, name,
+                          res.get("tier", "safe"), args, res)
+            return res
         if name in ittools.DESCRIPTIONS:
             if name in ittools.SAFE:
                 res = ittools.diagnose(name, args)

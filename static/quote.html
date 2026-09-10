@@ -1,0 +1,81 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VoltLine — Free EV Charger Survey</title>
+<style>
+body{font-family:system-ui;max-width:640px;margin:24px auto;padding:0 16px}
+.card{border:1px solid #ddd;border-radius:12px;padding:16px;margin:12px 0}
+label{display:block;margin:10px 0 4px;font-weight:600}
+input,select{width:100%;padding:12px;box-sizing:border-box}
+button{padding:12px 18px;margin-top:12px;cursor:pointer}
+.mut{color:#666;font-size:13px}.ok{color:#0a6b2a}.warn{color:#8a5a00}
+img.prev{max-width:100%;border-radius:8px;margin-top:6px}
+.step{display:none}.step.on{display:block}
+</style></head><body>
+<h1>Get a home EV charger quote</h1>
+<p class="mut">Free remote survey. 3 photos qualify 80% of jobs — no final price without survey, no spam.</p>
+
+<div class="card step on" id="s1">
+<h3>1. Your place + charger</h3>
+<label>Postcode</label><input id="postcode" placeholder="E2 8AA" autocomplete="postal-code">
+<label>Charger shortlist</label>
+<select id="charger"><option value="">Not sure yet</option><option>Ohme</option><option>Easee One</option><option>Pod Point Solo 3</option><option>Tesla Wall Connector</option><option>myenergi zappi</option></select>
+<label><input type="checkbox" id="threephase" style="width:auto"> I think I have / want three-phase (11/22kW)</label>
+<button onclick="go2()">Continue</button>
+</div>
+
+<div class="card step" id="s2">
+<h3>2. Three photos</h3>
+<p class="mut">ChatGPT can already guess from photos — we need them to book you a real slot and check your fuse/board.</p>
+<label>Parking spot + cable route to house</label><input type="file" id="p_parking" accept="image/*">
+<label>Consumer unit (lid open, spare ways visible)</label><input type="file" id="p_board" accept="image/*">
+<label>Meter + main fuse</label><input type="file" id="p_meter" accept="image/*">
+<div id="score" class="mut"></div>
+<button onclick="qualify()">Check if I qualify</button>
+</div>
+
+<div class="card step" id="s3">
+<h3>3. Book free survey</h3>
+<div id="qual"></div>
+<label>Name</label><input id="name" autocomplete="name">
+<label>Phone</label><input id="phone" autocomplete="tel">
+<label>Slot</label><select id="slot"><option>next-available</option><option>weekday-morning</option><option>weekday-evening</option><option>saturday</option></select>
+<button onclick="book()">Book my free survey</button>
+<div id="done"></div>
+</div>
+
+<script>
+const $=id=>document.querySelector('#'+id);
+const photos={}; // label -> upload ref
+function go2(){$('s1').classList.remove('on');$('s2').classList.add('on');}
+async function uploadOne(input, label){
+  const f=input.files[0]; if(!f) return null;
+  const fd=new FormData(); fd.append('file', f);
+  const r=await fetch('/funnel/upload',{method:'POST',body:fd});
+  const j=await r.json(); if(j.ok){photos[label]=j.ref;}
+  return j.ok?1:null;
+}
+async function qualify(){
+  $('score').textContent='Uploading + scoring…';
+  const flags={
+    parking: await uploadOne($('p_parking'),'parking'),
+    consumer_unit: await uploadOne($('p_board'),'consumer_unit'),
+    meter: await uploadOne($('p_meter'),'meter'),
+  };
+  const body={postcode:$('postcode').value.trim(),charger:$('charger').value,
+    three_phase:$('threephase').checked,
+    parking_photo:flags.parking?1:0,consumer_unit_photo:flags.consumer_unit?1:0,meter_photo:flags.meter?1:0};
+  const r=await fetch('/funnel/qualify_json',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json();
+  $('score').innerHTML=`Score <b>${j.score}/100</b> — ${j.ready_to_book?'<span class=ok>ready to book</span>':'<span class=warn>'+j.next+'</span>'}`;
+  $('qual').innerHTML=`<p>${j.ready_to_book?'Good news — we can book you in.':'We need a bit more: '+j.missing.join('; ')}</p>`;
+  window._flags=flags;
+  $('s2').classList.remove('on');$('s3').classList.add('on');
+}
+async function book(){
+  const key=crypto.randomUUID();
+  const body={name:$('name').value.trim(),phone:$('phone').value.trim(),postcode:$('postcode').value.trim(),
+    slot:$('slot').value,charger:$('charger').value,idempotency_key:key,photos};
+  const r=await fetch('/funnel/book',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  const j=await r.json();
+  $('done').innerHTML=r.ok?`<p class=ok>Booked — ref <b>${j.booking_id}</b>. We'll text ${body.phone} to confirm. Case ${j.case_id}</p>`:`<p class=warn>${j.detail||'Missing name/phone/postcode'}</p>`;
+}
+</script></body></html>
