@@ -71,6 +71,7 @@ Rules:
     def _fallback(self, message: str, context: str):
         if context:
             first = context.split("\n\n")[0]
-            body = " ".join(first.splitlines()[1:]).strip()
+            body = " ".join(l for l in first.splitlines()[1:]
+                            if not l.startswith("META=")).strip()
             return body[:600] or "I found relevant business information, but the LLM adapter is not configured."
         return "I can't verify that from the current business graph. Configure an LLM endpoint or add the missing policy/product/service node."
