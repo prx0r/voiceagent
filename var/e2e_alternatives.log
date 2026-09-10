@@ -1,0 +1,10 @@
+E2E alternatives run 2026-09-10 (keyless box: node24, py3.11, no provider keys/DID)
+[ours] pytest 34/34 + e2e_kernel 15/15 -> var/e2e_kernel.log
+[openvox] 56 text/portutil + 30 providers/skills/templates = 86 green (mocked HTTP)
+[starter] vitest 37/37 green (adapters, barge-in, tools)
+[pipecat-telnyx] inbound+outbound bot.py py_compile OK; needs 3 keys + DID
+[chitti] bot/main/ingest py_compile OK; NO LICENSE (patterns only); needs keys+Pinecone
+[ai-phone-caller] MIT, server files compile; needs Twilio/Telnyx keys
+[research-S2S] not runnable here (GPU + checkpoints + disk 91%)
+live-audio comparison: BLOCKED on keys/DID (see docs/E2E_ALTERNATIVES.md)
+incident: stray sparse-checkout cone hid tracked files; disabled, 34/34 re-verified

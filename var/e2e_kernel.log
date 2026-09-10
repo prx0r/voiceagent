@@ -1,0 +1,17 @@
+[PASS] health 
+[PASS] pages 
+[PASS] qualify-ready score=100
+[PASS] book SURV-0AAF43
+[PASS] book-idempotent 
+[PASS] urgent-wakes 
+[PASS] routine-queues worth=80
+[PASS] digest items=57
+[PASS] act-book slot=2026-09-11T08:00
+[PASS] act-send local
+[PASS] act-log 
+[PASS] act-close 
+[PASS] feed-ranked top=job_ev_e2:100
+[PASS] export rows=13
+[PASS] retention-dryrun kept=75 swept=0
+
+E2E KERNEL: 15/15 steps green.
