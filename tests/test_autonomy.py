@@ -68,6 +68,14 @@ def test_retention_keeps_open_sweeps_closed(tmp_path):
     assert store.load(open_c["case_id"]) is not None
 
 
+def test_triage_negation_and_arcing():
+    from app.evtools import triage_urgency as t
+    assert t("nothing hot, no smell, breaker trips", hour=1)["level"] == "routine"
+    assert t("no smoke but the socket is sparking", hour=1)["level"] == "wake_now"
+    assert t("loud buzzing and crackling from the fuse box", hour=3)["level"] == "wake_now"
+    assert t("it is not burning", hour=2)["level"] == "routine"
+
+
 def test_api_key_gating_and_close_case(monkeypatch):
     monkeypatch.setenv("SPARKY_API_KEYS", "secret1")
     from fastapi.testclient import TestClient

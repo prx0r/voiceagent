@@ -62,10 +62,27 @@ def qualify_lead(payload: dict) -> dict:
 
 
 URGENT_RE = re.compile(
-    r"burning|smoke|shock|spark|hot|melt|smell.*burn|fire|exposed.?wire",
+    r"burning|smoke|shock|spark|hot|melt|smell.*burn|fire|exposed.?wire"
+    r"|buzzing|crackling|arcing|sizzling",
     re.I)
 NOT_CHARGING_RE = re.compile(
     r"not charg|won't charge|wont charge|tripp|no power|dead|stopped", re.I)
+
+# Negation guard: "nothing hot" / "no burning smell" must not read as danger.
+# A safety hit only counts if NOT negated within the 3 preceding words. Mixed
+# (one denied, one asserted) still wakes — fail-closed toward safety.
+NEG_RE = re.compile(r"\b(no|not|nothing|without|never|n't|isnt|arent)\b", re.I)
+
+
+def _asserted_safety(m: str) -> bool:
+    hits = list(URGENT_RE.finditer(m or ""))
+    if not hits:
+        return False
+    for h in hits:
+        window = (m or "").lower()[:h.start()].split()[-3:]
+        if not any(NEG_RE.fullmatch(w.strip(".,")) for w in window):
+            return True
+    return False
 
 
 def triage_urgency(message: str, hour: int | None = None,
@@ -76,7 +93,7 @@ def triage_urgency(message: str, hour: int | None = None,
     Conservative by design: any safety signal => wake_now.
     """
     m = message or ""
-    if URGENT_RE.search(m):
+    if _asserted_safety(m):
         return {"ok": True, "tier": "safe", "level": "wake_now",
                 "reason": "safety signal — power off if safe, engineer now"}
     if NOT_CHARGING_RE.search(m) and vulnerable:

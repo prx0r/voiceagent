@@ -128,7 +128,7 @@ nodes:
   - id: escalation.safety
     type: escalation
     name: Electrical safety escalation
-    aliases: [burning, smoke, shock, electric shock, sparking, hot, melting, smell burning, fire, exposed wire]
+    aliases: [burning, smoke, shock, electric shock, sparking, hot, melting, smell burning, fire, exposed wire, buzzing, crackling, arcing, sizzling]
     text: "Stop remote diagnosis. Tell customer to switch off at consumer unit if safe, do not touch charger/cable, call emergency services if fire/smoke. Route to engineer immediately + ticket."
 
   - id: escalation.human
