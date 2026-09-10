@@ -53,8 +53,10 @@ def main() -> int:
     step("digest", len(d) >= 2 and d[0]["escalated"] is True, f"items={len(d)}")
 
     slot = r["proposed_slots"][0]
+    import datetime as _dt
+    fresh = (_dt.datetime.now() + _dt.timedelta(days=30)).strftime("%Y-%m-%d") + "T09:00"
     bk = c.post("/sparky/act", json={"case_id": r["case_id"], "action": "book_slot",
-                "start": "2026-09-12T08:00", "minutes": 90}).json()
+                "start": fresh, "minutes": 90}).json()
     step("act-book", bk.get("ok") is True, f"slot={slot}")
     snd = c.post("/sparky/act", json={"case_id": r["case_id"], "action": "send_response",
                  "to": "07700900333", "text": "Morning — Dan here."}).json()

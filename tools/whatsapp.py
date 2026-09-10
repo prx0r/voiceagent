@@ -28,10 +28,11 @@ def send(to: str, text: str, kind: str = "text",
     elif kind in ("document", "audio", "image"):
         payload[kind] = {"link": media_url, "caption": caption[:1000]}
     if not (TOKEN and PHONE_ID):
+        from app.pii import scrub_all
         OUT.parent.mkdir(parents=True, exist_ok=True)
         with open(OUT, "a") as f:
-            f.write(json.dumps({"t": time.time(), "to": to,
-                                "payload": payload}) + "\n")
+            f.write(scrub_all(json.dumps({"t": time.time(), "to": to,
+                                          "payload": payload})) + "\n")
         return {"ok": True, "tier": "moderate", "queued": "local",
                 "note": "set WHATSAPP_TOKEN+PHONE_ID for live send"}
     import httpx

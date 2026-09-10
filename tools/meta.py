@@ -17,10 +17,12 @@ OUT = Path("var/comms_out.jsonl")
 
 
 def _log(channel: str, payload: dict) -> dict:
+def _log(channel: str, payload: dict) -> dict:
+    from app.pii import scrub_all
     OUT.parent.mkdir(parents=True, exist_ok=True)
     with open(OUT, "a") as f:
-        f.write(json.dumps({"t": time.time(), "channel": channel,
-                            "payload": payload}) + "\n")
+        f.write(scrub_all(json.dumps({"t": time.time(), "channel": channel,
+                                      "payload": payload})) + "\n")
     return {"ok": True, "tier": "moderate", "queued": "local",
             "note": "set live keys for real send"}
 

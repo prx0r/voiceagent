@@ -4,6 +4,34 @@ import httpx
 
 JSON_RE = re.compile(r"\{.*\}", re.S)
 
+
+def parse_json_answer(text: str) -> dict | None:
+    """Extract one JSON object, respecting nesting (raw_decode), with the old
+    greedy fallback. Returns None when no parseable object exists."""
+    if not text:
+        return None
+    dec = json.JSONDecoder()
+    idx = text.find("{")
+    while idx != -1:
+        try:
+            obj, _ = dec.raw_decode(text[idx:])
+            if isinstance(obj, dict):
+                obj.setdefault("tool", None)
+                obj.setdefault("tool_args", {})
+                obj.setdefault("confidence", 0.5)
+                return obj
+        except Exception:
+            pass
+        idx = text.find("{", idx + 1)
+    m = JSON_RE.search(text)
+    if m:
+        try:
+            obj = json.loads(m.group(0))
+            return obj if isinstance(obj, dict) else None
+        except Exception:
+            return None
+    return None
+
 # Provider presets: LLM_PROVIDER picks defaults; explicit LLM_BASE_URL always wins.
 # - meta: Meta Model API (Muse Spark), OpenAI-compatible Chat Completions.
 # - openai: OpenAI platform. - custom/auto: whatever LLM_BASE_URL says.
@@ -60,13 +88,10 @@ Rules:
             r = await client.post(url, headers={"Authorization": f"Bearer {self.s.llm_api_key}", "Content-Type":"application/json"}, json={"model":self.s.llm_model,"messages":msgs,"temperature":0.2})
             r.raise_for_status()
             text = r.json()["choices"][0]["message"]["content"]
-        m = JSON_RE.search(text)
-        if not m:
+        obj = parse_json_answer(text)
+        if obj is None:
             return {"answer": text.strip(), "tool": None, "tool_args": {}, "confidence": 0.5}
-        try:
-            return json.loads(m.group(0))
-        except Exception:
-            return {"answer": text.strip(), "tool": None, "tool_args": {}, "confidence": 0.5}
+        return obj
 
     def _fallback(self, message: str, context: str):
         if context:

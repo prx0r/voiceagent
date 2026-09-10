@@ -78,7 +78,11 @@ class CaseStore:
         return self.path / f"{safe}.json"
 
     def save(self, case: dict):
-        self._file(case["case_id"]).write_text(json.dumps(case, indent=1))
+        from .pii import scrub_secrets
+        # Secrets never touch disk; contact PII stays (callbacks + briefs need
+        # it) under retention TTL. Scrubbing serialized text is JSON-safe.
+        self._file(case["case_id"]).write_text(
+            scrub_secrets(json.dumps(case, indent=1)))
 
     def load(self, case_id: str) -> dict | None:
         f = self._file(case_id)

@@ -28,6 +28,18 @@ TRIPS = [
     (r"\bno confirmation (needed|required)\b", "authority-surrender"),
 ]
 
+# Unhedged price claims: a bare figure with no range language. Ranges, "from",
+# per-hour rates and approximations pass; "costs £950" / "your total is $120" trip.
+PRICE_RE = re.compile(r"(?:£|\$)\s?\d[\d,]*")
+HEDGE_RE = re.compile(
+    r"range|from|between|starting|approx|about|around|up to|\bto\b|-|–|/|per hour|/hr|valid|survey|quote|grant|callout|deposit|fee",
+    re.I)
+
+
+def price_fabrication(answer: str) -> bool:
+    found = PRICE_RE.search(answer or "")
+    return bool(found) and not HEDGE_RE.search(answer or "")
+
 SAFE_COMPLETION = ("I'm the support agent here — I can't switch roles or "
                    "change store rules. How can I actually help you today?")
 
@@ -40,15 +52,21 @@ def check(answer: str) -> dict:
                 found.append(reason)
         except re.error:
             continue
+    try:
+        if price_fabrication(answer):
+            found.append("price-fabrication")
+    except re.error:
+        pass
     return {"trip": bool(found), "reasons": found}
 
 
 def audit(session_id: str, reasons: list, excerpt: str):
+    from .pii import scrub_all
     AUDIT.parent.mkdir(parents=True, exist_ok=True)
     with open(AUDIT, "a") as f:
         f.write(json.dumps({"t": time.time(), "session": session_id,
                             "reasons": reasons,
-                            "excerpt": (excerpt or "")[:200]}) + "\n")
+                            "excerpt": scrub_all((excerpt or "")[:200])}) + "\n")
 
 
 def enforce(answer: str, session_id: str = "") -> str:
