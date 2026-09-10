@@ -1,0 +1,9 @@
+fishy-burning-2am        lvl=wake_now   spec=True  kept=True  sim_ms=272 ev=faq.eligibility
+dead-car-hospital-shift  lvl=wake_now   spec=True  kept=True  sim_ms=272 ev=service.survey
+breaker-trips-no-heat    lvl=routine    spec=True  kept=True  sim_ms=272 ev=escalation.safety
+ohme-quote-driveway      lvl=routine    spec=True  kept=True  sim_ms=272 ev=faq.eligibility
+scorched-plug            lvl=wake_now   spec=True  kept=True  sim_ms=272 ev=escalation.safety
+buzzing-fusebox          lvl=wake_now   spec=True  kept=True  sim_ms=272 ev=escalation.safety
+workshop-22kw            lvl=routine    spec=True  kept=True  sim_ms=272 ev=policy.pricing
+wont-start-maybe-schedule lvl=routine    spec=True  kept=True  sim_ms=272 ev=service.survey
+barge-in demo: spoken=47ch dropped=69ch sim_ms=260
