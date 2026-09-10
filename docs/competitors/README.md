@@ -1,5 +1,21 @@
 # Store-agent competitors — matrix (full briefs in this folder, 2026-09-10)
 
+UK VOICE RECEPTIONISTS (the direct fight — see whoza.md, uk_receptionists.md, aiva.md):
+
+| Rival | Price | Triage | WhatsApp | Calendar | Edge |
+|---|---|---|---|---|---|
+| Whoza (Scotland) | £59-399 + per-job | RED/AMBER/GREEN | job card + 1-tap accept | G/O/Apple | review engine, CRM, sparky scripts |
+| tradereceptionist | £49-249 | flag + transfer | SMS summary | Google | price-talk toggle |
+| Callio (.me) | £20-90 | basic qualify | email notif. | — | floor price |
+| callio.co.uk (different co.) | £79.99 | SMS bot | n/a (SMS product) | Google | 8-sec textback wedge |
+| team-connect | £10-80 | emergency rules | SMS | +webhooks/API | cheapest; human backup top tier |
+| liorra | ~£199 all-in | emergency routing | SMS instant | G/iCloud | missed-call-only mode, voice clone |
+| bobsbots | £399-499 | emergency qualify | paid-job routing | — | premium emergency niche |
+| Aiva (MIT, self-host) | free + usage | — | SMS layer | booking built-in | insights/digest, 16 tests, 8 langs |
+
+Rule: answering commoditised (£10-60); nobody does score/parts/certs/feed/IT.
+Copy liorra onboarding + Whoza billing fairness + Aiva guardrails/insights.
+
 | | TailorTalk | eGrow | ShopyAgent | bitbybit | LenoChat | Tarang |
 |---|---|---|---|---|---|---|
 | Base | Bangalore, Meta Partner | Marrakech, Shopify App | Mukh.one | Meta Tech + Shopify Partner | Sydney '25 | Hyderabad, Meta Partner |
