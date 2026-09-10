@@ -316,7 +316,8 @@ def sparky_page():
 def sparky_digest():
     from . import afterhours as _ah
     return {"tradie": (_profile().get("tradie") or {}).get("name", "sparky"),
-            "items": _ah.morning_digest(case_store, _profile())}
+            "items": _ah.morning_digest(case_store, _profile()),
+            "catch": _ah.catch_report(case_store)}
 
 
 class ActIn(BaseModel):

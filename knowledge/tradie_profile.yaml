@@ -10,6 +10,10 @@ tradie:
 
 preferences:
   mornings_first: true        # offer 08:00-12:00 before afternoons
+  answer_mode: missed_only    # always | missed_only | after_hours — liorra trick:
+                              # agent waits RINGS_BEFORE_TAKEOVER rings, steps in only
+                              # if the human doesn't grab it. Lowest-fear onboarding.
+  rings_before_takeover: 5
   workdays: [mon, tue, wed, thu, fri]
   saturday_ok: true           # mornings only, +£40 callout
   max_drive_min: 35           # beyond this, worth-it score tanks

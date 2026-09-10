@@ -25,10 +25,11 @@ def drive_min(from_postcode: str, to_postcode: str) -> int:
 
     Swap for OSRM/Google Distance Matrix later — callers unchanged.
     """
-    a = (from_postcode or "").strip().upper().split()[0]
-    b = (to_postcode or "").strip().upper().split()[0]
+    a = (from_postcode or "").strip().upper().split()
+    b = (to_postcode or "").strip().upper().split()
     if not a or not b:
         return 20
+    a, b = a[0], b[0]
     if a == b:
         return 12
     la, lb = re.sub(r"[^A-Z]", "", a), re.sub(r"[^A-Z]", "", b)

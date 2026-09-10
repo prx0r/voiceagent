@@ -81,6 +81,22 @@ def test_calendar_mornings_first_and_clash(tmp_path):
     assert slots and int(slots[0][11:13]) < 12
 
 
+def test_missed_only_routing_and_catch_report(tmp_path):
+    from app.cases import CaseStore
+    from app import afterhours as AH, tradie as T
+    store = CaseStore(str(tmp_path / "cases"))
+    p = T.load_profile("knowledge/tradie_profile.yaml")
+    assert p["preferences"]["answer_mode"] == "missed_only"
+    r = AH.intake_call("do you fit Ohme?", {"phone": "077", "hour": 23,
+                                            "day": "2026-09-11",
+                                            "answered_by": "agent"}, store, p)
+    assert r["level"] == "routine"
+    rep = AH.catch_report(store)
+    assert rep["caught"] == 1 and rep["by_level"].get("routine") == 1
+    d = AH.morning_digest(store, p)
+    assert len(d) == 1 and "Ohme" in d[0]["transcript"]
+
+
 def test_api_intake_digest_act_feed():
     from fastapi.testclient import TestClient
     import app.main as m

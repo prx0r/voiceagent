@@ -47,6 +47,20 @@ def intake_call(transcript: str, meta: dict, case_store, profile: dict,
                          "payload": {"otype": "transcript",
                                      "value": format_transcript(transcript, meta)[:500],
                                      "confidence": 0.9}})
+    # Missed-call-only routing receipt: who answered and why the agent has it.
+    # (Telephony layer forwards after RINGS_BEFORE_TAKEOVER rings; see README.)
+    # Without this note the morning queue can't prove caught-vs-voicemail value.
+    answered_by = meta.get("answered_by", "agent")
+    mode = (profile.get("preferences") or {}).get("answer_mode", "always")
+    rings = (profile.get("preferences") or {}).get("rings_before_takeover", 5)
+    casekit.apply(case, {"type": "observation.added",
+                         "payload": {"otype": "route",
+                                     "value": (f"mode={mode} answered_by={answered_by} "
+                                               f"(rings={rings}) — would-be voicemail"
+                                               if answered_by == "agent" else
+                                               f"mode={mode} answered_by=human — "
+                                               f"logged for record"),
+                                     "confidence": 1.0}})
     casekit.apply(case, {"type": "observation.added",
                          "payload": {"otype": "triage",
                                      "value": f"{level}: {tri.get('reason','')}",
@@ -170,3 +184,32 @@ def morning_digest(case_store, profile: dict, since_ts: float = 0) -> list[dict]
         })
     items.sort(key=lambda i: (not i["escalated"], i["case_id"]))
     return items
+
+
+def catch_report(case_store, since_ts: float = 0) -> dict:
+    """Caught-vs-voicemail proof: calls the agent handled that no human touched.
+
+    (Human-answered calls never reach us, so the denominator is voicemail-bound
+    calls, not all calls. Report it honestly: 'caught N that would've been
+    voicemail, X urgent among them'.)
+    """
+    import json
+    caught, urgent, by_level = 0, 0, {}
+    for f in sorted(case_store.path.glob("case_*.json")):
+        try:
+            c = json.loads(f.read_text())
+        except Exception:
+            continue
+        if c.get("created_at", 0) < since_ts:
+            continue
+        routes = [o.get("value", "") for o in c.get("observations", [])
+                  if o.get("type") == "route"]
+        if any("answered_by=agent" in r for r in routes):
+            caught += 1
+            tri = next((o.get("value", "") for o in c.get("observations", [])
+                        if o.get("type") == "triage"), "")
+            lvl = tri.split(":")[0] if ":" in tri else "routine"
+            by_level[lvl] = by_level.get(lvl, 0) + 1
+            if c.get("escalation", {}).get("required"):
+                urgent += 1
+    return {"caught": caught, "urgent": urgent, "by_level": by_level}
