@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os, uuid, json
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
@@ -34,7 +34,67 @@ class ChatIn(BaseModel):
 
 @app.get("/")
 def home():
+    return FileResponse("static/home.html")
+
+@app.get("/t/{trade}")
+def trade_console(trade: str):
+    if not _trade_kernel(trade):
+        raise HTTPException(404, "unknown trade")
     return FileResponse("static/app.html")
+
+
+def _mcp_biz(trade: str):
+    from . import mcp as _mcp
+    kern = _trade_kernel(trade)
+    if not kern:
+        raise HTTPException(404, "unknown trade")
+    hours = {}
+    try:
+        d = next(i for i in api_industries()["industries"] if i["slug"] == trade)
+        hours = d.get("hours") or {}
+    except StopIteration:
+        pass
+    from . import workflows as _wf
+    return _mcp.Biz(trade, kern[2], hours, SAMPLE_PRICES.get(trade, []), "Manchester",
+                    triage=lambda text: _wf.triage(trade, kern[2], text))
+
+
+_MCP_HEADERS = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "*",
+                "Access-Control-Allow-Methods": "GET, POST, OPTIONS"}
+
+
+@app.post("/mcp/{trade}")
+async def mcp_post(trade: str, request: Request):
+    from fastapi.responses import JSONResponse, Response
+    from . import mcp as _mcp
+    b = _mcp_biz(trade)
+    try:
+        body = await request.json()
+    except Exception:
+        return JSONResponse({"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "parse error"}}, 400, headers=_MCP_HEADERS)
+    if isinstance(body, list):
+        out = [r for r in (_mcp.handle(b, m) for m in body) if r]
+        return JSONResponse(out, headers=_MCP_HEADERS) if out else Response(status_code=202, headers=_MCP_HEADERS)
+    r = _mcp.handle(b, body)
+    return JSONResponse(r, headers=_MCP_HEADERS) if r else Response(status_code=202, headers=_MCP_HEADERS)
+
+
+@app.options("/mcp/{trade}")
+def mcp_options(trade: str):
+    from fastapi.responses import Response
+    return Response(status_code=204, headers=_MCP_HEADERS)
+
+
+@app.get("/mcp/{trade}")
+def mcp_get(trade: str, request: Request):
+    from fastapi.responses import Response
+    from . import mcp as _mcp
+    b = _mcp_biz(trade)
+    if "text/event-stream" in request.headers.get("accept", ""):
+        return Response(status_code=405, headers={**_MCP_HEADERS, "Allow": "POST"})  # stateless: no server-initiated stream
+    return {"name": f"{b.name} receptionist", "transport": "streamable-http", "endpoint": f"/mcp/{trade}",
+            "protocol": _mcp.PROTOCOL, "tools": [t["name"] for t in _mcp.TOOLS],
+            "connect": "Add as a custom connector (MCP) in ChatGPT or Claude using this URL."}
 
 @app.get("/landing")
 def landing():
@@ -287,6 +347,7 @@ def console_boot(trade: str):
     if pack_name:
         rp = rp.replace(pack_name, biz)
     return {"trade": trade, "business": biz, "opening": con.opening(trade, biz), "stats": con.stats(trade),
+            "site": con.site(trade), "mcp": f"/mcp/{trade}",
             "prompts": con.funnel(trade, set()),
             "system_prompts": {"guide": con.guide_prompt(trade, biz), "receptionist": _clean(rp, biz)},
             "brief": {k: v for k, v in con.brief(trade).items() if k in ("emergency", "booking", "price_q")}}

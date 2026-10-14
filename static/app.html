@@ -20,7 +20,7 @@ a{color:inherit}
 .i{display:block;flex:0 0 auto}
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#2c2c2c;border-radius:10px;border:3px solid var(--bg)}
 
-#app{display:grid;height:100vh;height:100dvh;grid-template-columns:76px minmax(0,1fr) minmax(360px,32vw);grid-template-rows:52px minmax(0,1fr)}
+#app{display:grid;height:100vh;height:100dvh;grid-template-columns:248px minmax(0,1fr) minmax(360px,32vw);grid-template-rows:52px minmax(0,1fr)}
 /* top */
 #top{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 14px 0 18px;border-bottom:1px solid var(--line);background:var(--bg1);z-index:5}
 .logo{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:16px;letter-spacing:-.01em}
@@ -36,7 +36,22 @@ a{color:inherit}
 .btn.ghost:hover{background:var(--bg3)}
 .mob{display:none}
 /* rail */
-#rail{border-right:1px solid var(--line);background:var(--bg1);display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0;overflow-y:auto;scrollbar-width:none}
+#rail{border-right:1px solid var(--line);background:var(--bg1);display:flex;flex-direction:column;gap:1px;padding:10px 8px;overflow-y:auto;scrollbar-width:none}
+.nb{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border-radius:9px;color:var(--dim);font-size:13.5px;text-align:left;text-decoration:none}
+.nb:hover{background:var(--bg3);color:var(--text)}.nb.on{background:var(--bg4);color:var(--text)}
+.nb .i{color:var(--dim2)}.nb.on .i{color:var(--acc)}
+.nb small{margin-left:auto;font-size:11px;color:var(--dim2)}
+.nh{font-size:11px;color:var(--dim2);text-transform:uppercase;letter-spacing:.06em;padding:14px 10px 6px}
+.biz{display:flex;gap:10px;align-items:center;padding:6px 8px 10px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.biz .ic{width:34px;height:34px;border-radius:10px;background:var(--bg4);color:var(--acc);display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.biz b{display:block;font-weight:600;font-size:14px;line-height:1.2}.biz span{font-size:12px;color:var(--dim2)}
+.nb.back{color:var(--dim2);font-size:12.5px}
+.rfoot{margin-top:auto;padding:12px 10px 4px;font-size:11.5px;color:var(--dim2);line-height:1.45}
+.mcpbox{background:var(--bg2);border:1px solid var(--line2);border-radius:12px;padding:12px 14px;margin:0 0 14px}
+.mcpbox code{font-family:var(--mono);font-size:12.5px;word-break:break-all;color:var(--text)}
+.tl{list-style:none;margin:0 0 16px;padding:0}.tl li{padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}.tl li b{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--acc)}.tl li span{display:block;color:var(--dim2);font-size:12.5px}
+.why{margin:0 0 16px;padding-left:18px;color:var(--dim);font-size:13px}.why li{margin:3px 0}
+pre.j{white-space:pre-wrap;font-size:12px;max-height:260px;overflow:auto}
 .tr{width:64px;padding:8px 0 7px;border-radius:12px;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--dim2);position:relative}
 .tr .ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s}
 .tr .lb{font-size:10.5px;line-height:1.15;text-align:center}
@@ -155,8 +170,8 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
 /* mobile */
 @media (max-width:900px){
   #app{grid-template-columns:1fr;grid-template-rows:52px auto minmax(0,1fr)}
-  #rail{flex-direction:row;padding:6px 8px;border-right:0;border-bottom:1px solid var(--line);overflow-x:auto;gap:2px}
-  .tr{flex:0 0 62px;padding:5px 0}.tr .ic{width:32px;height:32px}
+  #app{grid-template-rows:52px minmax(0,1fr)}
+  #rail{display:none}
   #side{display:none}
   body.side #side{display:flex;position:fixed;inset:52px 0 0;z-index:40;border-left:0}
   .tabs .x{display:flex}
@@ -181,7 +196,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
     <button class="btn ghost mob" onclick="openSide()">Preview</button>
     <button class="btn" onclick="runChip({kind:'signup',label:'Set it up for me'})">Start free</button>
   </header>
-  <nav id="rail" aria-label="Trades"></nav>
+  <nav id="rail" aria-label="Your business"></nav>
   <main id="main"><canvas id="bgfx" aria-hidden="true"></canvas>
     <div id="thread"><div class="col" id="col"></div></div>
     <div id="dock">
@@ -203,12 +218,13 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
   </main>
   <aside id="side">
     <div class="tabs" id="tabs">
-      <button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Your phone</button><button data-t="plans">Plans</button><button data-t="prompt">Instructions</button>
+      <button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Your phone</button><button data-t="agents">AI agents</button><button data-t="plans">Plans</button><button data-t="prompt">Instructions</button>
       <button class="x ib" onclick="closeSide()" aria-label="Close" id="sidex"></button>
     </div>
     <div class="pane" id="p-website"><div class="frame"><div class="bar"><span id="lockic"></span><span id="url"></span><a id="openfull" target="_blank" rel="noopener" title="Open full site"></a></div><iframe id="site" title="Customer website preview"></iframe></div></div>
     <div class="pane" id="p-calendar"></div>
     <div class="pane" id="p-phone"></div>
+    <div class="pane" id="p-agents"></div>
     <div class="pane" id="p-plans"></div>
     <div class="pane" id="p-prompt"></div>
   </aside>
@@ -244,15 +260,14 @@ async function boot(){
   try{meshBg($('#bgfx'),['#171717','#2d220f','#1b1b1b','#24190b'],{speed:.5,scale:.35})}catch(e){}
   for(let k=0;k<3&&!IND;k++){try{IND=(await (await fetch('/api/industries')).json()).industries}catch(e){await new Promise(r=>setTimeout(r,600))}}
   if(!IND){$('#col').innerHTML='<div class="msg sys"><span>Couldn\'t reach the server. Reload in a moment.</span></div>';return}
-  $('#rail').innerHTML=IND.map(i=>`<button class="tr" data-s="${i.slug}" title="${esc(i.label)}"><span class="ic">${icon(i.slug,19)}</span><span class="lb">${esc(SHORT[i.slug]||i.label)}</span></button>`).join('');
-  $('#rail').querySelectorAll('.tr').forEach(b=>b.onclick=()=>select(b.dataset.s));
   $('#tabs').querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>tab(b.dataset.t));
-  const h=location.hash.slice(1);select(IND.find(i=>i.slug===h)?h:'electrician');
+  const pm=location.pathname.match(/^\/t\/([a-z]+)/),h=(pm&&pm[1])||location.hash.slice(1);
+  if(!IND.find(i=>i.slug===h)){location.href='/';return}
+  select(h);
 }
 
 async function select(slug){
-  CUR=slug;history.replaceState(null,'','#'+slug);
-  $('#rail').querySelectorAll('.tr').forEach(b=>b.classList.toggle('on',b.dataset.s===slug));
+  CUR=slug;
   const t=T();$('#crumb').innerHTML=`<span>/</span><b>${esc(t.business)}</b><span>${esc(t.label)}</span>`;
   $('#site').src='/demo/'+slug+'?embed=1';$('#openfull').href='/demo/'+slug;$('#url').textContent=t.business.toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'')+'.co.uk';
   $('#cname').textContent=t.business;
@@ -261,7 +276,7 @@ async function select(slug){
   if(slug!==CUR)return;
   if(!s.msgs.length&&!BOOT[slug]){s.msgs.push({r:'sys',ic:'alert',t:'The demo is waking up. Pick the trade again in a moment.'})}
   if(!s.msgs.length&&BOOT[slug]){const b=BOOT[slug];s.msgs.push({r:'g',t:b.opening,stats:b.stats,chips:b.prompts})}
-  setMode(s.mode,true);paint();paintPhone();paintPlans();paintPrompt();tab(TABS);paintCal();
+  setMode(s.mode,true);paint();paintPhone();paintPlans();paintPrompt();paintRail();paintAgents();tab(TABS);paintCal();
 }
 
 /* ---------- thread ---------- */
@@ -367,7 +382,7 @@ async function lead(){
 }
 
 /* ---------- side panel ---------- */
-function tab(t){TABS=t;$('#tabs').querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));if(t==='calendar')paintCal()}
+function tab(t){TABS=t;document.querySelectorAll('#rail [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===t));$('#tabs').querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));if(t==='calendar')paintCal()}
 function openSide(t,soft){if(t)tab(t);if(innerWidth<=900&&!soft)document.body.classList.add('side')}
 function closeSide(){document.body.classList.remove('side')}
 async function paintCal(){
@@ -385,6 +400,7 @@ function paintPhone(){
     `<div class="note"><div class="a red">${icon('phone',16)}</div><div><div class="hd"><b>Urgent · SMS + WhatsApp</b><span>02:14</span></div><p>${esc(EX[CUR]||EX.soletrader)} Ring now.</p></div></div>
     <div class="note"><div class="a">${icon('mail',16)}</div><div><div class="hd"><b>Morning digest</b><span>07:00</span></div><p>Three calls overnight: a quote request, a price question and one callback. Transcripts and recordings attached.</p></div></div>
     <div class="note"><div class="a grn">${icon('bell',16)}</div><div><div class="hd"><b>Callback reminder</b><span>every 2h</span></div><p>Keeps nudging until each caller is marked done, so nobody writes “never rang back”.</p></div></div></div>`;
+  if(typeof paintRail==='function'&&BOOT[CUR])paintRail();
 }
 function paintPlans(){
   const P=[['Answered','50p a minute','Calls you miss answered in your voice, urgent alerts, 7am digest, callback nags. No subscription. First 10 calls free.',1],
@@ -394,6 +410,38 @@ function paintPlans(){
     ['Calendar sync','Add-on','Reads only free and busy from your real calendar and writes holds to a separate calendar. Your personal events and contacts never leave it.'],
     ['Reviews and leads','Add-on','Nudges happy customers to Google, and every enquiry from calls, site, WhatsApp and email lands in one lead list.']];
   $('#p-plans').innerHTML=`<div class="pad"><div class="ph">Plans and add-ons</div>`+P.map(p=>`<div class="plan${p[3]?' main':''}"><div class="hd"><b>${esc(p[0])}</b><span class="pr">${esc(p[1])}</span></div><p>${esc(p[2])}</p></div>`).join('')+`<p style="color:var(--dim2);font-size:12.5px">Prices for Basic and add-ons are agreed on your setup call.</p></div>`;
+}
+function paintRail(){
+  const t=T(),b=BOOT[CUR];if(!b)return;const sc=(b.site&&b.site.scenarios)||[];
+  const P=[['website','globe','Your website'],['calendar','calendar','Diary'],['phone','phone','Alerts and leads'],['agents','bot','AI agents'],['plans','layers','Plans'],['prompt','file','Instructions']];
+  $('#rail').innerHTML=`<div class="biz"><span class="ic">${icon(CUR,18)}</span><div><b>${esc(t.business)}</b><span>${esc(t.label)} · demo</span></div></div>
+  <a class="nb back" href="/">${icon('back',14)}All trades</a>
+  <div class="nh">Be a customer</div>${sc.map((x,i)=>`<button class="nb" data-sc="${i}" title="${esc(x.message)}">${icon('chat',15)}<span>${esc(x.label)}</span></button>`).join('')}
+  <button class="nb" onclick="openCall()">${icon('phone',15)}<span>Ring it live</span></button>
+  <div class="nh">Your business</div>${P.map(([k,ic,l])=>`<button class="nb" data-p="${k}">${icon(ic,15)}<span>${l}</span>${k==='phone'&&st().alerts.length?`<small>${st().alerts.length}</small>`:''}</button>`).join('')}
+  <div class="nh">Get it</div><button class="nb" onclick="runChip({kind:'signup',label:'Set it up for me'})">${icon('check',15)}<span>Set it up for me</span></button>
+  <div class="rfoot">Sample business with a read-only demo diary. Nothing here books, charges or texts anyone.</div>`;
+  $('#rail').querySelectorAll('[data-sc]').forEach(el=>el.onclick=()=>runChip({kind:'roleplay',text:sc[+el.dataset.sc].message}));
+  $('#rail').querySelectorAll('[data-p]').forEach(el=>el.onclick=()=>openSide(el.dataset.p));
+  $('#rail').querySelectorAll('[data-p]').forEach(el=>el.classList.toggle('on',el.dataset.p===TABS));
+}
+function paintAgents(){
+  const b=BOOT[CUR];if(!b)return;const url=location.origin+b.mcp,si=b.site||{why:[],must:[]};
+  const tools=[['get_business_info','Hours, area, emergency and booking policy'],['list_services','Services with guide prices'],['check_availability','Free slots only, never diary details'],['request_booking','Tentative hold, owner confirms by text'],['report_emergency','Safety advice first, then alerts on-call'],['leave_message','Lands in the 7am digest']];
+  $('#p-agents').innerHTML=`<div class="pad"><div class="ph">Let AI assistants book with you</div>
+  <p style="margin:0 0 12px;color:var(--dim);font-size:13.5px">ChatGPT, Claude and other agents can ask ${esc(T().business)} questions and request bookings on a customer's behalf, through the same rules as the phone line.</p>
+  <div class="mcpbox"><div style="font-size:12px;color:var(--dim2);margin-bottom:4px">MCP connector URL</div><code id="mcpurl">${esc(url)}</code>
+  <div style="display:flex;gap:8px;margin-top:10px"><button class="btn ghost" style="padding:5px 12px;font-size:12.5px" onclick="navigator.clipboard&&navigator.clipboard.writeText('${esc(url)}');this.textContent='Copied'">Copy</button><button class="btn" style="padding:5px 12px;font-size:12.5px" onclick="tryMcp()">Ask it for free slots</button></div></div>
+  <div id="mcpout"></div>
+  <div class="ph">Tools an agent can use</div><ul class="tl">${tools.map(([n,d])=>`<li><b>${n}</b><span>${d}</span></li>`).join('')}</ul>
+  <div class="ph">Why customers visit your site</div><ul class="why">${si.why.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <div class="ph">So your site and agent do this</div><ul class="why">${si.must.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`;
+}
+async function tryMcp(){
+  const o=$('#mcpout');o.innerHTML='<div class="ph">Calling check_availability…</div>';
+  try{const r=await (await fetch('/mcp/'+CUR,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'check_availability',arguments:{limit:4}}})})).json();
+    o.innerHTML=`<div class="ph">Agent request → response</div><pre class="j">${esc(JSON.stringify(r.result.structuredContent,null,2))}</pre>`}
+  catch(e){o.innerHTML='<div class="ph">The connector didn\'t answer. Try again in a moment.</div>'}
 }
 function paintPrompt(){
   const b=BOOT[CUR];if(!b)return;
@@ -465,7 +513,7 @@ function endCall(){
 $('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});
 addEventListener('message',e=>{if(e.source===$('#site').contentWindow&&e.data&&e.data.type==='answered-ask'&&typeof e.data.text==='string'){setMode('customer');send(e.data.text.slice(0,400))}});
 document.addEventListener('keydown',e=>{const typing=/INPUT|TEXTAREA/.test(document.activeElement.tagName);if(e.key==='/'&&!typing){e.preventDefault();$('#q').focus()}if(e.key==='Escape'){if(CALL)endCall();else closeSide()}});
-addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(IND&&h!==CUR&&IND.find(i=>i.slug===h))select(h)});
+
 try{speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
 boot();
 </script>

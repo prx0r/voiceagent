@@ -268,3 +268,60 @@ def guide_answer(slug: str, business: str, message: str, done: set[str], minutes
         ans = f"Happy to show you. The fastest way to judge it is to be one of your own customers. Try \u201c{b['emergency']}\u201d."
     done = set(done) | ({intent} if intent != "general" else set())
     return {"answer": ans, "intent": intent, "panel": panel, "prompts": funnel(slug, done)}
+
+
+# ---------------------------------------------------------------- per-trade owner menu
+# Why a customer lands on this trade's site (and so what the site + agent must do),
+# and the customer scenarios the owner can role-play from the left menu.
+SITE = {
+    "electrician": dict(
+        why=["Something's sparking or tripping now", "A price for an EV charger or rewire", "An EICR for a landlord or sale", "Proof they're registered (NICEIC/NAPIT)"],
+        must=["Emergency button that rings or chats 24/7", "Guide prices for EV, EICR and consumer units", "Registration and insurance badges", "Book a survey from real diary gaps"],
+        scenarios=[("Sparking socket", "My sockets are sparking and there's a burning smell"), ("Fuse box tripping", "My fuse box keeps tripping, can someone come tomorrow?"),
+                   ("EV charger price", "How much for an EV charger fitted?"), ("Landlord EICR", "I need an EICR for my rental flat next week"), ("Power cut, neighbours fine", "Half my house has no power but the neighbours are fine")]),
+    "plumber": dict(
+        why=["Water is leaking right now", "A tap, toilet or boiler fixed this week", "What it'll cost before they commit", "Whether they cover the postcode"],
+        must=["Stopcock advice in one tap", "Price guide and callout fee up front", "Areas covered by postcode", "Book a visit from real diary gaps"],
+        scenarios=[("Burst pipe", "A pipe's burst under my sink and there's water everywhere"), ("Dripping tap", "My tap's dripping, can you come later this week?"),
+                   ("Toilet won't flush", "My toilet won't flush, how much to fix?"), ("Bathroom quote", "Can I get a quote for a new bathroom suite?"), ("Ceiling leak", "Water is coming through my kitchen ceiling")]),
+    "heating": dict(
+        why=["No heating or hot water today", "Annual boiler service booking", "A new boiler quote", "Gas Safe proof and landlord certificates"],
+        must=["Gas-smell safety advice first", "Service booking from real diary gaps", "Gas Safe number on every page", "New-boiler quote form with photos"],
+        scenarios=[("No heat, newborn", "No heating or hot water and I've got a newborn"), ("Smell of gas", "I can smell gas in the kitchen"),
+                   ("Boiler service", "I need my annual boiler service, when's your next slot?"), ("New combi price", "How much is a new combi boiler?"), ("Landlord gas cert", "I need a gas safety certificate for a tenant moving in Friday")]),
+    "locksmith": dict(
+        why=["Locked out right now", "How fast someone can get there", "Price before they come", "Locks changed after a move or break-in"],
+        must=["One-tap lockout line with ETA", "Day and night prices shown plainly", "DBS-checked and insured badges", "Book lock changes from diary gaps"],
+        scenarios=[("Locked out at night", "I'm locked out, my keys are inside and it's midnight"), ("Just moved in", "Can you change my locks this week? We've just moved in"),
+                   ("Break-in", "Someone's broken my back door lock, I can't secure the house"), ("Anti-snap price", "How much for an anti-snap lock?"), ("Snapped key", "My key's snapped in the lock")]),
+    "beauty": dict(
+        why=["Book a treatment without ringing", "Price list and how long it takes", "Patch test rules", "Move or cancel an appointment"],
+        must=["Book online from real gaps", "Price list with durations", "Patch-test reminder and aftercare", "Easy reschedule and deposit policy"],
+        scenarios=[("Book gel nails", "Can I book gel nails for Friday afternoon?"), ("Lash reaction", "I've had a reaction to my lash tint and my eye is swollen"),
+                   ("Move appointment", "I need to move my Saturday appointment"), ("Lash lift price", "How much is a lash lift?"), ("Patch test", "Do I need a patch test before brow tint?")]),
+    "barber": dict(
+        why=["Is there a chair free now?", "Book a slot today", "Price list", "Move a booking they can't make"],
+        must=["Live free slots for today", "Book in two taps, no app", "Price list and walk-in rules", "No-show reminders and reschedules"],
+        scenarios=[("Slot this afternoon", "Any slots this afternoon for a skin fade?"), ("Can't make 3pm", "I booked a fade for 3pm but can't make it, can I move it?"),
+                   ("Fade price", "How much is a skin fade?"), ("Kids cut Saturday", "Can I bring my son in for a cut Saturday morning?"), ("Walk-in?", "Do you take walk-ins?")]),
+    "dogwalker": dict(
+        why=["Is there space for a new dog?", "Prices and walk lengths", "Insured, DBS and first aid?", "Change or check a walk"],
+        must=["New-client form and meet-and-greet booking", "Price list and areas", "Insurance, DBS and first-aid badges", "Walk updates and changes"],
+        scenarios=[("New client", "Can you walk my spaniel weekdays at lunch?"), ("Dog hurt on walk", "My dog's been hurt on today's walk, what happened?"),
+                   ("Price", "How much is a group walk?"), ("Tomorrow at noon", "Can you walk my dog tomorrow at noon?"), ("Dog missing", "My dog got out and is missing!")]),
+    "msp": dict(
+        why=["Something's down and staff can't work", "Raise a support ticket", "A quote for managed IT", "New starter or laptop setup"],
+        must=["P1 outage line that pages on-call", "Ticket intake with priority", "Per-user pricing and SLA", "Status page and security advice"],
+        scenarios=[("Office offline", "The whole office is offline and nobody can work"), ("Phishing click", "I think I clicked a phishing link"),
+                   ("New starter", "We need a new starter set up for Monday"), ("Per-user price", "How much is managed IT per user?"), ("Printer issue", "Our printer won't connect, not urgent")]),
+    "soletrader": dict(
+        why=["Can they do my job?", "Rough price", "When they're free", "Are they local and reliable?"],
+        must=["Quote form with photos", "Guide prices", "Book a quote visit from diary gaps", "Reviews and areas covered"],
+        scenarios=[("Urgent tonight", "It's urgent, can someone come tonight?"), ("Quote visit", "Can I book a quote visit for next week?"),
+                   ("Callout price", "What do you charge for a callout?"), ("Small job", "Can you hang a door and fix a shelf?"), ("Sales call", "Hi, I can get you to the top of Google")]),
+}
+
+
+def site(slug: str) -> dict:
+    s = SITE.get(slug) or SITE["soletrader"]
+    return {"why": s["why"], "must": s["must"], "scenarios": [{"label": a, "message": b} for a, b in s["scenarios"]]}
