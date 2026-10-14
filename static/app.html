@@ -187,7 +187,7 @@ iframe{flex:1;width:100%;border:0;background:#fff}
         <button id="dv-desk" class="on" onclick="setDevice('desk')">Desktop</button>
         <button id="dv-phone" onclick="setDevice('phone')">Phone</button>
       </div>
-      <a class="lnk" id="openfull" href="#" target="_blank" rel="noopener">Open full site ↗</a>
+      <a class="lnk" id="openfull" href="#" target="_blank" rel="noopener">Open ↗</a>
     </div>
     <div id="frame-wrap">
       <div class="browser" id="browser">
@@ -268,10 +268,22 @@ function select(slug,first){
 function setDevice(d){DEVICE=d;$('#browser').classList.toggle('phone',d==='phone');$('#dv-desk').classList.toggle('on',d==='desk');$('#dv-phone').classList.toggle('on',d==='phone')}
 
 /* ---------- owner panel ---------- */
+// per-trade example of the instant alert (fictional caller; 07700 900xxx is Ofcom's drama range)
+const EXAMPLE={
+  electrician:{alert:'Urgent: sparking socket, burning smell. Mrs Patel, M20 4QL, 07700 900123. Told to switch off at the mains. Ring her now.'},
+  plumber:{alert:'Urgent: burst pipe under kitchen sink. Tom Reid, M14 5RG, 07700 900456. Told to turn off the stopcock. Ring him now.'},
+  heating:{alert:'Urgent: no heating, elderly resident. Jean Hall, M21 9PL, 07700 900271. Told to keep warm, gas smell ruled out. Ring now.'},
+  locksmith:{alert:'Urgent: locked out, child inside. Priya Shah, M16 8EE, 07700 900318. Waiting by the front door. Ring now.'},
+  beauty:{alert:'Allergic reaction after lash tint. Chloe B, 07700 900642. Swelling, no breathing issues, advised to see a pharmacist. Ring her now.'},
+  barber:{alert:'Walk-in at 9:15 cancelled, slot freed. Waitlist offered: Jordan M, 07700 900587 accepted. No action needed.'},
+  dogwalker:{alert:'Urgent: Bella (cockapoo) got out of the garden. Owner Leah, 07700 900733, last seen near Fog Lane Park. Ring now.'},
+  msp:{alert:'P1: whole office offline at Hart & Co, 14 users. Contact: Mark, 07700 900914. Router lights red. Ring now.'},
+};
 function paintOwner(){
   const t=T(),D=DATA;
   const em=(t.escalations&&t.escalations[0])||null;
   const emTxt=em?(em.aliases[0]||em.name):'urgent job';
+  const ex=Object.assign({alert:`Urgent: ${emTxt}. Sam Okafor, M20 4QL, 07700 900123. Told to stay safe. Ring back now.`},EXAMPLE[t.slug]||{});
   const lead=t.slug==='soletrader'?'Whatever your trade':`For ${t.label.toLowerCase()}`;
   $('#owner').innerHTML=`
   <div class="eyebrow">${esc(lead)}</div>
@@ -281,7 +293,7 @@ function paintOwner(){
   <div class="sec"><h3>Try a call</h3><div class="chips">${(PROMPTS[t.slug]||PROMPTS.soletrader).map(([p,e])=>`<button class="chip${e?' em':''}" data-p="${esc(p)}">${e?'🚨 ':''}${esc(p)}</button>`).join('')}</div></div>
 
   <div class="sec"><h3>What lands on your phone</h3><div class="feed">
-    <div class="note"><div class="av red">🚨</div><div><div class="hd"><b>SMS + WhatsApp · instantly</b><span>02:14</span></div><p>Emergency: ${esc(emTxt)}. Mrs Patel, M20 4QL, 07700 900123. Told to stay safe. Ring her now.</p></div></div>
+    <div class="note"><div class="av red">🚨</div><div><div class="hd"><b>SMS + WhatsApp · instantly</b><span>02:14</span></div><p>${esc(ex.alert)}</p></div></div>
     <div class="note"><div class="av">✉️</div><div><div class="hd"><b>Morning digest · 7:00</b><span>3 calls</span></div><p>${esc((t.services[0]||{}).name||'New enquiry')} quote request, a price question, one callback. Transcripts and recordings attached.</p></div></div>
     <div class="note"><div class="av grn">🔁</div><div><div class="hd"><b>Callback reminder</b><span>every 2h</span></div><p>Nags you until each caller is marked done, so no one writes "never rang back".</p></div></div>
   </div></div>

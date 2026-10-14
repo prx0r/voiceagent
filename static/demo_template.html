@@ -128,6 +128,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:w
 .chatw .mic.rec{background:var(--bad);color:#fff;border-color:var(--bad)}
 
 @media(max-width:700px){.trust{grid-template-columns:1fr}}
+@media(max-width:1100px){nav .links{display:none}}
+@media(max-width:520px){.b247 .t{display:none}.brand small{white-space:normal}}
+html{scroll-padding-top:84px}
+.fab{transition:opacity .25s,transform .25s}.fab.hide{opacity:0;transform:translateY(12px);pointer-events:none}
 @media(max-width:860px){
   nav .links{display:none}
   .trust{gap:10px 18px}
@@ -141,7 +145,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:w
 <nav><div class="wrap">
   <a class="brand" href="#"><span class="mark">{{ICON}}</span><span><b>{{BUSINESS}}</b><small>{{TRADE_LABEL}} · {{AREA}}</small></span></a>
   <div class="links"><a href="#services">Services</a><a href="#pricing">Pricing</a><a href="#book">Book</a></div>
-  <button class="b pri sm" style="margin-left:auto;flex-shrink:0" onclick="openChat()">📞 24/7 line</button>
+  <button class="b pri sm b247" style="margin-left:auto;flex-shrink:0" onclick="openChat()">📞<span class="t"> 24/7 line</span></button>
 </div></nav>
 
 <header class="hero"><div class="wrap">
@@ -182,7 +186,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:w
   <p class="intro">No surprises. You'll know the price range before anyone turns up.</p>
   <div class="price">
     <div class="pcard"><b>Typical prices</b><div class="plist" id="plist"></div><p class="pnote">Guide prices including VAT. Your exact price is confirmed before any work starts.</p></div>
-    <div class="pcard"><b>What you can expect</b><ul><li>A reply first thing if you contact us out of hours</li><li>A price range up front, confirmed before work starts</li><li>Photos welcome, so we arrive with the right parts</li><li>A reminder before your visit</li></ul></div>
+    <div class="pcard"><b>What you can expect</b><ul id="expect"></ul></div>
   </div>
 </div></section>
 
@@ -210,7 +214,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:8px 20px;flex-wrap:w
 
 <footer><div class="wrap"><span>© {{BUSINESS}} · {{AREA}}</span><span>Calls may be answered by an AI assistant and recorded for quality. <span id="slugline"></span></span></div></footer>
 
-<button class="fab" id="fab" onclick="openChat()"><span class="d"></span>Chat or call · 24/7</button>
+<button class="fab hide" id="fab" onclick="openChat()"><span class="d"></span>Chat or call · 24/7</button>
 <div class="chatw" id="chatw" role="dialog" aria-label="Chat with {{BUSINESS}}">
   <div class="hd"><span class="mark" style="width:34px;height:34px;font-size:16px">{{ICON}}</span><div><b>{{BUSINESS}}</b><small>AI assistant · usually replies instantly</small></div><button onclick="closeChat()" aria-label="Close">×</button></div>
   <div id="chatlog"></div>
@@ -239,11 +243,22 @@ fetch('/api/industries').then(r=>r.json()).then(d=>{
   if(em&&em.aliases&&em.aliases.length)document.getElementById('emline').innerHTML=`<b>Emergency?</b> ${esc(em.aliases.slice(0,3).join(', '))}: tap the 24/7 line and we'll get someone on it straight away.`;
   document.getElementById('chatq').placeholder=(i.escalations&&i.escalations.length)?'e.g. '+(em.aliases[0]||'it\'s urgent')+'…':'e.g. can I book for Friday?';
 });
+// FAB only once the hero's own 24/7 button has scrolled away, so it never sits on the hours card
+const fab=document.getElementById('fab');
+addEventListener('scroll',()=>{if(!document.getElementById('chatw').classList.contains('on'))fab.classList.toggle('hide',scrollY<420)},{passive:true});
+// role and promises per trade kind
+const APPT=['beauty','barber','dogwalker'].includes(TRADE),IT=TRADE==='msp';
+const ROLE=APPT?'the owner':IT?'the on-call engineer':'the on-call engineer';
+document.getElementById('emtext').textContent=APPT?`Ring any time. Anything urgent goes straight to ${ROLE}'s phone, even out of hours.`:`Ring any time. Urgent jobs go straight to ${ROLE}, even at 2am.`;
+const EXPECT=APPT?['A reply first thing if you message out of hours','Prices up front, no add-ons at the till','Easy rebooking and a reminder the day before','Your preferences noted for next time']
+ :IT?['A response within the hour for urgent issues','Fixed prices agreed before work starts','Plain-English updates, no jargon','A ticket reference for every request']
+ :['A reply first thing if you contact us out of hours','A price range up front, confirmed before work starts','Photos welcome, so we arrive with the right parts','A reminder before your visit'];
+document.getElementById('expect').innerHTML=EXPECT.map(x=>`<li>${esc(x)}</li>`).join('');
 const log=document.getElementById('chatlog');
 function addMsg(r,t){const d=document.createElement('div');d.className='m '+r;d.textContent=t;log.appendChild(d);log.scrollTop=1e9;return d}
 addMsg('a',`Hi, you've reached ${BIZ}. Ask me anything about our work or prices, or tell me what's happened and I'll get it sorted.`);
-function openChat(){document.getElementById('chatw').classList.add('on');document.getElementById('fab').style.display='none';setTimeout(()=>document.getElementById('chatq').focus(),50)}
-function closeChat(){document.getElementById('chatw').classList.remove('on');document.getElementById('fab').style.display='flex'}
+function openChat(){document.getElementById('chatw').classList.add('on');fab.classList.add('hide');setTimeout(()=>document.getElementById('chatq').focus(),50)}
+function closeChat(){document.getElementById('chatw').classList.remove('on');fab.classList.toggle('hide',scrollY<420)}
 function toggleCallback(){const el=document.getElementById('callback');el.style.display=el.style.display==='none'?'block':'none'}
 async function sendCallback(){
   const out=document.getElementById('cbout');

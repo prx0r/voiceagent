@@ -222,6 +222,8 @@ def api_industries():
         i["business"] = SAMPLE_BIZ.get(i["slug"], "Sample & Sons")
         i["area"] = "Manchester"
         i["price_list"] = SAMPLE_PRICES.get(i["slug"], [])
+        dflt = {"monday-friday": "08:00-18:00", "saturday": "09:00-13:00", "sunday": "closed"}
+        i["hours"] = {k: (dflt.get(k, "closed") if "[" in str(v) else v) for k, v in (i.get("hours") or {}).items()}
     return d
 
 @app.get("/health")
