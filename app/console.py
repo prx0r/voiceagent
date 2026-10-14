@@ -203,7 +203,7 @@ def funnel(slug: str, done: set[str]) -> list[dict]:
 
 def opening(slug: str, business: str) -> str:
     b = brief(slug)
-    return (f"This is {business}, a sample {b['who'][:-1]} business running Answered. "
+    return (f"This is {business}, a sample {b['who'][:-1].replace(' team', '')} business running Answered. "
             f"It answers the calls you miss: {b['pain']}. Pick one below and you'll hear it handle a real call in about ten seconds.")
 
 
