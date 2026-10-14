@@ -230,6 +230,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const PLURAL={electrician:'electricians',plumber:'plumbers',heating:'heating engineers',locksmith:'locksmiths',beauty:'salons',barber:'barbers',dogwalker:'dog walkers',msp:'IT support',soletrader:'your trade'};
 const SHORT={electrician:'Electrician',plumber:'Plumber',heating:'Heating',locksmith:'Locksmith',beauty:'Beauty',barber:'Barber',dogwalker:'Pet care',msp:'IT / MSP',soletrader:'Other trade'};
 let IND=null,CUR=null,BOOT={},TABS='website';
 const S={}; // per trade: {msgs,mode,done,gsid,csid,boot}
@@ -256,8 +257,9 @@ async function select(slug){
   $('#site').src='/demo/'+slug+'?embed=1';$('#openfull').href='/demo/'+slug;$('#url').textContent=t.business.toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'')+'.co.uk';
   $('#cname').textContent=t.business;
   const s=st();
-  if(!BOOT[slug]){try{BOOT[slug]=await (await fetch('/api/console/'+slug)).json()}catch(e){BOOT[slug]=null}}
+  for(let k=0;k<4&&!BOOT[slug];k++){try{const r=await fetch('/api/console/'+slug);if(r.ok)BOOT[slug]=await r.json()}catch(e){}if(!BOOT[slug])await new Promise(r=>setTimeout(r,500*(k+1)))}
   if(slug!==CUR)return;
+  if(!s.msgs.length&&!BOOT[slug]){s.msgs.push({r:'sys',ic:'alert',t:'The demo is waking up. Pick the trade again in a moment.'})}
   if(!s.msgs.length&&BOOT[slug]){const b=BOOT[slug];s.msgs.push({r:'g',t:b.opening,stats:b.stats,chips:b.prompts})}
   setMode(s.mode,true);paint();paintPhone();paintPlans();paintPrompt();tab(TABS);paintCal();
 }
@@ -288,7 +290,7 @@ const CK={roleplay:'chat',call:'phone',panel:'ext',guide:'chat',signup:'check'};
 function setMode(m,quiet){
   const s=st();s.mode=m;$('#m-guide').classList.toggle('on',m==='guide');$('#m-cust').classList.toggle('on',m==='customer');
   const t=T();
-  $('#q').placeholder=m==='guide'?`Ask about Answered for ${SHORT[CUR].toLowerCase()}s`:`You're a customer ringing ${t.business}. What's happened?`;
+  $('#q').placeholder=m==='guide'?`Ask about Answered for ${PLURAL[CUR]||'your business'}`:`You're a customer ringing ${t.business}. What's happened?`;
   $('#hint').textContent=m==='guide'?'You\'re talking to Answered\'s guide. Switch to "Be the customer" to test the receptionist.':`Role-play: ${t.business}'s receptionist answers as it would at 2am. It reads the diary but never books on its own.`;
   if(!quiet&&m==='customer'&&!s.msgs.some(x=>x.r==='sys'&&x.rp)){s.msgs.push({r:'sys',rp:1,ic:'phone',t:`Customer role-play · ${t.business} after-hours line`});paint()}
 }

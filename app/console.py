@@ -122,7 +122,12 @@ def next_free(slug: str, n: int = 3, after_today: bool = False) -> list[tuple[st
 
 def slots_sentence(slug: str, message: str = "") -> str:
     tom = bool(re.search(r"(?i)\btomorrow\b", message))
-    picks = next_free(slug, 3, after_today=tom)
+    m = message.lower()
+    rng = (12, 17) if "afternoon" in m else (0, 12) if "morning" in m else (17, 24) if re.search(r"evening|after work|tonight", m) else None
+    picks = next_free(slug, 30, after_today=tom)
+    if rng:
+        picks = [p for p in picks if rng[0] <= int(p[1][:2]) < rng[1]] or picks
+    picks = picks[:3]
     if tom:
         picks = [p for p in picks if p[0] == "Tomorrow"] or picks
     if not picks:
@@ -131,6 +136,8 @@ def slots_sentence(slug: str, message: str = "") -> str:
         return f"{p[0].lower() if p[0] in ('Today', 'Tomorrow') else p[0]} at {p[1]}"
     parts = [lab(p) for p in picks]
     joined = ", ".join(parts[:-1]) + f" or {parts[-1]}" if len(parts) > 1 else parts[0]
+    if len(parts) == 1:
+        return f"The next free slot is {joined}. Does that suit you? I'll hold it and the owner confirms by text."
     return f"The next free slots are {joined}. Which suits you? I'll hold it and the owner confirms by text."
 
 
