@@ -36,6 +36,15 @@ class ChatIn(BaseModel):
 def home():
     return FileResponse("static/home.html")
 
+@app.get("/api/pricing")
+def api_pricing():
+    """Every price on the site and console comes from knowledge/pricing.json."""
+    with open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "knowledge", "pricing.json"), encoding="utf-8") as f:
+        p = json.load(f)
+    p["booking_url"] = os.environ.get("TOM_BOOKING_URL", "")  # Cal.com/Calendly link; empty = built-in request form
+    return p
+
+
 @app.get("/t/{trade}")
 def trade_console(trade: str):
     if not _trade_kernel(trade):

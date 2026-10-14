@@ -194,7 +194,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
     <div class="sp"></div>
     <span class="pill"><span class="live"></span>50p per active minute · first 10 calls free</span>
     <button class="btn ghost mob" onclick="openSide()">Preview</button>
-    <button class="btn" onclick="runChip({kind:'signup',label:'Set it up for me'})">Start free</button>
+    <button class="btn" onclick="Tom.open(CUR)">Book a call with Tom</button>
   </header>
   <nav id="rail" aria-label="Your business"></nav>
   <main id="main"><canvas id="bgfx" aria-hidden="true"></canvas>
@@ -218,7 +218,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
   </main>
   <aside id="side">
     <div class="tabs" id="tabs">
-      <button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Your phone</button><button data-t="agents">AI agents</button><button data-t="plans">Plans</button><button data-t="prompt">Instructions</button>
+      <button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Your phone</button><button data-t="agents">AI agents</button><button data-t="plans">Prices</button><button data-t="prompt">Instructions</button>
       <button class="x ib" onclick="closeSide()" aria-label="Close" id="sidex"></button>
     </div>
     <div class="pane" id="p-website"><div class="frame"><div class="bar"><span id="lockic"></span><span id="url"></span><a id="openfull" target="_blank" rel="noopener" title="Open full site"></a></div><iframe id="site" title="Customer website preview"></iframe></div></div>
@@ -243,6 +243,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
 </div>
 
 <script src="/static/ui.js"></script>
+<script src="/static/pricing.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -315,7 +316,8 @@ async function runChip(c){
   if(c.kind==='roleplay'){setMode('customer');s.pending=c.text;await send(c.text,true);return}
   if(c.kind==='call'){openCall();return}
   if(c.kind==='panel'){openSide(c.text);await guide(c.label);return}
-  if(c.kind==='signup'){s.msgs.push({r:'u',t:c.label});s.msgs.push({r:'g',t:'Leave your number and we\'ll ring you for a 20-minute setup: voice clone, prices, hours, your divert code and a test call. First 10 calls are free.',form:1});s.done.push('setup');paint();setTimeout(()=>$('#f-name')&&$('#f-name').focus(),50);return}
+  if(c.kind==='signup'){Tom.open(CUR);return}
+  if(c.kind==='signup_old'){s.msgs.push({r:'u',t:c.label});s.msgs.push({r:'g',t:'Leave your number and we\'ll ring you for a 20-minute setup: voice clone, prices, hours, your divert code and a test call. First 10 calls are free.',form:1});s.done.push('setup');paint();setTimeout(()=>$('#f-name')&&$('#f-name').focus(),50);return}
   await guide(c.text||c.label);
 }
 
@@ -356,7 +358,7 @@ function funnel(slug){
     ['calendar',{label:'How does it use my diary?',kind:'panel',text:'calendar'}],
     ['prompt',{label:'Show me its instructions for my trade',kind:'guide',text:'Show me the system prompt'}],
   ].filter(([k])=>!done.includes(k)).slice(0,3).map(x=>x[1]);
-  return list.concat([{label:'Set it up for me',kind:'signup'}]);
+  return list.concat([{label:'Book a call with Tom',kind:'signup'}]);
 }
 
 async function guide(t){
@@ -402,24 +404,16 @@ function paintPhone(){
     <div class="note"><div class="a grn">${icon('bell',16)}</div><div><div class="hd"><b>Callback reminder</b><span>every 2h</span></div><p>Keeps nudging until each caller is marked done, so nobody writes “never rang back”.</p></div></div></div>`;
   if(typeof paintRail==='function'&&BOOT[CUR])paintRail();
 }
-function paintPlans(){
-  const P=[['Answered','50p a minute','Calls you miss answered in your voice, urgent alerts, 7am digest, callback nags. No subscription. First 10 calls free.',1],
-    ['Basic','Monthly, with support','Adds a website on your domain that ChatGPT and Google can read and quote, your Google Business Profile set up and kept in sync, and tech support on WhatsApp.'],
-    ['WhatsApp agent','Add-on','Answers FAQs and bookings on your WhatsApp. Anything urgent or human comes to you.'],
-    ['Agent inbox','Add-on',`hello@${$('#url').textContent} run by your agent: answers within your rules, drafts the rest for you to approve.`],
-    ['Calendar sync','Add-on','Reads only free and busy from your real calendar and writes holds to a separate calendar. Your personal events and contacts never leave it.'],
-    ['Reviews and leads','Add-on','Nudges happy customers to Google, and every enquiry from calls, site, WhatsApp and email lands in one lead list.']];
-  $('#p-plans').innerHTML=`<div class="pad"><div class="ph">Plans and add-ons</div>`+P.map(p=>`<div class="plan${p[3]?' main':''}"><div class="hd"><b>${esc(p[0])}</b><span class="pr">${esc(p[1])}</span></div><p>${esc(p[2])}</p></div>`).join('')+`<p style="color:var(--dim2);font-size:12.5px">Prices for Basic and add-ons are agreed on your setup call.</p></div>`;
-}
+function paintPlans(){const el=$('#p-plans');if(!el.dataset.r){el.dataset.r=1;el.innerHTML='<div class="pad"><div class="ph">What it costs</div><div id="pz"></div></div>';Pricing.render(el.querySelector('#pz'),{compact:1})}}
 function paintRail(){
   const t=T(),b=BOOT[CUR];if(!b)return;const sc=(b.site&&b.site.scenarios)||[];
-  const P=[['website','globe','Your website'],['calendar','calendar','Diary'],['phone','phone','Alerts and leads'],['agents','bot','AI agents'],['plans','layers','Plans'],['prompt','file','Instructions']];
+  const P=[['website','globe','Your website'],['calendar','calendar','Diary'],['phone','phone','Alerts and leads'],['agents','bot','AI agents'],['plans','layers','Plans and prices'],['prompt','file','Instructions']];
   $('#rail').innerHTML=`<div class="biz"><span class="ic">${icon(CUR,18)}</span><div><b>${esc(t.business)}</b><span>${esc(t.label)} · demo</span></div></div>
   <a class="nb back" href="/">${icon('back',14)}All trades</a>
   <div class="nh">Be a customer</div>${sc.map((x,i)=>`<button class="nb" data-sc="${i}" title="${esc(x.message)}">${icon('chat',15)}<span>${esc(x.label)}</span></button>`).join('')}
   <button class="nb" onclick="openCall()">${icon('phone',15)}<span>Ring it live</span></button>
   <div class="nh">Your business</div>${P.map(([k,ic,l])=>`<button class="nb" data-p="${k}">${icon(ic,15)}<span>${l}</span>${k==='phone'&&st().alerts.length?`<small>${st().alerts.length}</small>`:''}</button>`).join('')}
-  <div class="nh">Get it</div><button class="nb" onclick="runChip({kind:'signup',label:'Set it up for me'})">${icon('check',15)}<span>Set it up for me</span></button>
+  <div class="nh">Get it</div><button class="nb" data-p="plans">${icon('tag',15)}<span>Prices, no subscription</span></button><button class="nb" onclick="Tom.open(CUR)">${icon('phone',15)}<span>Book a call with Tom</span></button>
   <div class="rfoot">Sample business with a read-only demo diary. Nothing here books, charges or texts anyone.</div>`;
   $('#rail').querySelectorAll('[data-sc]').forEach(el=>el.onclick=()=>runChip({kind:'roleplay',text:sc[+el.dataset.sc].message}));
   $('#rail').querySelectorAll('[data-p]').forEach(el=>el.onclick=()=>openSide(el.dataset.p));

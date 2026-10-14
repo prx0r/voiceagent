@@ -166,7 +166,7 @@ PRODUCT = """PRODUCT FACTS (only these; never invent others):
 - Emergencies trigger an instant SMS and WhatsApp to the owner with name, address, number and the safety advice given. Everything else goes in a 7am email digest with transcripts.
 - Callback reminders every 2 hours until each caller is marked done.
 - Price: 50p per active minute, no subscription, first 10 calls free. Setup is a 20-minute call: voice clone, call divert code, test call.
-- Basic plan (subscription, with tech support): an AI-readable website on their domain that ChatGPT and Google can read and quote, plus Google Business Profile setup and sync.
+- No subscriptions anywhere. Free starter pack (20-min setup call with Tom, the human founder). Add-ons are pick-what-you-need: website £5 one-off, own domain + email £5/year at cost, after-call agent 10p per call, WhatsApp agent 20p per conversation, email agent 10p per email, diary sync and ChatGPT bookings free. To talk to a human, book a call with Tom.
 - Add-ons: WhatsApp agent; an agent-run inbox on their own domain (e.g. hello@markelectrician.co.uk) that answers within policy and drafts the rest for approval; calendar sync that reads free/busy only and writes holds to a separate calendar, so personal details never leak; review nudges; lead tracking.
 - Subscription and add-on prices are set on the setup call; never quote a figure for them.
 - Also: a call-training simulator for staff, and recordings and notes."""
@@ -200,9 +200,9 @@ def funnel(slug: str, done: set[str]) -> list[dict]:
         ("calendar", _chip("How does it use my diary?", "panel", "calendar")),
         ("cost", _chip("What would it cost me?", "guide", "What would it cost me?")),
         ("site", _chip("Show me what my customers see", "panel", "website")),
-        ("plans", _chip("What else comes with it? Website, Google, WhatsApp, email", "panel", "plans")),
+        ("plans", _chip("Add-ons: website, own email, WhatsApp", "panel", "plans")),
         ("prompt", _chip("Show me its instructions for my trade", "guide", "Show me the system prompt")),
-        ("setup", _chip("Set it up for me", "signup")),
+        ("setup", _chip("Book a call with Tom", "signup")),
     ]
     out = [c for k, c in steps if k not in done and k != "setup"][:3]
     return out + [steps[-1][1]]
@@ -233,11 +233,12 @@ def guide_answer(slug: str, business: str, message: str, done: set[str], minutes
     intent = next((k for k, rx in INTENTS if re.search(rx, message, re.I)), "general")
     panel = None
     if intent == "cost":
-        ans = ("50p per active minute, no subscription, and the first 10 calls are free. Forty missed calls a month at two minutes each "
-               "comes to £30. One job won back covers that several times over.")
+        ans = ("No subscription, ever. Setup is free, then it's 50p a minute only while it's talking, and the first 10 calls are free. "
+               "Forty missed calls a month at two minutes each is about £40. One job won back covers that. Add-ons are optional and priced on screen.")
+        panel = "plans"
     elif intent == "plans":
-        ans = ("Answering is pay as you go. Basic adds a website that ChatGPT and Google can read and quote, your Google profile kept in sync, and "
-               "tech support. On top: a WhatsApp agent, an agent-run inbox on your own domain, and diary sync that only sees busy or free, never your personal details.")
+        ans = ("Pick only what you want, no subscription: a website for £5 one-off, your own web address and email for £5 a year at cost, "
+               "an after-call agent, WhatsApp and email agents priced per use, and free diary sync and ChatGPT bookings. Tom can talk it through on a call.")
         panel = "plans"
     elif intent == "prompt":
         ans = (f"Every trade gets its own instructions. For {b['who']} it knows the emergencies, the safety advice to give, your guide prices, "
@@ -256,8 +257,8 @@ def guide_answer(slug: str, business: str, message: str, done: set[str], minutes
     elif intent == "call":
         ans = "Press Call and talk to it like a customer would. It answers as the business, in a British voice, and you can hang up any time."
     elif intent == "setup":
-        ans = ("Setup is a 20-minute call: we clone your voice, load your prices and hours, set your phone's divert code and test-ring it "
-               "with you. Leave your number and we'll ring you.")
+        ans = ("Setup is free: a 20-minute call with Tom. He clones your voice, loads your prices and hours, sets your phone to send missed calls "
+               "to it and test-rings it with you. Pick a time that suits you.")
         panel = "signup"
     elif intent == "site":
         ans = "That's the site your customers get, built from your trade's playbook, with the same receptionist behind its chat."

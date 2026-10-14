@@ -2,55 +2,98 @@
 <html lang="en-GB"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Answered — the receptionist for UK trades</title>
-<meta name="description" content="Missed calls answered in your voice. Emergencies texted instantly. Everything else in a 7am email. 50p per active minute, no subscription.">
+<meta name="description" content="Answers your phone in your voice when you can't. No subscription. Free setup with Tom. 50p a minute only while it's talking.">
 <style>
 :root{--bg:#171717;--bg1:#181818;--bg2:#212121;--bg3:#2a2a2a;--bg4:#2f2f2f;--line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.12);--text:#ececec;--dim:#b4b4b4;--dim2:#8f8f8f;--acc:#f5a524;--ok:#34d399;
 --font:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%}
-body{background:radial-gradient(1000px 480px at 50% -12%,rgba(245,165,36,.09),transparent 60%),var(--bg);color:var(--text);font:15px/1.5 var(--font);-webkit-font-smoothing:antialiased}
-a{color:inherit;text-decoration:none}.i{display:block;flex:0 0 auto}
-header{display:flex;align-items:center;gap:12px;max-width:1080px;margin:0 auto;padding:18px 22px}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden}
+body{background:radial-gradient(1000px 480px at 30% -12%,rgba(245,165,36,.09),transparent 60%),var(--bg);color:var(--text);font:15px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;cursor:pointer;background:none;border:0}.i{display:block;flex:0 0 auto}
+#pg{height:100vh;height:100dvh;display:grid;grid-template-rows:56px minmax(0,1fr) 40px;max-width:1180px;margin:0 auto;padding:0 24px}
+header{display:flex;align-items:center;gap:12px}
 .logo{display:flex;align-items:center;gap:9px;font-weight:600;font-size:16px}
 .logo .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px rgba(245,165,36,.6)}
-.sp{flex:1}.pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--dim);border:1px solid var(--line2);border-radius:999px;padding:4px 11px}
-.pill .live{width:7px;height:7px;border-radius:50%;background:var(--ok)}
-main{max-width:1080px;margin:0 auto;padding:36px 22px 56px}
-h1{font-size:clamp(30px,4.6vw,46px);line-height:1.08;letter-spacing:-.02em;margin:0 0 14px;font-weight:600;max-width:780px}
-.sub{color:var(--dim);font-size:17px;max-width:640px;margin:0 0 34px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
-.card{display:flex;flex-direction:column;gap:10px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:18px;transition:border-color .15s,background .15s,transform .15s}
-.card:hover{border-color:var(--line2);background:#262626;transform:translateY(-1px)}
-.card .top{display:flex;align-items:center;gap:12px}
-.card .ic{width:40px;height:40px;border-radius:11px;background:var(--bg4);color:var(--acc);display:flex;align-items:center;justify-content:center}
-.card b{font-weight:600;font-size:15.5px;display:block}.card small{color:var(--dim2);font-size:12.5px}
-.card p{margin:0;color:var(--dim);font-size:13.5px;flex:1}
-.card .go{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text)}
-.how{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:40px 0 0}
-.how div{border-top:1px solid var(--line2);padding-top:14px;color:var(--dim);font-size:14px}.how b{display:block;color:var(--text);font-weight:600;margin-bottom:4px}
-footer{max-width:1080px;margin:0 auto;padding:0 22px 30px;color:var(--dim2);font-size:12.5px}
-@media (max-width:700px){.how{grid-template-columns:1fr}main{padding-top:18px}.pill{display:none}}
+.sp{flex:1}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:40px;align-items:center;min-height:0}
+h1{font-size:clamp(28px,3.6vw,44px);line-height:1.06;letter-spacing:-.02em;margin:0 0 12px;font-weight:650}
+.sub{color:var(--dim);font-size:16.5px;margin:0 0 18px;max-width:520px}
+.promise{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 18px}
+.promise span{font-size:13px;font-weight:600;border:1px solid rgba(52,211,153,.35);color:#a7f3d0;background:rgba(52,211,153,.08);border-radius:999px;padding:5px 12px}
+.price{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 0 18px;max-width:520px}
+.pc{background:var(--bg2);border:1px solid var(--line2);border-radius:14px;padding:12px 14px}
+.pc.main{border-color:rgba(245,165,36,.45)}
+.pc b{display:block;font-size:20px;font-weight:700;color:var(--acc);letter-spacing:-.01em}
+.pc span{font-size:13px;color:var(--dim)}
+.adds{font-size:13.5px;color:var(--dim);margin:0 0 20px;max-width:520px}
+.adds b{color:var(--text);font-weight:600}
+.ctas{display:flex;flex-wrap:wrap;gap:10px}
+.tomb{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:12px 22px;font-weight:600;font-size:15px;background:#fff;color:#0d0d0d;white-space:nowrap}
+.tomb:hover{opacity:.9}.tomb.sm{padding:7px 14px;font-size:13.5px}
+.btn2{display:inline-flex;align-items:center;border:1px solid var(--line2);border-radius:999px;padding:12px 20px;font-weight:600;font-size:15px}
+.btn2:hover{background:var(--bg3)}
+.pick{display:flex;flex-direction:column;min-height:0}
+.pick h2{font-size:15px;font-weight:600;margin:0 0 4px}.pick p{margin:0 0 12px;color:var(--dim2);font-size:13.5px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.card{display:flex;flex-direction:column;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:14px;transition:border-color .15s,background .15s,transform .15s}
+.card:hover{border-color:var(--acc);background:#262626;transform:translateY(-1px)}
+.card .ic{width:38px;height:38px;border-radius:11px;background:var(--bg4);color:var(--acc);display:flex;align-items:center;justify-content:center}
+.card b{font-weight:600;font-size:14.5px;line-height:1.2}.card small{color:var(--dim2);font-size:12px;display:block}
+footer{display:flex;align-items:center;color:var(--dim2);font-size:12px}
+#prm{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:90;padding:16px}
+#prm.on{display:flex}
+#prm .card2{background:#1b1b1b;border:1px solid var(--line2);border-radius:20px;width:min(860px,100%);max-height:92vh;overflow:auto;padding:20px 22px}
+#prm .top{display:flex;align-items:center;margin:0 0 12px}#prm h3{margin:0;font-size:19px}
+#prm .x{margin-left:auto;border:1px solid var(--line2);border-radius:999px;padding:6px 14px}
+@media (max-width:900px){
+  #pg{grid-template-rows:52px minmax(0,1fr) 0;padding:0 14px}
+  main{grid-template-columns:1fr;gap:14px;align-content:start;padding-top:4px}
+  h1{font-size:26px;margin-bottom:6px}.sub{font-size:14.5px;margin-bottom:10px}
+  .promise{margin-bottom:10px}.promise span{font-size:11.5px;padding:3px 9px}
+  .price{margin-bottom:10px}.pc{padding:8px 10px}.pc b{font-size:17px}.pc span{font-size:12px}
+  .adds{display:none}.ctas .btn2{display:none}.tomb{padding:10px 18px;font-size:14px}
+  .pick p{display:none}.grid{gap:6px}.card{padding:9px;gap:5px;flex-direction:row;align-items:center}.card .ic{width:28px;height:28px}.card small{display:none}.card b{font-size:12.5px}
+  footer,.hdrpill{display:none}
+}
+@media (max-height:640px) and (min-width:901px){.adds{display:none}.sub{margin-bottom:10px}.card small{display:none}}
 </style></head>
 <body>
-<header><a class="logo" href="/"><span class="dot"></span>Answered</a><span class="sp"></span><span class="pill"><span class="live"></span>50p per active minute · first 10 calls free</span></header>
+<div id="pg">
+<header><a class="logo" href="/"><span class="dot"></span>Answered</a><span class="sp"></span><button class="tomb sm" onclick="Tom.open()">Book a call with Tom</button></header>
 <main>
-  <h1>The receptionist that answers when you can't.</h1>
-  <p class="sub">Pick your trade to try yours: be one of your own customers, ring it live, and see what lands on your phone. ChatGPT and other AI assistants can book with it too.</p>
-  <div class="grid" id="grid"></div>
-  <div class="how">
-    <div><b>Answers in your voice</b>Missed and after-hours calls, 24/7, with your prices, hours and safety advice.</div>
-    <div><b>Wakes you only for emergencies</b>Urgent calls text you instantly. Everything else lands in a 7am digest.</div>
-    <div><b>Never books behind your back</b>It reads free and busy slots, holds one, and you confirm with a tap.</div>
-  </div>
+  <section>
+    <h1>Never miss a job because you couldn't answer.</h1>
+    <p class="sub">It answers your phone in your voice, texts you if it's urgent, and sorts the rest for the morning.</p>
+    <div class="promise"><span>No subscription</span><span>No contract</span><span>Pay only for what you use</span></div>
+    <div class="price">
+      <div class="pc main"><b>Free setup</b><span>20-minute call with Tom. He sets it all up with you.</span></div>
+      <div class="pc"><b>50p a minute</b><span>Only while it's talking. First 10 calls free.</span></div>
+    </div>
+    <p class="adds">Optional extras: <b>website £5</b> one-off · <b>your own web address and email £5 a year</b> at cost · WhatsApp, email and after-call agents per use. <button onclick="openPrices()" style="text-decoration:underline;color:var(--text)">See all prices</button></p>
+    <div class="ctas"><button class="tomb" onclick="Tom.open()">Book a free call with Tom</button><button class="btn2" onclick="openPrices()">Pick what I need</button></div>
+  </section>
+  <section class="pick">
+    <h2>Try it for your trade</h2>
+    <p>Pretend to be your own customer. You'll see your website and your business dashboard.</p>
+    <div class="grid" id="grid"></div>
+  </section>
 </main>
-<footer>Sample businesses with read-only demo diaries. Nothing in the demo books, charges or texts anyone.</footer>
+<footer>Demo businesses only. Nothing here books, charges or texts anyone.</footer>
+</div>
+<div id="prm" role="dialog" aria-label="Prices"><div class="card2"><div class="top"><h3>Pick exactly what you need</h3><button class="x" onclick="closePrices()">Close</button></div><div id="pz"></div></div></div>
 <script src="/static/ui.js"></script>
+<script src="/static/pricing.js"></script>
 <script>
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const LBL={electrician:'Electricians',plumber:'Plumbers',heating:'Heating engineers',locksmith:'Locksmiths',beauty:'Beauty and salons',barber:'Barbers',dogwalker:'Dog walkers and pet care',msp:'IT support',soletrader:'Any other trade'};
+const LBL={electrician:'Electrician',plumber:'Plumber',heating:'Heating engineer',locksmith:'Locksmith',beauty:'Beauty salon',barber:'Barber',dogwalker:'Dog walker',msp:'IT support',soletrader:'Other trade'};
+let PR=0;
+function openPrices(){document.getElementById('prm').classList.add('on');if(!PR){PR=1;Pricing.render(document.getElementById('pz'))}}
+function closePrices(){document.getElementById('prm').classList.remove('on')}
+document.getElementById('prm').addEventListener('click',e=>{if(e.target.id==='prm')closePrices()});
 (async()=>{
   let d=null;for(let k=0;k<3&&!d;k++){try{d=(await (await fetch('/api/industries')).json()).industries}catch(e){await new Promise(r=>setTimeout(r,600))}}
-  if(!d){document.getElementById('grid').innerHTML='<p class="sub">The demo is waking up. Refresh in a moment.</p>';return}
-  document.getElementById('grid').innerHTML=d.map(i=>`<a class="card" href="/t/${i.slug}"><div class="top"><span class="ic">${icon(i.slug,20)}</span><div><b>${esc(LBL[i.slug]||i.label)}</b><small>${esc(i.business)}, demo</small></div></div><p>${esc(i.tagline||'')}</p><span class="go">Try it ${icon('arrow',14)}</span></a>`).join('');
+  if(!d){document.getElementById('grid').innerHTML='<p>The demo is waking up. Refresh in a moment.</p>';return}
+  document.getElementById('grid').innerHTML=d.map(i=>`<a class="card" href="/t/${i.slug}"><span class="ic">${icon(i.slug,18)}</span><div><b>${esc(LBL[i.slug]||i.label)}</b><small>${esc(i.business)}</small></div></a>`).join('');
 })();
 </script>
 </body></html>
