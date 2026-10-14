@@ -140,7 +140,7 @@ def _trade_kernel(slug: str):
 def _re_urgent(msg: str) -> bool:
     import re as _re
     return bool(_re.search(r"(?i)\b(locked out|lockout|urgent|emergency|no heating|no hot water|"
-                           r"burst|leak|flood|gas|spark\w*|burning|smoke|offline|down|hacked|injur\w*|bleed\w*|tonight|no power|"
+                           r"burst|leak|flood|gas|spark\w*|burning|smoke|offline|down|hacked|injur\w*|hurt|bleed\w*|missing|lost dog|ran off|got out|tonight|no power|"
                            r"phishing|ransom\w*|priority 1|water everywhere|ceiling|break-?in)\b", msg))
 
 
@@ -207,8 +207,9 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
         first = rest.split(". ")[0].rstrip(".") if rest else ""
         def lc(x):  # keep acronyms: "EV charger" stays, "Leak repair" -> "leak repair"
             return " ".join(w if w[:2].isupper() else w.lower() for w in x.split())
-        named = next((n for n, _ in SAMPLE_PRICES.get(slug, []) if n.lower() in message.lower()), None)
-        line = f"Yes, we can help with {lc(named or svc.get('name', 'that'))}."
+        _norm = lambda x: " ".join(_re.findall(r"[a-z0-9]+", x.lower()))
+        named = next((n for n, _ in SAMPLE_PRICES.get(slug, []) if _norm(n.split("(")[0]) in _norm(message)), None)
+        line = f"Yes, we can help with {lc((named or svc.get('name', 'that')).split(',')[0].split(' (')[0])}."
         when = _re.search(r"\b([01]?\d|2[0-3]):[0-5]\d\b", message)
         booking = _re.search(r"(?i)\b(book|appointment|slot)\b", message)
         price_q = _re.search(r"(?i)\b(how much|price|cost|quote|charge)\b", message) or booking
@@ -241,6 +242,7 @@ SAMPLE_BIZ = {
     "heating": "CosyHeat", "locksmith": "Keyline Locks",
     "beauty": "Glow Studio", "barber": "Fade Factory",
     "dogwalker": "Happy Tails", "msp": "Nimbus IT",
+    "soletrader": "Rob Hart Handyman",
 }
 
 # Published guide prices for the SAMPLE businesses on the demo sites (illustrative,
@@ -265,7 +267,7 @@ SAMPLE_PRICES = {
                   ["Puppy visit, 30 min", "£12"], ["Home boarding, per night", "£40"]],
     "msp": [["Managed IT, per user", "£45 a month"], ["Remote support, per hour", "£75"],
             ["On-site visit", "from £120"], ["Microsoft 365 migration", "from £850"]],
-    "soletrader": [["Callout", "from £60"], ["Hourly rate", "from £45"], ["Free quote visit", "£0"]],
+    "soletrader": [["Callout", "from £60"], ["Hourly rate", "from £45"], ["Small job, up to 2 hours", "from £90"], ["Free quote visit", "£0"]],
 }
 
 

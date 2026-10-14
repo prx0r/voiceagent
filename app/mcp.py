@@ -74,7 +74,7 @@ SAFETY = {
     "locksmith": "If you feel unsafe, wait somewhere public and well lit. If anyone is in danger, ring 999.",
     "beauty": "Rinse the area with cool clean water and don't rub it. If swelling spreads or breathing is affected, ring 999 or 111.",
     "barber": "Apply firm pressure with a clean cloth. If bleeding doesn't stop, ring 111 or 999.",
-    "dogwalker": "Keep calm and keep the dog still. For injuries, ring your vet or the nearest emergency vet.",
+    "dogwalker": "If a dog is hurt, keep it calm and still and ring your vet. If one is missing, search nearby and report it to the council dog warden and local vets.",
     "msp": "Don't power things off or click any more links. Disconnect an affected machine from the network if you suspect a breach.",
     "soletrader": "If anyone is in danger, ring 999 first.",
 }

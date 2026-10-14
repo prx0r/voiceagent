@@ -38,7 +38,7 @@ TRADES = [
      "label": "IT & MSP", "icon": "🖥️",
      "tagline": "Tier-1 triage and training sims for your helpdesk."},
     {"slug": "soletrader", "file": "trades_soletrader_uk.yaml",
-     "label": "Something else?", "icon": "🧰",
+     "label": "Sole trader", "icon": "🧰",
      "tagline": "Any sole trade, live in 20 minutes."},
 ]
 
