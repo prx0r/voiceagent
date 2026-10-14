@@ -391,7 +391,7 @@ def console_boot(trade: str):
     if pack_name:
         rp = rp.replace(pack_name, biz)
     return {"trade": trade, "business": biz, "opening": con.opening(trade, biz), "stats": con.stats(trade),
-            "site": con.site(trade), "mcp": f"/mcp/{trade}",
+            "site": con.site(trade), "mcp": f"/mcp/{trade}", "services": SAMPLE_PRICES.get(trade, []),
             "prompts": con.funnel(trade, set()),
             "system_prompts": {"guide": con.guide_prompt(trade, biz), "receptionist": _clean(rp, biz)},
             "brief": {k: v for k, v in con.brief(trade).items() if k in ("emergency", "booking", "price_q")}}

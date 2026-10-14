@@ -28,6 +28,7 @@ const css=`
 .pz .est{position:sticky;bottom:0;background:#101010;border:1px solid var(--line2);border-radius:16px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center}
 .pz .est .n{font-size:22px;font-weight:700;letter-spacing:-.01em}.pz .est small{display:block;color:var(--dim2);font-size:12px}
 .pz .est .sp{flex:1}
+.pz.compact .est{position:static}
 .pz input[type=range]{width:100%;accent-color:#f5a524}
 .pz .draft{color:var(--dim2);font-size:12px}
 .tomb{display:inline-flex;align-items:center;gap:8px;border-radius:999px;padding:11px 20px;font-weight:600;font-size:15px;background:#fff;color:#0d0d0d;border:0;cursor:pointer;white-space:nowrap}
