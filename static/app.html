@@ -445,7 +445,8 @@ function endCall(){
   if(!CALL)return;const c=CALL;CALL=null;clearInterval(c.timer);try{speechSynthesis.cancel();c.rec&&c.rec.abort()}catch(e){}
   $('#call').classList.remove('on');
   const s=S[c.slug],sec=Math.floor((Date.now()-c.start)/1000),dur=`${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
-  if(c.lines.length>1){
+  if(c.lines.length<=1){s.msgs.push({r:'sys',ic:'phone',t:`Call ended · ${dur} · no words heard`});s.msgs.push({r:'g',t:c.SR?'I didn\'t catch anything on that one. Check your mic is allowed and ring again, or type as the customer instead.':'Your browser can\'t listen, so type your lines in the call box next time, or switch to Chrome or Edge to talk.',chips:funnel(c.slug)});if(c.slug===CUR)paint();return}
+  {
     s.msgs.push({r:'sys',ic:'phone',t:`Live call · ${dur}${c.urgent?' · urgent alert sent to you':''}`});
     c.lines.forEach(l=>s.msgs.push(l.r==='u'?{r:'u',t:l.t,cust:1}:{r:'a',t:l.t}));
     if(!s.done.includes('call'))s.done.push('call');
