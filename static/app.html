@@ -223,7 +223,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
   </main>
   <aside id="side">
     <div class="tabs" id="tabs">
-      <button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Your phone</button><button data-t="pack">What you get</button><button data-t="agents">AI agents</button><button data-t="plans">Prices</button><button data-t="prompt">Instructions</button>
+      <button data-t="pack">What you get</button><button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Alerts</button><button data-t="agents">AI agents</button><button data-t="plans">Prices</button><button data-t="prompt">Rules</button>
       <button class="x ib" onclick="closeSide()" aria-label="Close" id="sidex"></button>
     </div>
     <div class="pane" id="p-website"><div class="frame"><div class="bar"><span id="lockic"></span><span id="url"></span><a id="openfull" target="_blank" rel="noopener" title="Open full site"></a></div><iframe id="site" title="Customer website preview"></iframe></div></div>
@@ -295,7 +295,7 @@ function paint(){
     const g=m.r==='g';
     const head=g?`<div class="who">Answered <span class="tag">guide</span></div>`:`<div class="who">${esc(t.business)} <span class="tag">AI receptionist</span></div>`;
     const av=g?`<div class="av g"><span class="dot"></span></div>`:`<div class="av r">${icon(CUR,15)}</div>`;
-    const body=(m.typing?`<span class="typing"><i></i><i></i><i></i></span>`:`<div class="txt">${esc(m.t)}</div>`)+(m.tri&&m.tri.output?triLine(m.tri):'');
+    const body=(m.typing?`<span class="typing"><i></i><i></i><i></i></span>`:`<div class="txt">${esc(m.t)}</div>`)+(m.tri&&m.tri.output?triLine(m.tri,m.t):'');
     const stats=m.stats&&m.stats.length?`<div class="stats">${m.stats.map(x=>`<a class="stat" href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.stat)}</b><span>${esc(x.text)}</span><small>${esc(x.source)} ${icon('ext',10)}</small></a>`).join('')}</div>`:'';
     const chips=m.chips&&i===last?`<div class="chips">${m.chips.map((c,k)=>`<button class="chip${c.kind==='signup'?' pri':''}" data-k="${k}">${icon(CK[c.kind]||'chat',14)}<span>${esc(c.label)}</span></button>`).join('')}</div>`:'';
     const form=m.form&&i===last?`<div class="form"><input id="f-name" placeholder="Your name" autocomplete="name"><input id="f-phone" placeholder="Mobile" inputmode="tel" autocomplete="tel"><input id="f-dom" placeholder="Website or domain, if you have one"><button class="btn" onclick="lead()">Ring me to set up</button></div><div id="f-out"></div>`:'';
@@ -305,8 +305,12 @@ function paint(){
   if(lm&&lm.chips)$('#col').querySelectorAll('.chip').forEach(b=>b.onclick=()=>runChip(lm.chips[+b.dataset.k]));
   const th=$('#thread');th.scrollTop=th.scrollHeight;
 }
-function triLine(t){const o=t.output,c=t.confidence||{},A={alert_owner_now:'alert owner now',offer_slots:'offer diary slots',check_diary:'check the diary',give_price:'give guide price',reschedule:'reschedule',take_message:'take a message',drop_spam:'drop as spam'};
-  return `<div class="tri" title="Typed decision by Jev through an AgentRun workflow">${icon('check',11,2.4)}<span>${esc(o.intent)}${c.intent!=null?' '+Math.round(c.intent*100)+'%':''}</span><span>→ ${esc(A[o.action]||o.action)}</span>${o.priority?`<span>${esc(o.priority.toUpperCase())}</span>`:''}${o.vulnerable?'<span>vulnerable</span>':''}${t.ms?`<span>${t.ms} ms</span>`:''}</div>`}
+function triLine(t,txt){const o={...t.output},c=t.confidence||{};
+  if(o.action==='take_message'&&/guide price/i.test(txt||'')){o.action='give_price';o.intent='price'}
+  const A={alert_owner_now:'texts you straight away',offer_slots:'offers your free times',check_diary:'checks your diary',give_price:'gives your guide price',reschedule:'moves the booking',take_message:'takes a message for your 7am email',drop_spam:'ignores it as spam'};
+  const I={emergency:'Emergency',booking:'Booking',price:'Price question',reschedule:'Change of booking',complaint:'Complaint',existing_job:'About a job you did',other:'General enquiry',unclear:'General enquiry'};
+  const det=`${o.intent} ${c.intent!=null?Math.round(c.intent*100)+'%':''} · ${o.action}${o.priority?' · '+o.priority:''}${t.ms?' · '+t.ms+' ms':''}`;
+  return `<div class="tri" title="How it decided: ${esc(det)}">${icon('check',11,2.4)}<span>${esc(I[o.intent]||'Enquiry')}: ${esc(A[o.action]||'handles it')}</span>${o.vulnerable?'<span>vulnerable caller, extra care</span>':''}</div>`}
 const CK={roleplay:'chat',call:'phone',panel:'ext',guide:'chat',signup:'check'};
 
 function setMode(m,quiet){
@@ -390,7 +394,8 @@ async function lead(){
 }
 
 /* ---------- side panel ---------- */
-function tab(t){TABS=t;document.querySelectorAll('#rail [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===t));$('#tabs').querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));if(t==='calendar')paintCal()}
+function tab(t){TABS=t;document.querySelectorAll('#rail [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===t));$('#tabs').querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));if(t==='calendar')paintCal();if(t==='website')wakeSite()}
+function wakeSite(){const f=$('#site');try{const d=f.contentDocument;if(!d||!d.body||!d.body.children.length||d.body.scrollHeight<50){const u=f.src;f.src='about:blank';setTimeout(()=>f.src=u,30)}}catch(e){}}
 function openSide(t,soft){if(t)tab(t);if(innerWidth<=900&&!soft)document.body.classList.add('side')}
 function closeSide(){document.body.classList.remove('side')}
 async function paintCal(){

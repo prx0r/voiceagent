@@ -207,7 +207,8 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
         first = rest.split(". ")[0].rstrip(".") if rest else ""
         def lc(x):  # keep acronyms: "EV charger" stays, "Leak repair" -> "leak repair"
             return " ".join(w if w[:2].isupper() else w.lower() for w in x.split())
-        line = f"Yes, we can help with {lc(svc.get('name', 'that'))}."
+        named = next((n for n, _ in SAMPLE_PRICES.get(slug, []) if n.lower() in message.lower()), None)
+        line = f"Yes, we can help with {lc(named or svc.get('name', 'that'))}."
         when = _re.search(r"\b([01]?\d|2[0-3]):[0-5]\d\b", message)
         booking = _re.search(r"(?i)\b(book|appointment|slot)\b", message)
         price_q = _re.search(r"(?i)\b(how much|price|cost|quote|charge)\b", message) or booking
@@ -221,9 +222,6 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
             joined = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
             lead = "To get you booked in" if pa else "So the team can come prepared"
             line += f" {lead}, it helps to know: {joined}."
-        if (first and len(first) < 90 and len(first.split()) >= 4 and '—' not in first
-                and not first.lower().startswith(("home", svc.get("name", "").lower()[:6]))):
-            line += f" {first}."
         if booking and when:
             line += f" I'll hold {when.group(0)} for you and the confirmation comes by text."
         tail = (" And your name and best number, and you'll hear back first thing with times." if need
