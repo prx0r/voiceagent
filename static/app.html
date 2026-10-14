@@ -20,7 +20,7 @@ a{color:inherit}
 .i{display:block;flex:0 0 auto}
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#2c2c2c;border-radius:10px;border:3px solid var(--bg)}
 
-#app{display:grid;height:100vh;height:100dvh;grid-template-columns:248px minmax(0,1fr) minmax(360px,32vw);grid-template-rows:52px minmax(0,1fr)}
+#app{display:grid;height:100vh;height:100dvh;grid-template-columns:232px minmax(0,1fr);grid-template-rows:52px minmax(0,1fr)}
 /* top */
 #top{grid-column:1/-1;display:flex;align-items:center;gap:12px;padding:0 14px 0 18px;border-bottom:1px solid var(--line);background:var(--bg1);z-index:5}
 .logo{display:flex;align-items:center;gap:9px;text-decoration:none;font-weight:600;font-size:16px;letter-spacing:-.01em}
@@ -34,7 +34,7 @@ a{color:inherit}
 .btn:hover{opacity:.88}
 .btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line2)}
 .btn.ghost:hover{background:var(--bg3)}
-.mob{display:none}
+.menub{display:inline-flex}
 /* rail */
 #rail{border-right:1px solid var(--line);background:var(--bg1);display:flex;flex-direction:column;gap:1px;padding:10px 8px;overflow-y:auto;scrollbar-width:none}
 .nb{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px;border-radius:9px;color:var(--dim);font-size:13.5px;text-align:left;text-decoration:none}
@@ -119,14 +119,18 @@ pre.j{white-space:pre-wrap;font-size:12px;max-height:260px;overflow:auto}
 .callb:hover{background:rgba(52,211,153,.2)}
 .send{width:36px;height:36px;border-radius:50%;background:#fff;color:#0d0d0d;display:flex;align-items:center;justify-content:center}
 .send:disabled{opacity:.3;cursor:default}
-.hint{max-width:760px;margin:6px auto 0;text-align:center;font-size:11.5px;color:var(--dim2)}
+.hint{max-width:760px;margin:6px auto 0;text-align:center;font-size:12px;color:var(--dim2)}.hint a{color:var(--text);text-decoration:underline;text-underline-offset:2px}
 /* side */
-#side{border-left:1px solid var(--line);background:var(--bg1);display:flex;flex-direction:column;min-height:0;min-width:0}
-.tabs{display:flex;gap:2px;padding:8px 10px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+#side{border-left:1px solid var(--line);background:var(--bg1);display:none;flex-direction:column;min-height:0;min-width:0;position:fixed;top:52px;right:0;bottom:0;width:min(460px,100vw);z-index:40;box-shadow:-24px 0 60px rgba(0,0,0,.45)}
+body.side #side{display:flex}
+.tabs .x{display:flex}
+.menu{display:flex;align-items:center;gap:8px;width:100%;margin-top:auto;padding:10px 12px;border-radius:10px;background:var(--bg3);color:var(--text);font-size:13.5px}.menu:hover{background:var(--bg4)}
+.svc{display:flex;justify-content:space-between;gap:12px;width:100%;padding:11px 12px;border-radius:10px;background:var(--bg2);margin-bottom:6px;font-size:14px;text-align:left}.svc:hover{background:var(--bg3)}.svc small{color:var(--dim);font-size:13px;white-space:nowrap}
+.tabs{display:flex;flex-wrap:wrap;gap:2px;padding:8px 48px 8px 10px;border-bottom:1px solid var(--line);position:relative}
 .tabs button{padding:6px 11px;border-radius:9px;color:var(--dim);font-size:13px;display:inline-flex;gap:6px;align-items:center;white-space:nowrap}
 .tabs button:hover{color:var(--text);background:var(--bg2)}
 .tabs button.on{color:var(--text);background:var(--bg3)}
-.tabs .x{margin-left:auto;display:none}
+.tabs .x{position:absolute;top:8px;right:8px;width:32px;height:32px;align-items:center;justify-content:center;border-radius:9px;color:var(--dim)}.tabs .x:hover{background:var(--bg3);color:var(--text)}
 .pane{flex:1;min-height:0;display:none;overflow-y:auto}
 .pane.on{display:flex;flex-direction:column}
 #p-website{padding:10px;overflow:hidden}
@@ -177,17 +181,14 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
   #app{grid-template-columns:1fr;grid-template-rows:52px auto minmax(0,1fr)}
   #app{grid-template-rows:52px minmax(0,1fr)}
   #rail{display:none}
-  #side{display:none}
-  body.side #side{display:flex;position:fixed;inset:52px 0 0;z-index:40;border-left:0}
-  .tabs .x{display:flex}
-  .mob{display:inline-flex}.pill,.crumb{display:none}
+  body.side #side{width:100vw;border-left:0}
+  .menub{display:inline-flex}.pill,.crumb{display:none}
   #thread{padding:18px 14px 8px}
   #dock{padding:4px 10px calc(10px + env(safe-area-inset-bottom))}
   .stats{grid-template-columns:1fr}
   .stat{flex-direction:row;align-items:baseline;gap:10px}.stat small{display:none}
   .seg button span{display:none}
   .inbox input{font-size:16px}
-  .hint{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style></head>
@@ -198,7 +199,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
     <span class="crumb" id="crumb"></span>
     <div class="sp"></div>
     <span class="pill"><span class="live"></span>50p per active minute · first 10 calls free</span>
-    <button class="btn ghost mob" onclick="openSide()">Preview</button>
+    <button class="btn ghost menub" onclick="toggleSide()">Menu</button>
     <button class="btn" onclick="Tom.open(CUR)">Book a call with Tom</button>
   </header>
   <nav id="rail" aria-label="Your business"></nav>
@@ -208,7 +209,7 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
       <div class="inbox">
         <input id="q" autocomplete="off" placeholder="Ask anything">
         <div class="row">
-          <div class="seg" role="tablist" aria-label="Who you're talking to">
+          <div class="seg" style="display:none" role="tablist" aria-label="Who you're talking to">
             <button id="m-guide" class="on" onclick="setMode('guide')"><span>Ask Answered</span></button>
             <button id="m-cust" onclick="setMode('customer')"><span>Be the customer</span></button>
           </div>
@@ -223,13 +224,14 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
   </main>
   <aside id="side">
     <div class="tabs" id="tabs">
-      <button data-t="pack">What you get</button><button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Alerts</button><button data-t="agents">AI agents</button><button data-t="plans">Prices</button><button data-t="prompt">Rules</button>
+      <button data-t="services">Prices</button><button data-t="pack">What you get</button><button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Alerts</button><button data-t="agents">AI agents</button><button data-t="plans">Our fees</button><button data-t="prompt">Rules</button>
       <button class="x ib" onclick="closeSide()" aria-label="Close" id="sidex"></button>
     </div>
     <div class="pane" id="p-website"><div class="frame"><div class="bar"><span id="lockic"></span><span id="url"></span><a id="openfull" target="_blank" rel="noopener" title="Open full site"></a></div><iframe id="site" title="Customer website preview"></iframe></div></div>
     <div class="pane" id="p-calendar"></div>
     <div class="pane" id="p-phone"></div>
     <div class="pane" id="p-pack"></div>
+    <div class="pane" id="p-services"></div>
     <div class="pane" id="p-agents"></div>
     <div class="pane" id="p-plans"></div>
     <div class="pane" id="p-prompt"></div>
@@ -255,7 +257,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const PLURAL={electrician:'electricians',plumber:'plumbers',heating:'heating engineers',locksmith:'locksmiths',beauty:'salons',barber:'barbers',dogwalker:'dog walkers',msp:'IT support',soletrader:'your trade'};
 const SHORT={electrician:'Electrician',plumber:'Plumber',heating:'Heating',locksmith:'Locksmith',beauty:'Beauty',barber:'Barber',dogwalker:'Pet care',msp:'IT / MSP',soletrader:'Other trade'};
-let IND=null,CUR=null,BOOT={},TABS='website';
+let IND=null,CUR=null,BOOT={},TABS='services';
 const S={}; // per trade: {msgs,mode,done,gsid,csid,boot}
 const st=()=>S[CUR]||(S[CUR]={msgs:[],mode:'guide',done:[],gsid:null,csid:null,alerts:[]});
 const T=()=>IND.find(i=>i.slug===CUR);
@@ -296,7 +298,7 @@ function paint(){
     const head=g?`<div class="who">Answered <span class="tag">guide</span></div>`:`<div class="who">${esc(t.business)} <span class="tag">AI receptionist</span></div>`;
     const av=g?`<div class="av g"><span class="dot"></span></div>`:`<div class="av r">${icon(CUR,15)}</div>`;
     const body=(m.typing?`<span class="typing"><i></i><i></i><i></i></span>`:`<div class="txt">${esc(m.t)}</div>`)+(m.tri&&m.tri.output?triLine(m.tri,m.t):'');
-    const stats=m.stats&&m.stats.length?`<div class="stats">${m.stats.map(x=>`<a class="stat" href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.stat)}</b><span>${esc(x.text)}</span><small>${esc(x.source)} ${icon('ext',10)}</small></a>`).join('')}</div>`:'';
+    const stats=false&&m.stats&&m.stats.length?`<div class="stats">${m.stats.map(x=>`<a class="stat" href="${esc(x.url)}" target="_blank" rel="noopener"><b>${esc(x.stat)}</b><span>${esc(x.text)}</span><small>${esc(x.source)} ${icon('ext',10)}</small></a>`).join('')}</div>`:'';
     const chips=m.chips&&i===last?`<div class="chips">${m.chips.map((c,k)=>`<button class="chip${c.kind==='signup'?' pri':''}" data-k="${k}">${icon(CK[c.kind]||'chat',14)}<span>${esc(c.label)}</span></button>`).join('')}</div>`:'';
     const form=m.form&&i===last?`<div class="form"><input id="f-name" placeholder="Your name" autocomplete="name"><input id="f-phone" placeholder="Mobile" inputmode="tel" autocomplete="tel"><input id="f-dom" placeholder="Website or domain, if you have one"><button class="btn" onclick="lead()">Ring me to set up</button></div><div id="f-out"></div>`:'';
     return `<div class="msg">${av}<div class="body">${head}${body}${stats}${chips}${form}</div></div>`;
@@ -317,7 +319,7 @@ function setMode(m,quiet){
   const s=st();s.mode=m;$('#m-guide').classList.toggle('on',m==='guide');$('#m-cust').classList.toggle('on',m==='customer');
   const t=T();
   $('#q').placeholder=m==='guide'?`Ask about Answered for ${PLURAL[CUR]||'your business'}`:`You're a customer ringing ${t.business}. What's happened?`;
-  $('#hint').textContent=m==='guide'?'You\'re talking to Answered\'s guide. Switch to "Be the customer" to test the receptionist.':`Role-play: ${t.business}'s receptionist answers as it would at 2am. It reads the diary but never books on its own.`;
+  $('#hint').innerHTML=m==='guide'?`Asking Answered about the product. <a href="#" onclick="setMode('customer');return false">Pretend to be a customer instead</a>`:`You're a customer ringing ${esc(t.business)}. <a href="#" onclick="setMode('guide');return false">Back to asking about Answered</a>`;
   if(!quiet&&m==='customer'&&!s.msgs.some(x=>x.r==='sys'&&x.rp)){s.msgs.push({r:'sys',rp:1,ic:'phone',t:`Customer role-play · ${t.business} after-hours line`});paint()}
 }
 
@@ -381,7 +383,7 @@ async function guide(t){
   if(j.intent&&j.intent!=='general'&&!s.done.includes(j.intent))s.done.push(j.intent);
   L.push({r:'g',t:j.answer,chips:funnel(slug)});
   if(j.panel==='signup'){Tom.open(CUR)}
-  else if(j.panel&&slug===CUR)openSide(j.panel,true);
+  else if(j.panel&&slug===CUR)openSide(j.panel);
   if(slug===CUR)paint();
 }
 
@@ -396,7 +398,8 @@ async function lead(){
 /* ---------- side panel ---------- */
 function tab(t){TABS=t;document.querySelectorAll('#rail [data-p]').forEach(b=>b.classList.toggle('on',b.dataset.p===t));$('#tabs').querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',b.dataset.t===t));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));if(t==='calendar')paintCal();if(t==='website')wakeSite()}
 function wakeSite(){const f=$('#site');try{const d=f.contentDocument;if(!d||!d.body||!d.body.children.length||d.body.scrollHeight<50){const u=f.src;f.src='about:blank';setTimeout(()=>f.src=u,30)}}catch(e){}}
-function openSide(t,soft){if(t)tab(t);if(innerWidth<=900&&!soft)document.body.classList.add('side')}
+function openSide(t,soft){if(t)tab(t);if(!soft)document.body.classList.add('side')}
+function toggleSide(){if(document.body.classList.contains('side'))closeSide();else openSide()}
 function closeSide(){document.body.classList.remove('side')}
 async function paintCal(){
   const slug=CUR;let c=null;try{c=await (await fetch('/api/console/calendar?trade='+slug)).json()}catch(e){}
@@ -425,13 +428,10 @@ function paintRail(){
   <a class="nb back" href="/">${icon('back',14)}All trades</a>
   <div class="nh">Try it as a customer</div>${sc.map((x,i)=>`<button class="nb" data-sc="${i}" title="${esc(x.message)}">${icon('chat',15)}<span>${esc(x.label)}</span></button>`).join('')}
   <button class="nb" onclick="openCall()">${icon('phone',15)}<span>Ring it live</span></button>
-  <div class="nh">Services and prices</div>${sv.map(([nm,pr],i)=>`<button class="nb sv" data-sv="${i}" title="Ask about ${esc(nm)}"><span>${esc(nm)}</span><small>${esc(pr)}</small></button>`).join('')}
-  <div class="nh">Ask about Answered</div>${GQ.map((q,i)=>`<button class="nb" data-gq="${i}">${icon('star',15)}<span>${esc(q)}</span></button>`).join('')}
-  <div class="nh">Your dashboard</div><div class="pg">${P.map(([k,ic,l])=>`<button data-p="${k}">${icon(ic,16)}<span>${l}</span>${k==='phone'&&n?`<i>${n}</i>`:''}</button>`).join('')}</div>`;
+  <button class="menu" onclick="openSide('services')">${icon('tag',15)}<span>Prices, website, diary and more</span></button>`;
+  $('#p-services').innerHTML=`<div class="pad"><div class="ph">${esc(t.business)} prices</div><p style="margin:0 0 12px;color:var(--dim);font-size:13.5px">Tap one to ask the receptionist about it.</p>${(b.services||[]).map(([nm,pr],i)=>`<button class="svc" data-sv="${i}"><span>${esc(nm)}</span><small>${esc(pr)}</small></button>`).join('')}</div>`;
+  $('#p-services').querySelectorAll('[data-sv]').forEach(el=>el.onclick=()=>{closeSide();const nm=b.services[+el.dataset.sv][0];runChip({kind:'roleplay',text:`How much is ${nm.toLowerCase()} and when could you do it?`})});
   $('#rail').querySelectorAll('[data-sc]').forEach(el=>el.onclick=()=>runChip({kind:'roleplay',text:sc[+el.dataset.sc].message}));
-  $('#rail').querySelectorAll('[data-sv]').forEach(el=>el.onclick=()=>{const nm=sv[+el.dataset.sv][0];runChip({kind:'roleplay',text:`How much is ${nm.toLowerCase().replace(/^(\w)/,c=>c)} and when could you do it?`})});
-  $('#rail').querySelectorAll('[data-gq]').forEach(el=>el.onclick=()=>{setMode('guide');guide(GQ[+el.dataset.gq])});
-  $('#rail').querySelectorAll('[data-p]').forEach(el=>{el.onclick=()=>openSide(el.dataset.p);el.classList.toggle('on',el.dataset.p===TABS)});
 }
 function paintPack(){
   const b=BOOT[CUR];if(!b||!b.package)return;
