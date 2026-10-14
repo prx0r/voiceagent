@@ -74,7 +74,7 @@ def _re_urgent(msg: str) -> bool:
 def _re_symptom(msg: str) -> bool:
     import re as _re
     return bool(_re.search(r"(?i)\b(trip(s|ping)?|keeps|won'?t|not working|stopped|broken|faulty|leak(s|ing)?|"
-                           r"no (power|heating|hot water)|dripping|blocked|offline|can'?t)\b", msg or ""))
+                           r"no (power|heating|hot water)|dripping|blocked|offline|can'?t|pressure|fault code|error code|flicker\w*)\b", msg or ""))
 
 
 def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str = "") -> str:
@@ -98,7 +98,7 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
     if _re_symptom(message):
         fix = next((n for n in nodes if n.get("type") == "service" and any(
             k in (n.get("id", "") + " " + n.get("name", "")).lower()
-            for k in ("fault", "repair", "leak", "fix", "unblock", "diagnos", "support"))), None)
+            for k in ("fault", "repair", "breakdown", "leak", "fix", "unblock", "diagnos", "support"))), None)
         svc = fix or svc
     pol = next((n for n in nodes if n.get("type") in ("policy", "faq")), None)
     from .industries import _clean

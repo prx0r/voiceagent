@@ -50,7 +50,7 @@ CORE_SERVICES = [
     {"icon": "🔁", "title": "Callback reminders that nag",
      "text": "Every unanswered caller re-surfaces every 2 hours until marked done. No-callback 1-star reviews stop here."},
     {"icon": "🎓", "title": "Call training simulator",
-     "text": "Staff rehearse your five hardest calls — burst pipe at 2am to furious repeat customer — scored, before touching a real line."},
+     "text": "Staff rehearse your five hardest calls — the 2am emergency to the furious repeat customer — scored, before touching a real line."},
     {"icon": "📝", "title": "Recordings + notes",
      "text": "Every call recorded (announced), transcribed, and filed. Play it back, search it, learn from it."},
     {"icon": "⭐", "title": "Review engine",

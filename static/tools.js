@@ -42,7 +42,7 @@
       msg: (r, l) => `I'd like to book ${l.filter(x => !/^Nothing/.test(x)).join(' + ')} (${r}).`,
       extra: l => /lash|tint/i.test(l.join(' ')) ? 'Needs a patch test 48 hours before. We\u2019ll book that for you too.' : 'No patch test needed for this one.' },
     barber: { kind: 'slots', icon: 'barber', title: 'Today\u2019s chair', sub: 'Pick a free slot and it\u2019s held while you confirm.',
-      services: [['Skin fade', 22, 30], ['Scissor cut', 20, 30], ['Beard trim and line-up', 12, 15], ['Kids cut (under 12)', 15, 20]] },
+      services: [['Skin fade', 22, 30], ['Scissor cut', 24, 30], ['Beard trim', 12, 15], ['Fade and beard', 30, 45], ['Kids cut (under 12)', 15, 20]] },
     dogwalker: { kind: 'estimate', icon: 'dogwalker', title: 'Plan your dog\u2019s week', sub: 'See your weekly price, then pick days.',
       inputs: [['Dogs', 'sel', [['1 dog', 1], ['2 dogs', 1.6], ['3 dogs', 2.1]]],
                ['Walk', 'sel', [['Group walk (1 hour)', 15], ['Solo walk (1 hour)', 20], ['Puppy visit (30 min)', 12]]],
@@ -92,19 +92,20 @@
       };
       sels.forEach(s => s.onchange = upd); upd();
     } else if (t.kind === 'slots') {
-      const now = new Date(), slots = [];
-      for (let h = 9; h < 19; h++) for (const m of [0, 30]) {
-        const d = new Date(now); d.setHours(h, m, 0, 0);
-        const seed = (h * 7 + m + now.getDate()) % 5;
-        slots.push([`${String(h).padStart(2, '0')}:${m ? '30' : '00'}`, d > now && seed > 1]);
-      }
-      el.innerHTML = head + `<div class="tt-grid"><label class="f">Service<select>${t.services.map((s, i) => `<option value="${i}">${s[0]} \u00b7 \u00a3${s[1]} \u00b7 ${s[2]} min</option>`).join('')}</select></label></div>
+      const now = new Date(); let slots = [], day = 'today';
+      const build = off => { const out = []; for (let h = 9; h < 19; h++) for (const m of [0, 30]) {
+        const d = new Date(now); d.setDate(d.getDate() + off); d.setHours(h, m, 0, 0);
+        const seed = (h * 7 + m + d.getDate()) % 5;
+        out.push([`${String(h).padStart(2, '0')}:${m ? '30' : '00'}`, d > now && seed > 1]); } return out; };
+      slots = build(0); if (!slots.some(x => x[1])) { slots = build(1); day = 'tomorrow'; }
+      const hd = head.replace(t.title, day === 'tomorrow' ? 'Tomorrow\u2019s chair' : t.title);
+      el.innerHTML = hd + `<div class="tt-grid"><label class="f">Service<select>${t.services.map((s, i) => `<option value="${i}">${s[0]} \u00b7 \u00a3${s[1]} \u00b7 ${s[2]} min</option>`).join('')}</select></label></div>
         <div class="tt-slots">${slots.map(([s, ok]) => `<button class="slot${ok ? '' : ' off'}" ${ok ? '' : 'disabled'}>${s}</button>`).join('')}</div>
-        ${slots.some(s => s[1]) ? '' : '<p class="tt-note">Fully booked for today. Ask for tomorrow\u2019s first slot.</p>'}`;
+        ${day === 'tomorrow' ? '<p class="tt-note">Today is fully booked. These are tomorrow\u2019s free slots.</p>' : ''}`;
       const sel = el.querySelector('select');
       el.querySelectorAll('.slot:not(.off)').forEach(b => b.onclick = () => {
         const s = t.services[sel.value];
-        window.askFromTool(`Can I book a ${s[0].toLowerCase()} today at ${b.textContent}?`);
+        window.askFromTool(`Can I book a ${s[0].toLowerCase()} ${day} at ${b.textContent}?`);
       });
     }
   };
