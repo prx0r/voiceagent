@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="en-GB"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Answered — the after-hours receptionist for UK trades</title>
+<meta name="description" content="Missed calls answered in your voice. Emergencies texted instantly. Everything else in a 7am email. 50p per active minute, no subscription.">
+<style>
+:root{
+  --bg:#171717;--bg1:#181818;--bg2:#212121;--bg3:#2a2a2a;--bg4:#303030;
+  --line:rgba(255,255,255,.07);--line2:rgba(255,255,255,.12);--text:#ececec;--dim:#b4b4b4;--dim2:#8f8f8f;
+  --acc:#f5a524;--acc2:#ff8a00;--accbg:rgba(245,165,36,.10);--ok:#34d399;--bad:#f87171;
+  --r:14px;--shadow:0 1px 0 rgba(255,255,255,.04) inset,0 20px 50px -12px rgba(0,0,0,.6);
+  --font:-apple-system-body,ui-sans-serif,-apple-system,system-ui,"Segoe UI",Helvetica,"Apple Color Emoji",Arial,sans-serif,"Segoe UI Emoji","Segoe UI Symbol";
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:14px/1.5 var(--font);font-feature-settings:'cv11','ss01';text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;overflow:hidden}
+button{font:inherit;color:inherit;cursor:pointer}
+input{font:inherit;color:inherit}
+a{color:inherit}
+::selection{background:rgba(245,165,36,.35);color:#fff}
+.i{display:block;flex:0 0 auto}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#2a3038;border-radius:10px;border:3px solid var(--bg1)}
+
+#app{display:grid;height:100vh;grid-template-columns:84px minmax(0,1fr) 392px;grid-template-rows:56px minmax(0,1fr) auto}
+
+/* ---------- top bar ---------- */
+#top{grid-column:1/-1;display:flex;align-items:center;gap:14px;padding:0 16px 0 18px;border-bottom:1px solid var(--line);background:var(--bg1)}
+.logo{display:flex;align-items:baseline;gap:10px;text-decoration:none}
+.logo b{font-size:17px;letter-spacing:-.01em;font-weight:600}
+.logo .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);display:inline-block;margin-right:8px;box-shadow:0 0 12px rgba(245,165,36,.6)}
+.logo b i{font-style:normal;color:var(--acc)}
+.logo span{color:var(--dim);font-size:12.5px}
+#top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:12px;color:var(--dim);border:1px solid var(--line2);border-radius:999px;padding:5px 12px;white-space:nowrap}
+.pill .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(61,220,151,.15)}
+.btn{border:0;border-radius:999px;padding:8px 16px;font-weight:500;background:#fff;color:#0d0d0d;white-space:nowrap;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line2);box-shadow:none;font-weight:550}
+.btn.ghost:hover{border-color:var(--dim2);background:var(--bg2)}
+
+/* ---------- rail ---------- */
+#rail{grid-row:2/4;border-right:1px solid var(--line);background:var(--bg1);display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 0;overflow-y:auto;scrollbar-width:none}
+#rail::-webkit-scrollbar{display:none}
+.tr{width:72px;padding:8px 2px 7px;border-radius:12px;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--dim);position:relative;transition:background .15s,color .15s}
+.tr .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:transparent;border:1px solid transparent;transition:all .15s}
+.tr .lb{font-size:11px;letter-spacing:.005em;line-height:1.15;text-align:center;max-width:70px}
+.tr:hover{color:var(--text)}.tr:hover .ic{border-color:var(--line2);background:var(--bg3)}
+.tr.on{color:var(--text)}
+.tr.on .ic{background:var(--bg4);border-color:var(--line2);color:var(--acc)}
+.tr.on::before{content:"";position:absolute;left:-6px;top:15px;width:3px;height:22px;border-radius:3px;background:var(--acc)}
+
+/* ---------- stage (customer view) ---------- */
+#stage{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;padding:14px 18px 12px;gap:10px;background:radial-gradient(900px 420px at 20% -8%,rgba(245,165,36,.10),transparent 60%),radial-gradient(700px 380px at 95% 0%,rgba(255,138,0,.06),transparent 60%),var(--bg);isolation:isolate}
+#bgfx{position:absolute;inset:0;width:100%;height:100%;z-index:-1;opacity:.55;pointer-events:none;mask-image:radial-gradient(120% 90% at 50% 0%,#000 30%,transparent 85%)}
+.stagehead{display:flex;align-items:center;gap:12px;min-width:0}
+.stagehead h1{font-size:15px;font-weight:650;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stagehead h1 em{font-style:normal;color:var(--dim);font-weight:500}
+.stagehead h1{flex:0 1 auto;min-width:120px}
+@media(max-width:1440px){.stagehead h1 em{display:none}}
+.seg{display:inline-flex;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:transparent;color:var(--dim);padding:5px 12px;border-radius:7px;font-size:12.5px}
+.seg button.on{background:var(--bg4);color:var(--text)}
+.stagehead .sp{flex:1}
+.lnk{font-size:12.5px;color:var(--dim);text-decoration:none;white-space:nowrap}
+.lnk:hover{color:var(--text)}
+#frame-wrap{flex:1;min-height:0;display:flex;justify-content:center}
+.browser{flex:1;min-width:0;max-width:1180px;display:flex;flex-direction:column;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,.14);box-shadow:var(--shadow);background:#fff;transition:max-width .3s ease}
+.browser.phone{max-width:390px;border-radius:44px;border:11px solid #0b0b0b;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 0 0 2px #0b0b0b,var(--shadow)}
+.chrome{height:38px;flex:0 0 38px;background:#f1f2f4;border-bottom:1px solid #e1e3e6;display:flex;align-items:center;gap:10px;padding:0 12px}
+.browser.phone .chrome{height:30px;flex-basis:30px;justify-content:center}
+.dots{display:flex;gap:6px}.dots i{width:11px;height:11px;border-radius:50%;background:#e0e2e5;display:block}
+.dots i:nth-child(1){background:#ff5f57}.dots i:nth-child(2){background:#febc2e}.dots i:nth-child(3){background:#28c840}
+.browser.phone .dots{display:none}
+.url{flex:1;max-width:520px;margin:0 auto;height:24px;border-radius:7px;background:#fff;border:1px solid #e3e5e8;color:#5f6670;font-size:12px;display:flex;align-items:center;justify-content:center;gap:6px}
+.browser.phone .url{flex:0 1 auto;padding:0 12px;border:0;background:transparent}
+.url .lock{color:#5f6670}
+iframe{flex:1;width:100%;border:0;background:#fff}
+
+/* ---------- owner panel ---------- */
+#owner{grid-row:2/3;border-left:1px solid var(--line);background:var(--bg1);overflow-y:auto;padding:16px 16px 24px}
+.eyebrow{font-size:12px;color:var(--acc);font-weight:500}
+#owner h2{font-size:22px;line-height:1.25;letter-spacing:-.02em;margin:6px 0 8px;font-weight:600;text-wrap:balance}
+#owner .lede{color:var(--dim);margin:0 0 14px;font-size:13.5px}
+.sec{margin-top:22px}
+.sec h3{font-size:13px;color:var(--dim2);margin:0 0 10px;font-weight:500}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:13px 14px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{border:1px solid var(--line2);background:transparent;border-radius:999px;padding:7px 12px;font-size:13px;color:var(--text);text-align:left;display:inline-flex;align-items:center;gap:6px;transition:background .15s,border-color .15s}
+.chip .i{color:var(--bad)}
+.chip:hover{background:var(--bg3);border-color:rgba(255,255,255,.2)}
+.chip.em{border-color:rgba(255,93,93,.4)}
+.chip.em:hover{background:rgba(255,93,93,.08);border-color:var(--bad)}
+
+/* phone mock: what lands on the owner's phone */
+.feed{display:flex;flex-direction:column;gap:9px}
+.note{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px}
+.note .av{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;background:var(--bg4);color:var(--dim)}
+.note .av.red{background:rgba(248,113,113,.12);color:var(--bad)}.note .av.grn{background:rgba(52,211,153,.12);color:var(--ok)}
+.note .hd{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--dim)}
+.note .hd b{color:var(--text);font-weight:600}
+.note p{margin:3px 0 0;font-size:13px}
+
+/* pricing */
+.calc .row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--dim);margin:2px 0 4px}
+.calc .row b{color:var(--text)}
+.calc input[type=range]{width:100%;accent-color:var(--acc);margin:0 0 10px}
+.calc .total{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line);padding-top:11px;margin-top:2px}
+.calc .total .big{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.calc .total small{color:var(--dim)}
+.calc .vs{font-size:12px;color:var(--dim);margin-top:6px}
+
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:11px 12px}
+.stat b{display:block;font-size:20px;color:var(--text);letter-spacing:-.02em;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2}
+.stat span{font-size:11.5px;color:var(--dim);line-height:1.35;display:block;margin-top:4px}
+.ships{display:flex;flex-direction:column;gap:2px}
+.ship .si{color:var(--dim);padding-top:2px}
+.ship{display:grid;grid-template-columns:26px 1fr;gap:8px;padding:8px 2px;border-bottom:1px solid var(--line)}
+.ship:last-child{border-bottom:0}
+.ship b{font-size:13px;font-weight:600}.ship p{margin:1px 0 0;font-size:12px;color:var(--dim)}
+.cta{background:var(--bg2);border:1px solid var(--line2);border-radius:16px;padding:16px;position:relative;overflow:hidden}
+.cta::before{content:"";position:absolute;inset:-1px;border-radius:16px;padding:1px;background:linear-gradient(140deg,rgba(245,165,36,.55),transparent 45%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.cta h4{margin:0 0 3px;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.cta p{margin:0 0 11px;color:var(--dim);font-size:12.5px}
+.cta .f{display:flex;flex-direction:column;gap:8px}
+.cta input{background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:10px 12px;outline:none}
+.cta input:focus{border-color:var(--acc)}
+.cta .ok{color:var(--ok);font-size:13px;margin-top:8px}
+.cta .err{color:var(--bad);font-size:13px;margin-top:8px}
+.fine{font-size:11.5px;color:var(--dim2);margin-top:10px;text-align:center}
+
+/* ---------- global chat bar (bottom) ---------- */
+#chat{grid-column:2/4;position:relative;z-index:20;background:linear-gradient(to bottom,rgba(13,13,13,0),var(--bg) 45%)}
+#log{display:none;position:absolute;bottom:calc(100% - 4px);left:50%;transform:translateX(-50%);width:min(800px,calc(100% - 32px));max-height:min(62vh,640px);overflow-y:auto;padding:14px 20px 10px;background:rgba(28,28,28,.97);backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:22px;box-shadow:0 30px 80px -20px rgba(0,0,0,.7);animation:logup .22s ease}
+@keyframes logup{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+#chat.open #log{display:block}
+.loghd{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--dim);margin-bottom:8px}
+.loghd .sp{flex:1}
+.loghd button{background:transparent;border:0;color:var(--dim);font-size:12px}
+.loghd button:hover{color:var(--text)}
+.msg{display:flex;margin:8px 0}
+.msg .b{max-width:min(600px,78%);padding:9px 13px;border-radius:14px;font-size:13.5px;white-space:pre-wrap}
+.msg.u{justify-content:flex-end}.msg.u .b{background:var(--bg4);color:var(--text);border-radius:18px;padding:9px 15px}
+.msg.a .b{background:transparent;padding:4px 2px;font-size:14.5px;line-height:1.6}
+.msg.a .who{font-size:11px;color:var(--dim);margin-bottom:2px}
+.msg.sys .b{background:transparent;color:var(--dim);font-size:12px;padding:2px 0}
+.typing{display:inline-flex;gap:4px}.typing i{width:6px;height:6px;border-radius:50%;background:var(--dim);animation:bl 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes bl{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.bar{display:flex;align-items:center;gap:12px;padding:6px 16px 16px;max-width:832px;margin:0 auto;width:100%}
+.who-badge,.kbd{display:none!important}
+.inbox{background:#2f2f2f!important;border-color:rgba(255,255,255,.08)!important;padding:8px 8px 8px 20px!important}
+.who-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim);white-space:nowrap;max-width:240px;overflow:hidden;text-overflow:ellipsis}
+.who-badge .ic{width:28px;height:28px;border-radius:8px;background:var(--bg4);color:var(--acc);display:flex;align-items:center;justify-content:center;flex:0 0 28px}
+.inbox{flex:1;display:flex;align-items:center;gap:4px;background:var(--bg4);border:1px solid var(--line);border-radius:28px;padding:6px 6px 6px 18px;transition:border-color .15s,box-shadow .15s;box-shadow:0 0 0 1px rgba(0,0,0,.2),0 8px 30px -10px rgba(0,0,0,.5)}
+.inbox:focus-within{border-color:var(--line2)}
+.inbox input{flex:1;background:transparent;border:0;outline:none;padding:8px 0;min-width:0;font-size:15px}
+.inbox input::placeholder{color:var(--dim2)}
+.ib{width:36px;height:36px;border-radius:50%;border:0;background:transparent;color:var(--dim);display:flex;align-items:center;justify-content:center;font-size:16px}
+.ib:hover{background:var(--bg4);color:var(--text)}
+.ib.on{color:var(--text)}
+.ib.rec{background:var(--bad);color:#fff;animation:pulse 1.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,93,93,.5)}70%{box-shadow:0 0 0 10px rgba(255,93,93,0)}100%{box-shadow:0 0 0 0 rgba(255,93,93,0)}}
+.send{width:36px;height:36px;border-radius:50%;border:0;padding:0;background:#fff;color:#0d0d0d;display:flex;align-items:center;justify-content:center;transition:opacity .15s}
+.send:hover{opacity:.85}
+.kbd{font-size:11px;color:var(--dim2);white-space:nowrap}
+.kbd b{border:1px solid var(--line2);border-radius:5px;padding:0 5px;font-weight:500;color:var(--dim)}
+
+@media (max-width:1180px){#app{grid-template-columns:76px minmax(0,1fr) 340px}}
+.ownbtn{display:none}
+@media (max-width:900px){
+  #app{grid-template-columns:1fr;grid-template-rows:56px auto minmax(0,1fr) auto;height:100vh;height:100svh}
+  #owner{display:none}
+  body.own #owner{display:block;position:fixed;inset:56px 0 0;z-index:40;animation:logup2 .2s ease}
+  @keyframes logup2{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .ownbtn{display:inline-flex}
+  #stage{height:auto!important}
+  #log{max-height:58svh!important;width:calc(100% - 16px)!important}
+  #rail{grid-row:auto;flex-direction:row;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid var(--line)}
+  .tr.on::before{display:none}
+  #stage{height:78vh}
+  #owner{grid-row:auto;border-left:0}
+  #chat{grid-column:1;position:sticky;bottom:0}
+  .who-badge,.kbd,#top .pill,.seg,.logo span{display:none}
+  #top{position:sticky;top:0;z-index:30}
+  #rail{position:sticky;top:56px;z-index:29;gap:2px;scroll-snap-type:x proximity}
+  .tr{flex:0 0 68px;scroll-snap-align:start}
+  #stage{height:72vh;height:72svh;padding:10px}
+  .browser{border-radius:14px}
+  #owner{padding:18px 16px 28px}
+  .bar{padding:8px 10px calc(10px + env(safe-area-inset-bottom))}
+  #log{max-height:55vh;padding:12px 14px 4px}
+  .inbox input{font-size:16px} /* no iOS zoom */
+}
+</style></head>
+<body>
+<div id="app">
+  <header id="top">
+    <a class="logo" href="/"><b><span class="dot"></span>Answered</b><span>The after-hours receptionist for UK trades</span></a>
+    <div class="sp"></div>
+    <span class="pill"><span class="live"></span><span id="price">50p per active minute · no subscription · first 10 calls free</span></span>
+    <button class="btn ghost ownbtn" onclick="document.body.classList.toggle('own')">Owner view</button>
+    <button class="btn" onclick="document.body.classList.add('own');goCta()">Start free</button>
+  </header>
+
+  <nav id="rail" aria-label="Trades"></nav>
+
+  <main id="stage"><canvas id="bgfx" aria-hidden="true"></canvas>
+    <div class="stagehead">
+      <h1 id="stitle">Loading…</h1>
+      <div class="sp"></div>
+      <div class="seg" role="tablist" aria-label="Device">
+        <button id="dv-desk" class="on" onclick="setDevice('desk')">Desktop</button>
+        <button id="dv-phone" onclick="setDevice('phone')">Phone</button>
+      </div>
+      <a class="lnk" id="openfull" href="#" target="_blank" rel="noopener">Open site</a>
+    </div>
+    <div id="frame-wrap">
+      <div class="browser" id="browser">
+        <div class="chrome"><div class="dots"><i></i><i></i><i></i></div><div class="url"><span class="lock" id="lockic"></span><span id="urltext">answered.uk</span></div></div>
+        <iframe id="site" title="Customer-facing site preview" loading="eager"></iframe>
+      </div>
+    </div>
+  </main>
+
+  <aside id="owner"></aside>
+
+  <section id="chat">
+    <div id="log"></div>
+    <div class="bar">
+      <div class="who-badge" id="whob"><span class="ic"></span><span>After-hours line</span></div>
+      <div class="inbox">
+        <input id="q" autocomplete="off" placeholder="Be the customer. It's 2am. What's gone wrong?">
+        <button class="ib" id="mic" title="Talk to it (Chrome/Edge)" onclick="toggleMic()" aria-label="Talk"></button>
+        <button class="ib on" id="spk" title="Read replies aloud" onclick="toggleSpeak()" aria-label="Read replies aloud"></button>
+        <button class="send" id="sendb" onclick="send()" aria-label="Send"></button>
+      </div>
+      <span class="kbd"><b>/</b> chat · <b>Esc</b> hide</span>
+    </div>
+  </section>
+</div>
+
+<script src="/static/ui.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const slugify=s=>String(s).toLowerCase().replace(/&/g,'and').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+const SHORT={electrician:'Electrician',plumber:'Plumber',heating:'Heating',locksmith:'Locksmith',beauty:'Beauty',barber:'Barber',dogwalker:'Pet care',msp:'IT / MSP',soletrader:'Other trade'};
+// What a real customer says when they ring each trade out of hours.
+const PROMPTS={
+  electrician:[['Sockets are sparking and there\'s a burning smell',1],['How much for an EV charger?'],['My fuse box keeps tripping'],['Can someone come Saturday?']],
+  plumber:[['Pipe burst under the sink, water everywhere',1],['Boiler\'s making a banging noise'],['How much to fit a new tap?'],['Blocked toilet, can you come tomorrow?']],
+  heating:[['No heating or hot water and I have a newborn',1],['Need my annual boiler service'],['I can smell gas',1],['How much is a new boiler?']],
+  locksmith:[['Locked out, keys inside, it\'s midnight',1],['Can you change the locks after a break-in?',1],['Quote for a new front door lock?'],['Lost my car key']],
+  beauty:[['Can I book gel nails for Friday?'],['I need to cancel tomorrow\'s appointment'],['How much is a lash lift?'],['Do you do patch tests?']],
+  barber:[['Any slots this afternoon?'],['How much is a skin fade?'],['Can I book for me and my son?'],['Are you open Sunday?']],
+  dogwalker:[['Can you walk my dog tomorrow at noon?'],['My dog has been injured on a walk',1],['How much for a weekly walk?'],['Do you do overnight sitting?']],
+  msp:[['Whole office is offline',1],['I think I clicked a phishing link',1],['Need a new starter set up Monday'],['Printer won\'t connect']],
+  soletrader:[['Can you give me a quote?'],['It\'s urgent, can someone come tonight?',1],['What areas do you cover?'],['Can I send photos?']]
+};
+let DATA=null,CUR=null,SID={},SPEAK=localStorage.ansSpeak!=='0',DEVICE='desk',REC=null,LISTEN=false;
+
+async function boot(){
+  $('#lockic').innerHTML=icon('lock',11,2.2);$('#mic').innerHTML=icon('mic',18);$('#sendb').innerHTML=icon('up',18,2.2);
+  $('#whob .ic').innerHTML=icon('phone',15);
+  meshBg($('#bgfx'),['#171717','#3a2a12','#1d1d1d','#2b1d0c'],{speed:.6,scale:.35});
+  try{DATA=await (await fetch('/api/industries')).json()}catch(e){$('#stitle').textContent='Could not load trades. Refresh to retry.';return}
+  if(DATA.price)$('#price').textContent=DATA.price.replace(/\.\s*/g,' · ').replace(/ · $/,'');
+  paintRail();
+  const want=location.hash.slice(1);
+  select(DATA.industries.find(i=>i.slug===want)?want:DATA.industries[0].slug,true);
+  paintSpeak();
+}
+// stats that name a specific trade only show on that trade (no "electrician" stat on the plumber page)
+const PROOF_TRADE={plumb:['plumber','heating'],electric:['electrician']};
+function proofFor(slug,list){return list.filter(p=>{const k=Object.keys(PROOF_TRADE).find(k=>p.text.toLowerCase().includes(k));return !k||PROOF_TRADE[k].includes(slug)||slug==='soletrader'})}
+function T(){return DATA.industries.find(i=>i.slug===CUR)}
+
+function paintRail(){
+  $('#rail').innerHTML=DATA.industries.map(i=>`<button class="tr${i.slug===CUR?' on':''}" data-s="${i.slug}" title="${esc(i.label)}"><span class="ic">${icon(i.slug,19)}</span><span class="lb">${esc(SHORT[i.slug]||i.label)}</span></button>`).join('');
+  $('#rail').querySelectorAll('.tr').forEach(b=>b.onclick=()=>select(b.dataset.s));
+}
+
+function select(slug,first){
+  if(slug===CUR&&!first)return;
+  CUR=slug;history.replaceState(null,'','#'+slug);
+  const t=T();
+  $('#rail').querySelectorAll('.tr').forEach(b=>b.classList.toggle('on',b.dataset.s===slug));
+  $('#stitle').innerHTML=`${esc(t.business)} <em>· what your customers see</em>`;
+  $('#urltext').textContent=slugify(t.business)+'.answered.uk';
+  const src='/demo/'+slug+'?embed=1';
+  $('#site').src=src;$('#openfull').href='/demo/'+slug;
+  $('#whob').innerHTML=`<span class="ic">${icon(t.slug,15)}</span><span>${esc(t.business)} · after hours</span>`;
+  $('#q').placeholder=`You're a customer ringing ${t.business} at 2am. What's gone wrong?`;
+  paintOwner();paintLog();
+}
+
+function setDevice(d){DEVICE=d;$('#browser').classList.toggle('phone',d==='phone');$('#dv-desk').classList.toggle('on',d==='desk');$('#dv-phone').classList.toggle('on',d==='phone')}
+
+/* ---------- owner panel ---------- */
+// per-trade example of the instant alert (fictional caller; 07700 900xxx is Ofcom's drama range)
+const EXAMPLE={
+  electrician:{alert:'Urgent: sparking socket, burning smell. Mrs Patel, M20 4QL, 07700 900123. Told to switch off at the mains. Ring her now.'},
+  plumber:{alert:'Urgent: burst pipe under kitchen sink. Tom Reid, M14 5RG, 07700 900456. Told to turn off the stopcock. Ring him now.'},
+  heating:{alert:'Urgent: no heating, elderly resident. Jean Hall, M21 9PL, 07700 900271. Told to keep warm, gas smell ruled out. Ring now.'},
+  locksmith:{alert:'Urgent: locked out, child inside. Priya Shah, M16 8EE, 07700 900318. Waiting by the front door. Ring now.'},
+  beauty:{alert:'Allergic reaction after lash tint. Chloe B, 07700 900642. Swelling, no breathing issues, advised to see a pharmacist. Ring her now.'},
+  barber:{alert:'Walk-in at 9:15 cancelled, slot freed. Waitlist offered: Jordan M, 07700 900587 accepted. No action needed.'},
+  dogwalker:{alert:'Urgent: Bella (cockapoo) got out of the garden. Owner Leah, 07700 900733, last seen near Fog Lane Park. Ring now.'},
+  msp:{alert:'P1: whole office offline at Hart & Co, 14 users. Contact: Mark, 07700 900914. Router lights red. Ring now.'},
+};
+function paintOwner(){
+  const t=T(),D=DATA;
+  const em=(t.escalations&&t.escalations[0])||null;
+  const emTxt=em?(em.aliases[0]||em.name):'urgent job';
+  const ex=Object.assign({alert:`Urgent: ${emTxt}. Sam Okafor, M20 4QL, 07700 900123. Told to stay safe. Ring back now.`},EXAMPLE[t.slug]||{});
+  const lead=t.slug==='soletrader'?'Whatever your trade':`For ${t.label.toLowerCase()}`;
+  $('#owner').innerHTML=`
+  <div class="eyebrow">${esc(lead)}</div>
+  <h2>${esc(t.tagline)}</h2>
+  <p class="lede">That's your site in the middle, built from your trade's playbook. Ring it from the bar below as if you were your own worst customer.</p>
+
+  <div class="sec"><h3>Try a call</h3><div class="chips">${(PROMPTS[t.slug]||PROMPTS.soletrader).map(([p,e])=>`<button class="chip${e?' em':''}" data-p="${esc(p)}">${e?icon('alert',14,2):''}${esc(p)}</button>`).join('')}</div></div>
+
+  <div class="sec"><h3>What lands on your phone</h3><div class="feed">
+    <div class="note"><div class="av red">${icon('phone',16)}</div><div><div class="hd"><b>SMS + WhatsApp · instantly</b><span>02:14</span></div><p>${esc(ex.alert)}</p></div></div>
+    <div class="note"><div class="av">${icon('mail',16)}</div><div><div class="hd"><b>Morning digest · 7:00</b><span>3 calls</span></div><p>${esc((t.services[0]||{}).name||'New enquiry')} quote request, a price question, one callback. Transcripts and recordings attached.</p></div></div>
+    <div class="note"><div class="av grn">${icon('bell',16)}</div><div><div class="hd"><b>Callback reminder</b><span>every 2h</span></div><p>Nags you until each caller is marked done, so no one writes "never rang back".</p></div></div>
+  </div></div>
+
+  <div class="sec"><h3>What it costs you</h3><div class="card calc">
+    <div class="row"><span>Missed calls a month</span><b id="c-n">40</b></div><input type="range" id="r-n" min="5" max="200" step="5" value="40">
+    <div class="row"><span>Average call length</span><b id="c-m">2 min</b></div><input type="range" id="r-m" min="1" max="6" step="1" value="2">
+    <div class="total"><div><div class="big" id="c-t">£0</div><small>a month at 50p per active minute</small></div><small id="c-f"></small></div>
+    <div class="vs" id="c-vs"></div>
+  </div></div>
+
+  <div class="sec"><h3>Why it pays</h3><div class="stats">${proofFor(t.slug,D.proof||[]).map(p=>`<div class="stat"><b>${esc(p.stat)}</b><span>${esc(p.text)}</span></div>`).join('')}</div></div>
+
+  ${t.services.length?`<div class="sec"><h3>Your playbook covers</h3><div class="card ships">${t.services.slice(0,5).map(s=>`<div class="ship"><span>✓</span><div><b>${esc(s.name)}</b><p>${esc(s.text)}</p></div></div>`).join('')}</div></div>`:''}
+
+  <div class="sec"><h3>Ships with every account</h3><div class="card ships">${(D.core||[]).map((c,k)=>`<div class="ship"><span class="si">${icon(['phone','electrician','repeat','cap','file','star','chat'][k]||'check',16)}</span><div><b>${esc(c.title)}</b><p>${esc(c.text)}</p></div></div>`).join('')}</div></div>
+
+  <div class="sec" id="cta"><div class="cta">
+    <h4>Get this for your ${esc(t.slug==='soletrader'?'business':(SHORT[t.slug]||'business').toLowerCase()+' business')}</h4>
+    <p>20-minute setup call. We clone your voice, set the divert code and test-ring it with you. First 10 calls free.</p>
+    <div class="f"><input id="l-name" placeholder="Your name" autocomplete="name"><input id="l-phone" placeholder="Mobile number" inputmode="tel" autocomplete="tel"><button class="btn" onclick="lead()">Book my setup call</button></div>
+    <div id="l-out"></div>
+  </div>
+  <div class="fine">No subscription · cancel by text · your number released the same day</div></div>`;
+  $('#owner').querySelectorAll('.chip').forEach(b=>b.onclick=()=>{$('#q').value=b.dataset.p;send()});
+  ['r-n','r-m'].forEach(id=>$('#'+id).oninput=calc);calc();
+}
+function calc(){
+  const n=+$('#r-n').value,m=+$('#r-m').value;
+  const billable=Math.max(0,n-10)*m, cost=billable*0.5;
+  $('#c-n').textContent=n;$('#c-m').textContent=m+' min';
+  $('#c-t').textContent='£'+(cost%1?cost.toFixed(2):cost);
+  $('#c-f').textContent='first 10 free';
+  const jobs=Math.max(1,Math.round(n*0.49*0.3));
+  $('#c-vs').textContent=`If even ${jobs} of those ${n} turn into a job, it has paid for itself many times over.`;
+}
+function goCta(){const c=$('#cta');if(c){c.scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$('#l-name')&&$('#l-name').focus(),400)}}
+async function lead(){
+  const out=$('#l-out'),name=$('#l-name').value.trim(),phone=$('#l-phone').value.trim();
+  if(name.length<2||phone.replace(/\D/g,'').length<10){out.innerHTML='<div class="err">Add your name and a mobile we can ring.</div>';return}
+  try{
+    const j=await (await fetch('/api/callback',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({business:'answered-trial',name,phone,reason:'setup call request: '+CUR})})).json();
+    out.innerHTML=j.ok?`<div class="ok">Done. We'll ring ${esc(phone)} to book your setup call.</div>`:`<div class="err">${esc(j.reason||'Something went wrong. Try again.')}</div>`;
+  }catch(e){out.innerHTML='<div class="err">Couldn\'t reach us. Try again in a moment.</div>'}
+}
+
+/* ---------- global chat ---------- */
+const LOGS={};
+function paintLog(){
+  const t=T(),L=LOGS[CUR]||[];
+  $('#chat').classList.toggle('open',L.length>0);
+  $('#log').innerHTML=`<div class="loghd"><span>Live demo · ${esc(t.business)} after-hours line · this is what your customer hears</span><span class="sp"></span><button onclick="resetLog()">New call</button><button onclick="hideLog()">Hide</button></div>`+
+    L.map(m=>m.r==='u'?`<div class="msg u"><div class="b">${esc(m.t)}</div></div>`:
+      m.r==='typing'?`<div class="msg a"><div class="b"><span class="typing"><i></i><i></i><i></i></span></div></div>`:
+      `<div class="msg a"><div><div class="who">${esc(t.business)} · AI receptionist</div><div class="b">${esc(m.t)}</div></div></div>`).join('');
+  $('#log').scrollTop=1e9;
+}
+function hideLog(){$('#chat').classList.remove('open')}
+function resetLog(){LOGS[CUR]=[];delete SID[CUR];try{speechSynthesis.cancel()}catch(e){};paintLog()}
+addEventListener('message',e=>{if(e.source===$('#site').contentWindow&&e.data&&e.data.type==='answered-ask'&&typeof e.data.text==='string')send(e.data.text.slice(0,400))});
+async function send(text){
+  const q=$('#q'),t=(text??q.value).trim();if(!t)return;q.value='';
+  const slug=CUR,L=(LOGS[slug]=LOGS[slug]||[]);
+  if(!L.length)L.push({r:'a',t:`Hi, you've reached ${T().business}. I'm the after-hours assistant. What's happened?`});
+  L.push({r:'u',t});L.push({r:'typing'});paintLog();$('#chat').classList.add('open');
+  let a='Sorry, I didn\'t catch that. Could you leave your name and number and someone will ring you first thing?';
+  try{
+    const j=await (await fetch('/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:t,trade:slug,session_id:SID[slug]||null})})).json();
+    SID[slug]=j.session_id;a=j.answer||a;
+  }catch(e){}
+  const i=L.findIndex(m=>m.r==='typing');if(i>=0)L.splice(i,1);
+  L.push({r:'a',t:a});if(slug===CUR){paintLog();say(a)}
+}
+function pickVoice(){const v=speechSynthesis.getVoices();return v.find(x=>/en-GB/i.test(x.lang)&&/Google|Natural|Ryan|Daniel/i.test(x.name))||v.find(x=>/en-GB/i.test(x.lang))||null}
+function say(t){if(!SPEAK)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.slice(0,500));u.lang='en-GB';const v=pickVoice();if(v)u.voice=v;u.rate=1.02;speechSynthesis.speak(u)}catch(e){}}
+function toggleSpeak(){SPEAK=!SPEAK;localStorage.ansSpeak=SPEAK?'1':'0';if(!SPEAK)try{speechSynthesis.cancel()}catch(e){};paintSpeak()}
+function paintSpeak(){$('#spk').classList.toggle('on',SPEAK);$('#spk').innerHTML=icon(SPEAK?'volume':'mute',18)}
+function toggleMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){$('#q').placeholder='Voice needs Chrome or Edge. Type instead.';return}
+  if(LISTEN){LISTEN=false;try{REC.stop()}catch(e){};$('#mic').classList.remove('rec');return}
+  LISTEN=true;$('#mic').classList.add('rec');try{speechSynthesis.cancel()}catch(e){}
+  REC=new SR();REC.lang='en-GB';REC.interimResults=true;
+  REC.onresult=ev=>{const r=ev.results[ev.results.length-1];$('#q').value=r[0].transcript;if(r.isFinal){send();}};
+  REC.onend=()=>{LISTEN=false;$('#mic').classList.remove('rec')};
+  try{REC.start()}catch(e){LISTEN=false;$('#mic').classList.remove('rec')}
+}
+$('#q').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();send()}});
+document.addEventListener('keydown',e=>{
+  const typing=/INPUT|TEXTAREA/.test(document.activeElement.tagName);
+  if(e.key==='/'&&!typing){e.preventDefault();$('#q').focus()}
+  if(e.key==='Escape'){hideLog();$('#q').blur()}
+  if(!typing&&(e.key==='j'||e.key==='k')&&DATA){const s=DATA.industries.map(i=>i.slug),i=s.indexOf(CUR);select(s[(i+(e.key==='j'?1:-1)+s.length)%s.length])}
+});
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);if(DATA&&h!==CUR&&DATA.industries.find(i=>i.slug===h))select(h)});
+try{speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
+boot();
+</script>
+</body></html>

@@ -1,0 +1,208 @@
+{
+  "global": [
+    {
+      "stat": "69%",
+      "text": "of UK callers who reach voicemail hang up without leaving a message",
+      "source": "Moneypenny Small Business Call Report, 2016",
+      "url": "https://www.moneypenny.com/uk/resources/news/small-business-call-report"
+    },
+    {
+      "stat": "6%",
+      "text": "of UK adults would leave a voicemail rather than wait for an answer",
+      "source": "YouGov for Answer4u, 2026",
+      "url": "https://pressat.co.uk/releases/one-in-three-uk-consumers-will-call-a-competitor-if-a-business-fails-to-answer-the-phone-within-60-seconds-4230b0516a07ab26be312329d1b20678"
+    },
+    {
+      "stat": "37%",
+      "text": "of UK adults would hang up within 60 seconds and call a competitor instead",
+      "source": "YouGov for Answer4u, 2026",
+      "url": "https://pressat.co.uk/releases/one-in-three-uk-consumers-will-call-a-competitor-if-a-business-fails-to-answer-the-phone-within-60-seconds-4230b0516a07ab26be312329d1b20678"
+    },
+    {
+      "stat": "33%",
+      "text": "of UK micro businesses (0-9 staff) failed to answer their incoming calls",
+      "source": "Moneypenny Small Business Call Report, 2016",
+      "url": "https://www.moneypenny.com/uk/resources/news/small-business-call-report"
+    },
+    {
+      "stat": "1 in 5",
+      "text": "UK customers won't try again if a business misses their first call",
+      "source": "Rinkel (press release), 2025",
+      "url": "https://www.prnewswire.co.uk/news-releases/no-second-chances-20-of-uk-customers-wont-call-back-after-a-missed-call-302454374.html"
+    },
+    {
+      "stat": "62%",
+      "text": "of calls to small businesses not answered live (US study of 85 firms)",
+      "source": "411 Locals (US), 2016",
+      "url": "http://411locals.us/small-business-owners-dont-answer-62-of-phone-calls"
+    }
+  ],
+  "electrician": [
+    {
+      "stat": "34%",
+      "text": "of UK tradespeople say they've lost work by not answering the phone",
+      "source": "Fix Radio / Builders Station survey, 2022",
+      "url": "https://www.fixradio.co.uk/fix-feed/construction-news/post/34-of-tradespeople-lose-work-by-not-answering-phone"
+    },
+    {
+      "stat": "60%",
+      "text": "of UK tradespeople struggle to answer the phone while working",
+      "source": "Fix Radio / Builders Station survey, 2022",
+      "url": "https://www.fixradio.co.uk/fix-feed/construction-news/post/34-of-tradespeople-lose-work-by-not-answering-phone"
+    },
+    {
+      "stat": "£90/hr",
+      "text": "typical UK emergency electrician rate (vs ~£50/hr daytime)",
+      "source": "Checkatrade cost guide, 2026",
+      "url": "https://www.checkatrade.com/blog/cost-guides/electrician-hourly-rate/"
+    }
+  ],
+  "plumber": [
+    {
+      "stat": "£110",
+      "text": "average UK emergency plumber call-out fee, before labour",
+      "source": "Checkatrade cost guide, 2026",
+      "url": "https://www.checkatrade.com/blog/cost-guides/plumber-cost"
+    },
+    {
+      "stat": "£1,200",
+      "text": "average escape-of-water home insurance payout; 15% of all claims",
+      "source": "Which? policyholder survey, 2024",
+      "url": "https://www.which.co.uk/news/article/the-most-common-home-insurance-claims-ajOQH1x0W5fK"
+    },
+    {
+      "stat": "34%",
+      "text": "of UK tradespeople say they've lost work by not answering the phone",
+      "source": "Fix Radio / Builders Station survey, 2022",
+      "url": "https://www.fixradio.co.uk/fix-feed/construction-news/post/34-of-tradespeople-lose-work-by-not-answering-phone"
+    }
+  ],
+  "heating": [
+    {
+      "stat": "17%",
+      "text": "of UK households had a boiler breakdown in a year; avg repair £245",
+      "source": "Uswitch / YouGov, 2018",
+      "url": "https://www.uswitch.com/media-centre/2018/02/boiler-breakdowns-cost-uk-households-725-million-unexpected-repair-bills/"
+    },
+    {
+      "stat": "50%+",
+      "text": "of boiler breakdowns happen in winter",
+      "source": "Hometree via Installer Online, 2021",
+      "url": "https://www.installeronline.co.uk/heating/uk-boiler-breakdowns-surged-due-to-lockdown"
+    },
+    {
+      "stat": "60%",
+      "text": "of UK tradespeople struggle to answer the phone while working",
+      "source": "Fix Radio / Builders Station survey, 2022",
+      "url": "https://www.fixradio.co.uk/fix-feed/construction-news/post/34-of-tradespeople-lose-work-by-not-answering-phone"
+    }
+  ],
+  "locksmith": [
+    {
+      "stat": "7pm",
+      "text": "peak time for UK lockout call-outs; Sunday is the peak day for lost keys",
+      "source": "Keytek analysis of 354k jobs, 2026",
+      "url": "https://www.keytek.co.uk/insights/uk-forgetfulness-index"
+    },
+    {
+      "stat": "£120/hr",
+      "text": "typical midnight-6am locksmith rate, plus £50-£150 call-out fee",
+      "source": "Checkatrade cost guide, 2026",
+      "url": "https://www.checkatrade.com/blog/cost-guides/locksmith-prices/"
+    }
+  ],
+  "beauty": [
+    {
+      "stat": "46%",
+      "text": "of salon and spa bookings are made while the salon is closed",
+      "source": "Phorest (5,000+ salons), 2019",
+      "url": "https://professionalbeauty.co.uk/site/newsdetails/nearly-half-of-appointment-bookings-happen-out-of-salon-hours"
+    },
+    {
+      "stat": "~7%",
+      "text": "of monthly revenue lost by UK hair & beauty firms to cancellations",
+      "source": "Fresha survey, 2026",
+      "url": "https://professionalbeauty.co.uk/beauty-appointment-cancellations-income-loss-survey"
+    },
+    {
+      "stat": "62%",
+      "text": "of UK beauty clients give under 24 hours' notice when cancelling",
+      "source": "Fresha survey, 2026",
+      "url": "https://professionalbeauty.co.uk/beauty-appointment-cancellations-income-loss-survey"
+    }
+  ],
+  "barber": [
+    {
+      "stat": "21%",
+      "text": "no-show rate at UK barbershops: about 1 in 5 bookings (Fresha data)",
+      "source": "Fresha via Professional Beauty, 2024",
+      "url": "https://professionalbeauty.co.uk/beauty-pros-lost-26m-to-no-shows-this-summer"
+    },
+    {
+      "stat": "53%",
+      "text": "of hair, beauty & wellness bookings are made outside opening hours",
+      "source": "booksalon, 2023",
+      "url": "https://news.cision.com/san-francisco-oy/r/data-from-paytech-market-leader-booksalon-shows-majority-of-british-salon-appointments-are-booked-ou,c3883921"
+    }
+  ],
+  "dogwalker": [
+    {
+      "stat": "10.2m",
+      "text": "pet dogs in the UK; 27% of adults own one",
+      "source": "PDSA PAW Report, 2026",
+      "url": "https://www.pdsa.org.uk/what-we-do/pdsa-animal-wellbeing-report/paw-report-2026/pet-populations"
+    },
+    {
+      "stat": "£19",
+      "text": "average UK price of a 30-min dog walk (£26 for 60 mins)",
+      "source": "Rover, 2026",
+      "url": "https://www.rover.com/uk/blog/dog-walking-rates-on-rover/"
+    },
+    {
+      "stat": "1 in 5",
+      "text": "UK customers won't retry after a missed call (all sectors, not pet-specific)",
+      "source": "Rinkel (press release), 2025",
+      "url": "https://www.prnewswire.co.uk/news-releases/no-second-chances-20-of-uk-customers-wont-call-back-after-a-missed-call-302454374.html"
+    }
+  ],
+  "msp": [
+    {
+      "stat": "43%",
+      "text": "of UK businesses had a cyber breach or attack in the last 12 months",
+      "source": "DSIT Cyber Security Breaches Survey, 2026",
+      "url": "https://www.gov.uk/government/statistics/cyber-security-breaches-survey-20252026/cyber-security-breaches-survey-20252026"
+    },
+    {
+      "stat": "64%",
+      "text": "of UK small businesses use an external cyber security provider",
+      "source": "DSIT Cyber Security Breaches Survey, 2026",
+      "url": "https://www.gov.uk/government/statistics/cyber-security-breaches-survey-20252026/cyber-security-breaches-survey-20252026"
+    },
+    {
+      "stat": "38%",
+      "text": "of UK businesses hit by phishing in a year, the most disruptive attack type",
+      "source": "DSIT Cyber Security Breaches Survey, 2026",
+      "url": "https://www.gov.uk/government/statistics/cyber-security-breaches-survey-20252026/cyber-security-breaches-survey-20252026"
+    }
+  ],
+  "soletrader": [
+    {
+      "stat": "3.2m",
+      "text": "sole proprietorships in the UK, 57% of all private businesses",
+      "source": "DBT Business Population Estimates, 2025",
+      "url": "https://www.gov.uk/government/statistics/business-population-estimates-2025/business-population-estimates-for-the-uk-and-regions-2025-statistical-release"
+    },
+    {
+      "stat": "93%",
+      "text": "of UK small business owners say they've missed important calls when busy",
+      "source": "Rinkel (press release), 2025",
+      "url": "https://www.prnewswire.co.uk/news-releases/no-second-chances-20-of-uk-customers-wont-call-back-after-a-missed-call-302454374.html"
+    },
+    {
+      "stat": "34%",
+      "text": "of UK tradespeople say they've lost work by not answering the phone",
+      "source": "Fix Radio / Builders Station survey, 2022",
+      "url": "https://www.fixradio.co.uk/fix-feed/construction-news/post/34-of-tradespeople-lose-work-by-not-answering-phone"
+    }
+  ]
+}

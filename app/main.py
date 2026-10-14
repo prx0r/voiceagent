@@ -36,6 +36,10 @@ class ChatIn(BaseModel):
 def home():
     return FileResponse("static/app.html")
 
+@app.get("/landing")
+def landing():
+    return FileResponse("static/landing.html")
+
 @app.get("/kernel")
 def kernel():
     return FileResponse("static/index.html")
@@ -256,6 +260,58 @@ def api_industries():
         i["hours"] = {k: (dflt.get(k, "closed") if "[" in str(v) else v) for k, v in (i.get("hours") or {}).items()}
     return d
 
+class GuideIn(BaseModel):
+    trade: str
+    message: str
+    session_id: str | None = None
+    done: list[str] = []
+
+
+@app.get("/api/console/calendar")
+def console_calendar(trade: str):
+    from . import console as con
+    return con.calendar(trade)
+
+
+@app.get("/api/console/{trade}")
+def console_boot(trade: str):
+    from . import console as con
+    kern = _trade_kernel(trade)
+    if not kern:
+        raise HTTPException(404, "unknown trade")
+    cfg, _, biz = kern
+    from .industries import _clean
+    pack_name = str((cfg.get("business", {}) or {}).get("name", ""))
+    rp = str((cfg.get("agent", {}) or {}).get("system_prompt", ""))
+    if pack_name:
+        rp = rp.replace(pack_name, biz)
+    return {"trade": trade, "business": biz, "opening": con.opening(trade, biz), "stats": con.stats(trade),
+            "prompts": con.funnel(trade, set()),
+            "system_prompts": {"guide": con.guide_prompt(trade, biz), "receptionist": _clean(rp, biz)},
+            "brief": {k: v for k, v in con.brief(trade).items() if k in ("emergency", "booking", "price_q")}}
+
+
+@app.post("/api/console/guide")
+async def console_guide(inp: GuideIn):
+    from . import console as con
+    kern = _trade_kernel(inp.trade)
+    if not kern:
+        raise HTTPException(404, "unknown trade")
+    biz = kern[2]
+    out = con.guide_answer(inp.trade, biz, inp.message[:500], set(inp.done or []))
+    if llm.enabled:
+        sid = inp.session_id or str(uuid.uuid4())
+        hist = store.history("guide:" + sid, 8)
+        r = await llm.respond(con.guide_prompt(inp.trade, biz), hist, inp.message[:500],
+                              con.PRODUCT + "\n" + con.calendar_context(inp.trade), {})
+        if r.get("answer"):
+            out["answer"] = r["answer"]
+        store.add_message("guide:" + sid, "user", inp.message[:500], {})
+        store.add_message("guide:" + sid, "assistant", out["answer"], {})
+        out["session_id"] = sid
+    return out
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "business": business.get("business",{}).get("name"), "llm": llm.enabled, "nodes": len(graph.nodes)}
@@ -278,9 +334,21 @@ async def chat(inp: ChatIn):
         sys = _clean(sys, biz_name) + " Keep replies to two or three short spoken sentences."
     else:
         sys = business.get("agent",{}).get("system_prompt", "You are a precise customer support agent.")
+    from . import console as _con
+    wants_slot = bool(kern) and bool(__import__("re").search(
+        r"(?i)\b(when|come|available|availability|slots?|today|tonight|tomorrow|afternoon|morning|this week|next week|book|appointment|visit|free)\b", inp.message)) \
+        and not _re_urgent(inp.message) and not __import__("re").search(r"\b([01]?\d|2[0-3]):[0-5]\d\b", inp.message)
+    if kern:
+        context = (context + "\n\n" + _con.calendar_context(inp.trade)).strip()
     if kern and not llm.enabled:
-        result = {"answer": _receptionist_fallback(inp.message, evidence, kern[2], g, inp.trade),
-                  "tool": None, "tool_args": {}, "confidence": 0.5}
+        ans = _receptionist_fallback(inp.message, evidence, kern[2], g, inp.trade)
+        if wants_slot:
+            import re as _r2
+            ans = _r2.sub(r"(?i)[,\s]*(and )?you'll hear back first thing with times\.?", ".", ans).strip()
+            ans = _r2.sub(r"\.\.+", ".", ans).replace("?.", "?")
+            ans = _r2.sub(r"\s*Want me to get you booked in\? I just need your name and number\.?", "", ans).strip()
+            ans = (ans + " " + _con.slots_sentence(inp.trade, inp.message)).strip()
+        result = {"answer": ans, "tool": None, "tool_args": {}, "confidence": 0.5}
     else:
         result = await llm.respond(sys, hist[:-1], inp.message, context, tools.descriptions())
     tool_result = None
