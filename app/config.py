@@ -8,6 +8,8 @@ class Settings:
     llm_base_url: str = os.getenv("LLM_BASE_URL", "")
     llm_api_key: str = os.getenv("LLM_API_KEY", "")
     llm_model: str = os.getenv("LLM_MODEL", "")
+    llm_protocol: str = os.getenv("LLM_PROTOCOL", "openai")
+    llm_session: str = os.getenv("LLM_SESSION", "")
     tts_provider: str = os.getenv("TTS_PROVIDER", "edge")
     edge_tts_voice: str = os.getenv("EDGE_TTS_VOICE", "en-GB-RyanNeural")
     default_locale: str = os.getenv("DEFAULT_LOCALE", "en-GB")

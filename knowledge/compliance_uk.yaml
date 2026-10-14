@@ -1,0 +1,33 @@
+# Compliance pack — every deployment, every trade. Plain rules, no legalese.
+# Basis: LBP Regs 2000 (business recording for facts/quality/training),
+# Ofcom General Conditions (announce before recording), UK GDPR (legitimate
+# interests + LIA, minimisation, retention, DSAR/deletion). Not legal advice.
+
+announcement:
+  say_first: "'I'll be recording this call so [OWNER] can play it back.' (voice) / automated equivalent on WhatsApp."
+  objection: "Stop recording immediately; offer morning callback instead. Log the objection."
+
+opt_out:
+  voice: "'Just say stop recording at any time.' Honored instantly, no argument."
+  whatsapp: "'STOP' ends automation; thread released to human queue."
+  meta_agent: "Handoff on second human request, always. Never deflect 'can I speak to a person'."
+
+data_minimisation:
+  collect: "name, callback number, address/postcode, issue, urgency. Nothing else."
+  never: "card details (tripwire before storage), passwords, unrelated personal data."
+  voiceprints: "donor consent on file per clone; delete clone + clip on request."
+
+retention:
+  recordings: "6 months, then auto-delete."
+  transcripts_notes: "6 months, then auto-delete."
+  ledger_billing: "6 years (HMRC)."
+  outbox_receipts: "90 days."
+
+rights:
+  access: "export everything held on a caller within 30 days."
+  deletion: "delete recordings, notes, clones on request unless law requires retention."
+  processor_terms: "we process customer data only for the business; sub-processors (Fish/Meta/Telnyx) listed in the service agreement."
+
+logging:
+  keep_30_days: "conversation logs minimum 30 days for dispute handling."
+  no_secret_material: "secrets/keys never in logs, transcripts, or repos."

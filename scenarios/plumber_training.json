@@ -1,0 +1,52 @@
+{
+  "pack": "plumber-training-v1",
+  "locale": "en-GB",
+  "note": "Rehearsal callers for staff (and the agent itself). Difficulty 1-5. Score each run: disclosure said, details captured (name/number/address/issue), emergency flagged correctly, range quoted not invented, no card details taken, callback promise set.",
+  "scenarios": [
+    {
+      "id": "t1-drip",
+      "title": "Dripping tap, daytime price-shopper",
+      "difficulty": 1,
+      "caller": "Calm homeowner, wants a price for a dripping kitchen tap, weekday morning.",
+      "beats": ["greet + disclose", "take name/number/address", "classify STANDARD", "quote daytime range, confirm-on-arrival caveat", "morning callback promise"],
+      "traps": ["inventing an exact quote", "skipping disclosure"],
+      "pass": "Standard intake complete, range quoted, callback promised."
+    },
+    {
+      "id": "t2-boiler-friday",
+      "title": "Boiler dead, Friday 7pm, family with kids",
+      "difficulty": 2,
+      "caller": "Cold house, two small children, wants to know if someone comes tonight and what it costs.",
+      "beats": ["greet + disclose", "classify: heating failure with children = EMERGENCY in winter", "evening range + minimum-charge framing", "SMS owner now", "callback within the hour promise"],
+      "traps": ["downgrading to standard because caller is polite", "vague pricing"],
+      "pass": "Emergency flagged, owner SMS queued, caller told exactly what happens next."
+    },
+    {
+      "id": "t3-burst-midnight",
+      "title": "Burst pipe, 2am, water through ceiling",
+      "difficulty": 3,
+      "caller": "Panicking, water pouring, doesn't know where the stopcock is.",
+      "beats": ["greet + disclose fast", "stopcock instruction FIRST (under kitchen sink, then boiler off)", "address + number captured", "EMERGENCY + owner SMS", "overnight range stated, confirm on arrival"],
+      "traps": ["taking details before stopping the water", "freezing on panic"],
+      "pass": "Damage-control advice given before admin, emergency escalated."
+    },
+    {
+      "id": "t4-angry-repeat",
+      "title": "Angry repeat caller, still waiting from Tuesday",
+      "difficulty": 4,
+      "caller": "Furious, booked Tuesday, nobody came, demands compensation and the owner's mobile number.",
+      "beats": ["greet + disclose, stay level", "acknowledge + take details, do NOT hand out owner number", "classify by the actual fault (ask)", "escalate as priority callback + owner SMS noting complaint", "no invented compensation"],
+      "traps": ["giving out the owner mobile", "promising discounts", "arguing"],
+      "pass": "De-escalated, details captured, owner notified, nothing promised that isn't policy."
+    },
+    {
+      "id": "t5-elderly-cold",
+      "title": "Elderly caller, no heating, confused about address",
+      "difficulty": 5,
+      "caller": "88 years old, cold, unsure of postcode, repeats herself, mentions a care visitor in the morning.",
+      "beats": ["slow pace, disclose gently + repeat", "patient address capture (landmark/phone-number fallback)", "vulnerable occupant + no heating = EMERGENCY", "owner SMS with vulnerability flag", "reassure: help tonight, care visitor told in morning digest"],
+      "traps": ["rushing", " postcode-or-nothing", "missing vulnerability flag", "card details if offered"],
+      "pass": "Vulnerability flagged, help arranged tonight, dignity intact."
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Answered — pick your trade</title>
+<style>
+:root{--bg:#0b0c0e;--bg2:#14171b;--text:#f2f4f6;--dim:#9aa3ad;--acc:#ffb224;--line:#262c34}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
+.top{padding:34px 26px 10px;max-width:1000px;margin:0 auto;text-align:center}
+.top h1{margin:0 0 6px;font-size:26px}.top h1 span{color:var(--acc)}
+.top p{color:var(--dim);margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;max-width:1000px;margin:22px auto;padding:0 26px 40px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;overflow:hidden;cursor:pointer;text-decoration:none;color:var(--text)}
+.card:hover{border-color:var(--acc)}
+.card img{width:100%;height:130px;object-fit:cover;display:block;background:#1c2128}
+.card .b{padding:12px 14px}.card b{font-size:15px}.card p{margin:5px 0 0;font-size:12px;color:var(--dim)}
+.card .go{font-size:12px;color:var(--acc);margin-top:8px;display:block}
+.foot{text-align:center;color:var(--dim);font-size:12px;padding:0 0 30px}
+</style></head><body>
+<div class="top"><h1>Answered<span>.</span></h1><p>Pick your trade — see exactly what your customers will see.</p></div>
+<div class="grid" id="grid"></div>
+<div class="foot">50p per active minute · no subscription · first 10 calls free</div>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+fetch('/api/industries').then(r=>r.json()).then(d=>{
+  const g=document.getElementById('grid');
+  g.innerHTML=d.industries.map(i=>
+    `<a class="card" href="/demo/${i.slug}"><img loading="lazy" src="https://picsum.photos/seed/answered-${i.slug}/440/260" alt="${esc(i.label)}"><div class="b"><b>${i.icon} ${esc(i.label)}</b><p>${esc(i.tagline)}</p><span class="go">See your site →</span></div></a>`).join('');
+}).catch(e=>{document.getElementById('grid').innerHTML='<p>Could not load.</p>'});
+</script></body></html>

@@ -1,0 +1,116 @@
+# MSP — IT helpdesk / managed service provider business kernel.
+# Doubles as voice-agent BUSINESS_CONFIG (business/agent/voice/nodes shape)
+# plus a `tradie:` block this side reads and the voice side ignores.
+business:
+  name: "{{BUSINESS_NAME}}"
+  locale: "en-GB"
+  phone: "{{PHONE}}"
+  hours:
+    monday-friday: "09:00-18:00"
+    saturday: "closed"
+    sunday: "closed"
+agent:
+  system_prompt: |
+    You are the after-hours agent for {{BUSINESS_NAME}}. Be warm, brief, operational.
+    After hours: take name, phone, company name, issue description, urgency. Critical
+    issues (server down, ransomware, data loss) → say the on-call engineer will call
+    back immediately. Everything else → promise a morning reply with a plan and slots.
+    Never invent prices; use only quoted ranges. Ask about systems affected and
+    business impact when relevant.
+voice:
+  edge_voice: "en-GB-RyanNeural"
+  production_note: "Qwen-Omni realtime (DashScope SG) for live calls; this prompt seeds it."
+nodes:
+  - id: service.remote_support
+    type: service
+    name: Remote support
+    aliases: [remote help, remote fix, remote troubleshooting, it support]
+    text: "Remote troubleshooting and support. Needs: issue description, system details, business impact. We never see your passwords."
+  - id: service.onsite_visit
+    type: service
+    name: On-site visit
+    aliases: [onsite, on-site, technician visit, engineer visit]
+    text: "On-site technician visit. Needs: address, issue description, access requirements, system details. Typically 1-4 hour attendance."
+  - id: service.new_client
+    type: service
+    name: New client IT setup
+    aliases: [new client, it setup, new business, onboarding]
+    text: "IT setup for new businesses. Needs: number of users, current systems, requirements. Includes assessment and migration plan."
+  - id: service.security
+    type: service
+    name: Cybersecurity assessment
+    aliases: [security, cyber security, security audit, vulnerability]
+    text: "Cybersecurity assessment and hardening. Needs: current security posture, compliance requirements, number of systems."
+  - id: service.cloud_migration
+    type: service
+    name: Cloud migration
+    aliases: [cloud, cloud move, migrate, office 365, google workspace]
+    text: "Cloud migration services. Needs: current infrastructure, target platform, number of users, timeline."
+  - id: escalation.safety
+    type: escalation
+    name: Security incident
+    aliases: [ransomware, hack, breach, data loss, malware]
+    text: "Escalate immediately. Advise customer to disconnect affected systems from network. On-call engineer will call back within 30 minutes."
+  - id: policy.sla
+    type: policy
+    name: SLA policy
+    aliases: [sla, response time, response, how fast]
+    text: "4-hour response for critical issues. 24-hour response for standard requests. Critical = business operations stopped."
+  - id: policy.scope
+    type: policy
+    name: Scope and approval policy
+    aliases: [scope, out of scope, approval, authorisation]
+    text: "Work outside agreed scope requires written approval before proceeding. We will always confirm costs first."
+  - id: policy.secrets
+    type: policy
+    name: Password and secrets policy
+    aliases: [password, secrets, credentials]
+    text: "We never see or store your passwords. All access uses secure methods. We will guide you through any password steps."
+  - id: policy.reporting
+    type: policy
+    name: Reporting policy
+    aliases: [report, monthly report, sla report]
+    text: "Monthly SLA reports provided. Includes ticket counts, response times, and recommendations."
+tradie:
+  autonomy: semi_auto
+  retention_days: 90
+  preferences:
+    preferred_slots: ["morning", "afternoon"]
+    max_distance_km: 40
+    min_job_value: 100
+    takes_emergency: true
+    job_affinity:
+      remote_support: 2
+      onsite_visit: 1
+      new_client: 1
+      security: 0
+      cloud_migration: -1
+    max_typical_min: 240
+  after_hours_multiplier: 2.0
+  callout_per_km: 1.5
+  default_range: [200, 800]
+  price_book:
+    remote_support:
+      labour: 100
+      typical_parts: []
+    onsite_visit:
+      labour: 250
+      typical_parts: []
+    new_client:
+      labour: 500
+      typical_parts: []
+    security:
+      labour: 400
+      typical_parts: []
+    cloud_migration:
+      labour: 0
+      typical_parts: []
+
+# ---- V1 LAUNCH OVERLAY (voiceagent product layer, 2026-10-14) ----
+launch:
+  rate_per_min_gbp: 0.50
+  owner_mobile: "[OWNER MOBILE]"
+  digest_to: "[EMAIL FOR MORNING DIGEST]"
+  whatsapp_to: "[WHATSAPP NUMBER]"
+  fish_voice_id: "[CLONED VOICE ID]"
+  fish_model: "s2.1-pro-free"

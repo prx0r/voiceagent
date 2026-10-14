@@ -1,0 +1,147 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{BUSINESS}} — {{TRADE_LABEL}} in {{AREA}}</title>
+<style>
+:root{--bg:#0b0c0e;--bg2:#14171b;--text:#f2f4f6;--dim:#9aa3ad;--acc:#ffb224;--line:#262c34}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
+.hero{padding:44px 26px;max-width:760px;margin:0 auto;text-align:center}
+.logo{width:72px;height:72px;border-radius:16px;background:var(--bg2);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:12px}
+.hero h1{margin:0 0 6px;font-size:28px}.hero p{color:var(--dim);margin:0 0 14px}
+.btn{background:var(--acc);color:#111;border:0;border-radius:8px;padding:12px 24px;font-size:15px;font-weight:700;cursor:pointer}
+.sec{max-width:760px;margin:0 auto;padding:18px 26px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.card b{font-size:14px}.card p{margin:6px 0 0;font-size:13px;color:var(--dim)}
+h2{font-size:18px;margin:22px 0 10px}
+#chatlog{border:1px solid var(--line);border-radius:12px;padding:14px;min-height:220px;background:var(--bg2)}
+.m{margin:10px 0;font-size:14px}.u{text-align:right}.a{white-space:pre-wrap}
+form.row{display:flex;gap:8px;margin-top:10px}input,select{flex:1;padding:11px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+button.sm{padding:11px 16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.foot{text-align:center;color:var(--dim);font-size:12px;padding:26px}
+.demo-stamp{display:inline-block;font-size:11px;color:var(--acc);border:1px solid var(--acc);border-radius:12px;padding:3px 12px;margin-bottom:10px}
+@media(max-width:640px){.grid{grid-template-columns:1fr}}
+</style></head><body>
+<div class="hero">
+<div class="demo-stamp">FREE PREVIEW — built for {{BUSINESS}}</div>
+<div class="logo">{{ICON}}</div>
+<h1>{{BUSINESS}}</h1>
+<p>{{TAGLINE}} {{AREA}}.</p>
+<button class="btn" onclick="document.getElementById('book').scrollIntoView({behavior:'smooth'})">📅 Make an appointment</button>
+<button class="btn" style="background:transparent;color:var(--text);border:1px solid var(--line);margin-left:8px" onclick="callMe()">📞 Call me back</button>
+<div id="callback" style="max-width:480px;margin:12px auto 0;display:none">
+<div class="row" style="display:flex;gap:8px"><input id="cname" placeholder="Your name" style="flex:1"><input id="cphone" placeholder="Your number" style="flex:1">
+<button class="sm btn" style="padding:11px 18px" onclick="sendCallback()">Ring me</button></div>
+<div id="cbout" style="margin-top:8px;font-size:13px"></div></div>
+</div>
+<div class="sec">
+<h2>What we do</h2>
+<div id="services"></div>
+<h2>Straight pricing</h2>
+<div class="card"><p id="pricing"></p></div>
+<h2 id="book">Book now — AI assistant, day or night</h2>
+<div class="card"><p>Ask anything below, or leave your number and we'll ring back within the hour.</p>
+<div id="chatlog"></div>
+<form class="row" id="chatform"><input id="chatq" placeholder="e.g. sockets sparking, what do I do?"><button class="sm">Send</button></form>
+<div class="row" style="margin-top:10px;align-items:center"><button class="sm" id="livebtn" onclick="toggleLive()">🎙 Test live call</button>
+<span id="livestat" style="font-size:12px;color:var(--dim)">browser mic → trade brain → spoken reply. No keys, no Telnyx.</span></div>
+<form class="row" id="bookform" style="margin-top:14px;flex-wrap:wrap">
+<input id="bname" placeholder="Your name" style="flex:1;min-width:120px">
+<input id="bphone" placeholder="Callback number" style="flex:1;min-width:130px">
+<input id="bemail" placeholder="Email for confirmation" style="flex:1;min-width:150px">
+<button class="sm btn" style="padding:11px 18px">See free times</button>
+</form><div id="slots" style="margin-top:8px"></div><div id="bookout" style="margin-top:8px;font-size:13px"></div>
+</div>
+<h2>Why neighbours switch</h2>
+<div class="grid" id="proof"></div>
+<h2>Ships with it</h2>
+<div id="features"></div>
+</div>
+<div class="foot">Demo site built by Answered · 50p/min · no subscription · <span id="slugline"></span></div>
+<script>
+const SLUG="{{SLUG}}", TRADE="{{TRADE}}";
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let DATA=null;
+fetch('/api/industries').then(r=>r.json()).then(d=>{
+  const i=d.industries.find(x=>x.slug===TRADE);
+  if(i){
+    document.getElementById('services').innerHTML=i.services.map(s=>`<div class="card"><b>${esc(s.name)}</b><p>${esc(s.text)}</p></div>`).join('');
+    document.getElementById('pricing').textContent=i.pricing||'Fair published rates, confirmed on arrival.';
+  }
+  document.getElementById('proof').innerHTML=(d.proof||[]).map(p=>`<div class="card"><b style="color:var(--acc);font-size:20px">${esc(p.stat)}</b><p>${esc(p.text)}</p></div>`).join('');
+  document.getElementById('features').innerHTML=(d.core||[]).map(c=>`<div class="card"><b>${esc(c.icon)} ${esc(c.title)}</b><p>${esc(c.text)}</p></div>`).join('');
+  document.getElementById('slugline').textContent=SLUG;
+});
+const log=document.getElementById('chatlog');
+log.innerHTML='<div class="m a"><b>Assistant:</b> Hi — ask me anything about our work, prices, or emergencies. Or book below.</div>';
+function callMe(){
+  const el=document.getElementById('callback');
+  el.style.display=el.style.display==='none'?'block':'none';
+}
+async function sendCallback(){
+  const out=document.getElementById('cbout');
+  const r=await fetch('/api/callback',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({business:SLUG,name:document.getElementById('cname').value,
+      phone:document.getElementById('cphone').value,reason:'demo site request'})});
+  const j=await r.json();
+  out.innerHTML=j.ok?`<span style="color:#7fe0a8">Done — we'll ring you back.</span>`:`<span style="color:#f66">${esc(j.reason||'failed')}</span>`;
+}
+let LIVE=false, RECOG=null;
+function speak(t){
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(t.slice(0,400));
+    u.lang='en-GB'; u.rate=1.02;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function toggleLive(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('livestat').textContent='voice input needs Chrome/Edge.';return}
+  if(LIVE){LIVE=false;try{RECOG.stop()}catch(e){}
+    document.getElementById('livebtn').textContent='🎙 Test live call';
+    document.getElementById('livestat').textContent='call ended.';return}
+  LIVE=true;
+  document.getElementById('livebtn').textContent='⏹ End call';
+  document.getElementById('livestat').textContent='listening… speak now.';
+  log.innerHTML+=`<div class="m a"><b>Assistant:</b> Hi, thanks for calling — go ahead, what's the problem?</div>`;
+  speak('Hi, thanks for calling. Go ahead — what is the problem?');
+  RECOG=new SR(); RECOG.lang='en-GB'; RECOG.interimResults=false;
+  RECOG.onresult=async ev=>{
+    const t=ev.results[ev.results.length-1][0].transcript;
+    log.innerHTML+=`<div class="m u"><b>You (voice):</b> ${esc(t)}</div>`;
+    try{const r=await fetch('/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:t})});
+      const j=await r.json();
+      const a=j.answer||'Sorry — a human will ring you back within the hour.';
+      log.innerHTML+=`<div class="m a"><b>Assistant:</b> ${esc(a)}</div>`;speak(a);
+    }catch(err){const f='Sorry — a human will ring you back within the hour.';log.innerHTML+=`<div class="m a"><b>Assistant:</b> ${f}</div>`;speak(f);}
+    log.scrollTop=99999;
+  };
+  RECOG.onend=()=>{if(LIVE){try{RECOG.start()}catch(e){}}};
+  try{RECOG.start()}catch(e){}
+}
+document.getElementById('chatform').onsubmit=async e=>{
+  e.preventDefault();const q=document.getElementById('chatq');const t=q.value.trim();if(!t)return;q.value='';
+  log.innerHTML+=`<div class="m u"><b>You:</b> ${esc(t)}</div>`;
+  try{const r=await fetch('/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:t})});const j=await r.json();
+  log.innerHTML+=`<div class="m a"><b>Assistant:</b> ${esc(j.answer||'Sorry — a human will ring you back within the hour.')}</div>`;}
+  catch(err){log.innerHTML+=`<div class="m a"><b>Assistant:</b> Sorry — a human will ring you back within the hour.</div>`;}
+  log.scrollTop=99999;
+};
+document.getElementById('bookform').onsubmit=async e=>{
+  e.preventDefault();
+  const out=document.getElementById('bookout'), slots=document.getElementById('slots');
+  const r=await fetch('/api/book',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({business:SLUG})});
+  const j=await r.json();
+  if(!j.days){out.innerHTML=`<span style="color:#f66">no availability right now — leave your number, we will ring you.</span>`;return}
+  slots.innerHTML=j.days.map(d=>`<div style="margin:6px 0;font-size:13px"><b>${esc(d.weekday)} ${esc(d.date)}</b> `+
+    d.slots.map(s=>`<button class="sm" style="margin:2px;padding:6px 10px" onclick="pickSlot('${esc(d.date)}','${esc(s)}')">${esc(s)}</button>`).join('')+'</div>').join('');
+  out.innerHTML='<span style="color:var(--dim)">pick a time — confirmation email follows.</span>';
+};
+async function pickSlot(date,time){
+  const out=document.getElementById('bookout');
+  const b={business:SLUG,name:document.getElementById('bname').value,phone:document.getElementById('bphone').value,
+    email:document.getElementById('bemail').value,service:TRADE,date:date,time:time};
+  const r=await fetch('/api/book',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(b)});const j=await r.json();
+  out.innerHTML=j.ok?`<span style="color:#7fe0a8">Booked ${esc(j.date)} ${esc(j.time)} — ref ${esc(j.ref)}${j.emailed?' · confirmation emailed':''}.</span>`
+    :`<span style="color:#f66">${esc(j.reason||'failed — pick another time')}</span>`;
+}
+</script></body></html>

@@ -2,7 +2,7 @@ from __future__ import annotations
 import os, uuid
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -33,7 +33,48 @@ class ChatIn(BaseModel):
 
 @app.get("/")
 def home():
+    return FileResponse("static/grid.html")
+
+@app.get("/kernel")
+def kernel():
     return FileResponse("static/index.html")
+
+@app.get("/grid")
+def grid():
+    return FileResponse("static/grid.html")
+
+SAMPLE_BIZ = {
+    "electrician": "Dave's Electrical", "plumber": "Flowright Plumbing",
+    "heating": "CosyHeat", "locksmith": "Keyline Locks",
+    "beauty": "Glow Studio", "barber": "Fade Factory",
+    "dogwalker": "Happy Tails", "msp": "Nimbus IT",
+}
+
+@app.get("/demo/{trade}")
+def demo_site(trade: str):
+    """Live sample site per trade: what their customers see + what ships."""
+    from . import industries as site_data
+    slugs = [t["slug"] for t in site_data.TRADES]
+    slug = trade if trade in slugs else "soletrader"
+    meta = next(t for t in site_data.TRADES if t["slug"] == slug)
+    biz = SAMPLE_BIZ.get(slug, "Sample & Sons")
+    area = "Manchester"
+    html = open("static/demo_template.html", encoding="utf-8").read()
+    for k, v in {"BUSINESS": biz, "TRADE_LABEL": meta["label"],
+                 "TRADE": slug, "ICON": meta["icon"],
+                 "TAGLINE": meta["tagline"], "AREA": area,
+                 "SLUG": slug}.items():
+        html = html.replace("{{" + k + "}}", v)
+    return HTMLResponse(html)
+
+@app.get("/site")
+def site():
+    return FileResponse("static/site.html")
+
+@app.get("/api/industries")
+def api_industries():
+    from . import industries as site_data
+    return site_data.industries()
 
 @app.get("/health")
 def health():
@@ -75,8 +116,16 @@ async def chat(inp: ChatIn):
     audio_url = None
     if inp.speak and result.get("answer"):
         try:
-            from adapters.edge_tts import synthesize
-            path = await synthesize(result["answer"], business.get("voice",{}).get("edge_voice", settings.edge_tts_voice))
+            if settings.tts_provider == "fish":
+                from adapters.fish_tts import synthesize
+                v = business.get("voice", {})
+                path = await synthesize(
+                    result["answer"],
+                    v.get("fish_voice_id", "") or settings.edge_tts_voice,
+                    model=v.get("fish_model", "s2.1-pro-free"))
+            else:
+                from adapters.edge_tts import synthesize
+                path = await synthesize(result["answer"], business.get("voice",{}).get("edge_voice", settings.edge_tts_voice))
             audio_url = "/tts/" + os.path.basename(path)
         except Exception as e:
             audio_url = None
@@ -90,6 +139,84 @@ def tts(filename: str):
     if not path.exists():
         raise HTTPException(404)
     return FileResponse(path, media_type="audio/mpeg")
+
+class HandoffIn(BaseModel):
+    customer_phone: str = ""
+    to: str = ""
+    metadata: str = ""
+    summary: str = ""
+
+@app.post("/webhooks/meta-handoff")
+async def meta_handoff(inp: HandoffIn):
+    """Meta Business Agent escalation receiver -> afterhours flow."""
+    import meta_handoff as mh
+    biz = business.get("business", {}) or {}
+    return mh.handle_handover(
+        {"customer_phone": inp.customer_phone, "to": inp.to,
+         "metadata": inp.metadata, "summary": inp.summary},
+        biz.get("digest_to", ""))
+
+class BookIn(BaseModel):
+    business: str = ""
+    name: str = ""
+    phone: str = ""
+    email: str = ""
+    service: str = ""
+    when: str = ""
+    date: str = ""
+    time: str = ""
+
+class CallbackIn(BaseModel):
+    business: str = ""
+    name: str = ""
+    phone: str = ""
+    reason: str = ""
+
+@app.post("/api/callback")
+async def api_callback(inp: CallbackIn):
+    """'Call me back' shared function: ticket + nagging reminder."""
+    if len(inp.name.strip()) < 2 or len(inp.phone.strip()) < 7:
+        return {"ok": False, "reason": "name + valid callback number required"}
+    tid = store.create_ticket(str(uuid.uuid4()), "callback", inp.model_dump())
+    try:
+        import sys as _s
+        _s.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from afterhours import queue_reminder
+        queue_reminder(inp.name.strip(), inp.phone.strip(),
+                       f"call-me-back: {inp.reason.strip()[:200] or 'no reason given'}",
+                       "standard", inp.business.strip())
+    except Exception:
+        pass
+    return {"ok": True, "ticket_id": tid}
+
+@app.get("/api/availability")
+def api_availability():
+    """Read-only availability: next days with free slots. Never writes."""
+    import booking as booking_engine
+    return {"ok": True, "days": booking_engine.propose()}
+
+@app.post("/api/book")
+async def api_book(inp: BookIn):
+    """Propose -> confirm booking. No date yet? returns free slots to pick.
+    Confirm path stores the row, queues the callback reminder, captures the
+    customer email, and best-effort sends the confirmation email."""
+    import booking as booking_engine
+    if not inp.date or not inp.time:
+        return {"ok": True, "needs_pick": True,
+                "days": booking_engine.propose()}
+    r = booking_engine.confirm(inp.business, inp.name, inp.phone, inp.email,
+                               inp.service, inp.date, inp.time)
+    if r.get("ok") and inp.email and "@" in inp.email:
+        try:
+            from adapters.gmail_notify import send_digest
+            r["emailed"] = bool(send_digest(inp.email,
+                        f"Booking confirmed: {r['date']} {r['time']} (ref {r['ref']})",
+                        f"Hi {inp.name.strip()},\n\nYou're booked for {inp.service or 'the visit'} "
+                        f"on {r['date']} at {r['time']} (ref {r['ref']}).\n"
+                        f"We'll ring {inp.phone.strip()} if anything changes.\n\n— {inp.business.strip() or 'us'}").get("ok"))
+        except Exception:
+            r["emailed"] = False
+    return r
 
 @app.get("/graph/search")
 def graph_search(q: str):

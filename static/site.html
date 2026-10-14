@@ -1,0 +1,71 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Answered — AI receptionist for UK trades</title>
+<style>
+:root{--bg:#0b0c0e;--bg2:#131518;--bg3:#1a1e24;--text:#f2f4f6;--dim:#9aa3ad;--acc:#ffb224;--line:#262c34}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,sans-serif}
+.top{padding:26px 30px;border-bottom:1px solid var(--line)}
+.top h1{margin:0;font-size:24px}.top h1 span{color:var(--acc)}
+.top p{margin:6px 0 0;color:var(--dim);max-width:640px}
+.price{display:inline-block;margin-top:10px;border:1px solid var(--acc);color:var(--acc);border-radius:20px;padding:5px 16px;font-size:13px}
+.wrap{display:flex;min-height:calc(100vh - 150px)}
+.rail{width:230px;flex-shrink:0;border-right:1px solid var(--line);padding:14px 10px}
+.rail .sec{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--dim);padding:10px 10px 4px}
+.item{padding:9px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+.item:hover{background:var(--bg2)}.item.on{background:var(--bg3);border-left:2px solid var(--acc)}
+.item .ic{margin-right:8px}
+.main{flex:1;padding:26px 30px;max-width:860px}
+.main h2{margin:0 0 4px;font-size:22px}.tag{color:var(--dim);margin-bottom:16px}
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px}
+.card b{font-size:14px}.card p{margin:6px 0 0;font-size:13px;color:var(--dim)}
+.script{background:#101c12;border:1px solid #1e4d2b;border-radius:10px;padding:14px 16px;margin:14px 0;font-size:14px;font-style:italic}
+.proof{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.proof .stat{font-size:24px;color:var(--acc);font-weight:700}
+.cta{margin-top:18px;background:var(--acc);color:#111;border:0;border-radius:8px;padding:12px 22px;font-size:15px;font-weight:700;cursor:pointer}
+.ghost{background:transparent;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:12px 22px;font-size:15px;cursor:pointer;margin-left:8px}
+@media(max-width:760px){.wrap{flex-direction:column}.rail{width:100%;border-right:0;border-bottom:1px solid var(--line}.proof{grid-template-columns:1fr}}
+</style></head><body>
+<div class="top">
+<h1>Answered<span>.</span> <span style="font-size:15px;color:var(--dim);font-weight:400">AI receptionist for UK trades</span></h1>
+<p>Missed calls answered in your own voice. Emergencies texted to you instantly. Everything else in one morning email. Pick your trade on the left.</p>
+<span class="price" id="price-line">50p per active minute · no subscription · first 10 calls free</span>
+</div>
+<div class="wrap">
+<div class="rail" id="rail"><div class="sec">Your trade</div><div style="padding:10px;color:var(--dim);font-size:13px">loading…</div></div>
+<div class="main" id="main"></div>
+</div>
+<script>
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let DATA=null, CUR=null;
+function paintRail(){
+  const r=document.getElementById('rail');
+  r.innerHTML='<div class="sec">Your trade</div>'+DATA.industries.map(i=>
+    `<div class="item${CUR===i.slug?' on':''}" onclick="show('${i.slug}')"><span class="ic">${i.icon}</span>${esc(i.label)}</div>`).join('')
+    +'<div class="sec">Why it works</div>'
+    +`<div class="item${CUR==='core'?' on':''}" onclick="show('core')">⚙️ What everyone gets</div>`
+    +`<div class="item${CUR==='proof'?' on':''}" onclick="show('proof')">📊 Proof, not promises</div>`;
+}
+function show(slug){
+  CUR=slug; paintRail();
+  const m=document.getElementById('main');
+  if(slug==='core'){
+    m.innerHTML='<h2>What everyone gets</h2><div class="tag">One platform. Every trade. These six, always on.</div>'
+      +DATA.core.map(c=>`<div class="card"><b>${c.icon} ${esc(c.title)}</b><p>${esc(c.text)}</p></div>`).join('')
+      +`<button class="cta" onclick="alert('Demo line goes live with your Telnyx number — reply YES and we ring you.')">Try the demo call</button>`;
+    return;
+  }
+  if(slug==='proof'){
+    m.innerHTML='<h2>Proof, not promises</h2><div class="tag">Real call studies and review analyses. Ask us for the sources.</div><div class="proof">'
+      +DATA.proof.map(p=>`<div class="card"><div class="stat">${esc(p.stat)}</div><p>${esc(p.text)}</p></div>`).join('')+'</div>';
+    return;
+  }
+  const i=DATA.industries.find(x=>x.slug===slug); if(!i)return;
+  m.innerHTML=`<h2>${i.icon} ${esc(i.label)}</h2><div class="tag">${esc(i.tagline)}</div>`
+    +(i.script?`<div class="script">“${esc(i.script)}”</div>`:'')
+    +i.services.map(s=>`<div class="card"><b>${esc(s.name)}</b><p>${esc(s.text)}</p></div>`).join('')
+    +(i.pricing?`<div class="card"><b>💷 Pricing</b><p>${esc(i.pricing)}</p></div>`:'')
+    +(i.emergency?`<div class="card"><b>🚨 Emergencies</b><p>${esc(i.emergency)}</p></div>`:'')
+    +`<button class="cta" onclick="show('core')">Get this for my business</button><button class="ghost" onclick="show('proof')">Show me proof</button>`;
+}
+fetch('/api/industries').then(r=>r.json()).then(d=>{DATA=d;CUR=d.industries[0]?.slug||'core';document.getElementById('price-line').textContent=d.price||'';paintRail();show(CUR);})
+.catch(e=>{document.getElementById('main').innerHTML='<p style="color:#f66">Could not load industries: '+esc(e.message)+'</p>'});
+</script></body></html>

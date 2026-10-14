@@ -1,0 +1,105 @@
+# Barbershop business kernel.
+# Doubles as voice-agent BUSINESS_CONFIG (business/agent/voice/nodes shape)
+# plus a `tradie:` block this side reads and the voice side ignores.
+business:
+  name: "{BUSINESS_NAME}"
+  locale: "en-GB"
+  phone: "+44 7000 000000"
+  hours:
+    monday-friday: "09:00-19:00"
+    saturday: "08:00-17:00"
+    sunday: "10:00-15:00"
+agent:
+  system_prompt: |
+    You are the after-hours agent for {BUSINESS_NAME}. Be warm, brief, operational.
+    After hours: take name, phone, preferred date/time, service type. Handle booking
+    inquiries, no-show concerns, and deposit questions. Deposits are £5 for new clients
+    and are forfeited on no-show. Always confirm the service and time before finishing.
+    Never invent prices; use only published ranges. Escalate any injury or chemical
+    reaction immediately — tell the customer to seek medical attention and the barber
+    will be woken to call back.
+voice:
+  edge_voice: "en-GB-RyanNeural"
+  production_note: "Qwen-Omni realtime (DashScope SG) for live calls; this prompt seeds it."
+nodes:
+  - id: service.haircut
+    type: service
+    name: Standard haircut
+    aliases: [cut, trim, haircut]
+    text: "Standard haircut. Includes wash, cut, and style. Duration approx 30 min. Walk-ins welcome but appointments preferred."
+  - id: service.beard
+    type: service
+    name: Beard trim and shaping
+    aliases: [beard, shave, line-up]
+    text: "Beard trim and shaping. Includes hot towel, trim, and line-up. Duration approx 20 min."
+  - id: service.fades
+    type: service
+    name: Skin fade, taper, or scissor fade
+    aliases: [fade, taper, skin fade]
+    text: "Fade cut — skin fade, taper, or scissor fade. Duration approx 30-40 min depending on complexity."
+  - id: service.kids
+    type: service
+    name: Children's haircut
+    aliases: [kids, children, boy's cut]
+    text: "Children's haircut. Relaxed pace, patient with young ones. Duration approx 20 min."
+  - id: policy.deposits
+    type: policy
+    name: Deposit policy
+    aliases: [deposit, hold, secure]
+    text: "A £5 deposit is required for new clients to secure a slot. The deposit is forfeited on no-show. Existing clients do not need a deposit."
+  - id: policy.cancellation
+    type: policy
+    name: Cancellation policy
+    aliases: [cancel, reschedule, change]
+    text: "We require 24-hour notice for cancellations or rescheduling. Late cancellations forfeit the deposit."
+  - id: policy.pricing
+    type: policy
+    name: Pricing policy
+    aliases: [price, quote, cost, how much]
+    text: "Prices depend on the service and hair length. Published ranges only — final price confirmed at the chair after consultation."
+  - id: faq.walkins
+    type: faq
+    name: Walk-in policy
+    aliases: [walk-in, walk in, drop in, no appointment]
+    text: "Walk-ins are welcome but appointments are preferred. A £5 deposit secures your slot and avoids waiting."
+  - id: escalation.safety
+    type: escalation
+    name: Injury or reaction emergency
+    aliases: [cut, bleed, burn, rash, reaction, allergy]
+    text: "Immediate escalation. Tell the customer to seek medical attention if needed. Wake the barber immediately. Log the incident."
+tradie:
+  autonomy: semi_auto
+  retention_days: 90
+  preferences:
+    preferred_slots: ["morning", "afternoon"]
+    min_job_value: 15
+    job_affinity:
+      haircut: 2
+      beard: 1
+      fades: 1
+      kids: 0
+  default_range: [15, 35]
+  price_book:
+    haircut:
+      typical: 18
+      typical_parts: []
+    beard:
+      typical: 12
+      typical_parts: []
+    fades:
+      typical: 22
+      typical_parts: []
+    kids:
+      typical: 12
+      typical_parts: []
+
+# ---- V1 LAUNCH OVERLAY (voiceagent product layer, 2026-10-14) ----
+launch:
+  v1_script: "Hi, you've reached [SHOP NAME] — [OWNER] is on the clippers right now. I'm [OWNER]'s AI assistant. I'll be recording this call so he can play it back. Walk-in or booking?"
+  rate_per_min_gbp: 0.50
+  owner_mobile: "[OWNER MOBILE]"
+  digest_to: "[EMAIL FOR MORNING DIGEST]"
+  whatsapp_to: "[WHATSAPP NUMBER]"
+  fish_voice_id: "[CLONED VOICE ID]"
+  fish_model: "s2.1-pro-free"
+  multilingual: "Fish voices exist for tr/ar/pl/ur/pa — offer caller language switch where the shop serves it"

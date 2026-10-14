@@ -1,0 +1,132 @@
+# Beauty Salon — voice-agent BUSINESS_CONFIG (business/agent/voice/nodes shape)
+# plus a `tradie:` block this side reads and the voice side ignores.
+business:
+  name: "Beauty Salon"
+  locale: "en-GB"
+  phone: "+44 7000 000000"
+  hours:
+    monday-friday: "09:00-20:00"
+    saturday: "09:00-17:00"
+    sunday: "closed"
+agent:
+  system_prompt: |
+    You are the AI receptionist for Beauty Salon. Be warm, professional, and beauty-aware.
+    You answer when the therapist is busy or out of hours. Book consultations, send
+    confirmations, and handle FAQs about prices, availability, and location.
+    Never invent prices — quote published ranges or say you'll confirm with the team.
+    Ask for photos when a consultation booking is made: current hair or skin, inspiration
+    photo, and any known allergies. Be empathetic about skin or hair concerns.
+voice:
+  edge_voice: "en-GB-SoniaNeural"
+  production_note: "Qwen-Omni realtime (DashScope SG) for live calls; this prompt seeds it."
+nodes:
+  - id: service.facial
+    type: service
+    name: Facial treatments
+    aliases: [facial, skin treatment, glow, dermaplaning, peel]
+    text: "Facial treatments — classic, deep cleansing, microdermabrasion, chemical peel. Needs: skin type, concerns, allergies. Patch test may apply."
+  - id: service.nails
+    type: service
+    name: Manicure and pedicure
+    aliases: [nails, manicure, pedicure, gel nails, shellac, acrylics]
+    text: "Manicure and pedicure — classic, gel, acrylic, nail art. Needs: desired style, length, any existing nail conditions."
+  - id: service.hair
+    type: service
+    name: Hair styling and colouring
+    aliases: [hair, colour, highlights, blow dry, balayage, toner]
+    text: "Hair styling and colouring — cut, blow dry, full colour, highlights, balayage. Needs: current hair photo, inspiration photo, allergy info. Patch test required 24-48 hrs before colour."
+  - id: service.waxing
+    type: service
+    name: Waxing and hair removal
+    aliases: [wax, waxing, threading, removal, brows, upper lip]
+    text: "Waxing and hair removal — face, body, brows, threading. Needs: area, skin sensitivity notes."
+  - id: service.lashes
+    type: service
+    name: Lash extensions and lifts
+    aliases: [lashes, lash extensions, lash lift, tint, classic lashes]
+    text: "Lash extensions, lifts, and tinting — classic, volume, hybrid. Patch test required 24-48 hrs before first appointment."
+  - id: service.makeup
+    type: service
+    name: Makeup application
+    aliases: [makeup, full face, event makeup, bridal, occasion]
+    text: "Makeup application — bridal, editorial, event, glam. Needs: occasion, skin type, preferred look. Inspiration photo helpful."
+  - id: policy.deposits
+    type: policy
+    name: Deposit policy
+    aliases: [deposit, booking fee, reservation]
+    text: "A £10 deposit is required for new clients and course bookings. The deposit is forfeited on no-show or cancellation within 48 hours."
+  - id: policy.patchtest
+    type: policy
+    name: Patch test policy
+    aliases: [patch test, allergy test, skin test]
+    text: "A patch test is required 24-48 hours before any colour treatment (hair, lash tint, chemical peel). Please visit the salon in advance or request a take-home kit."
+  - id: policy.cancellation
+    type: policy
+    name: Cancellation policy
+    aliases: [cancel, cancellation, reschedule, refund]
+    text: "48-hour cancellation policy for appointments over £50. Cancellations within 48 hours may incur a charge."
+  - id: policy.packages
+    type: policy
+    name: Package validity
+    aliases: [package, bundle, course, expiry]
+    text: "Packages and course bundles are valid for 6 months from the date of purchase. Extensions may be granted on request."
+  - id: faq.photos
+    type: faq
+    name: Consultation photo ask
+    aliases: [photo, picture, consultation photo]
+    text: "For consultation bookings we need: a current photo of your hair or skin, an inspiration photo of the look you want, and any known allergies or sensitivities."
+  - id: escalation.safety
+    type: escalation
+    name: Safety escalation
+    aliases: [allergic reaction, burn, swelling, rash, injury, chemical burn, itchy, redness]
+    text: "If a client reports an allergic reaction, chemical burn, or any injury, advise them to seek immediate medical help. Escalate to the salon owner right away."
+tradie:
+  # autonomy: observe (log only) | semi_auto (draft quotes+slots) | full_auto (also propose+book routine)
+  # sends ALWAYS need tradie confirm regardless of level.
+  autonomy: semi_auto
+  retention_days: 90  # transcripts older than this are swept (GDPR)
+  preferences:
+    preferred_slots: ["morning"]
+    max_distance_km: 10
+    min_job_value: 0
+    takes_emergency: false
+    job_affinity:
+      facial: 2
+      nails: 1
+      hair: 0
+      waxing: 1
+      lashes: 2
+      makeup: 0
+    max_typical_min: 120
+  after_hours_multiplier: 1.0
+  callout_per_km: 0
+  default_range: [25, 80]
+  price_book:
+    facial:
+      labour: 45
+      typical_parts: ["serum", "moisturiser", "SPF"]
+    nails:
+      labour: 30
+      typical_parts: ["gel polish", "acrylic tips", "nail art embellishments"]
+    hair:
+      labour: 55
+      typical_parts: ["colour", "toner", "bleach", "treatment mask"]
+    waxing:
+      labour: 18
+      typical_parts: ["warm wax", "strip wax", "post-wax oil"]
+    lashes:
+      labour: 50
+      typical_parts: ["lash extensions", "lash lift kit", "tint"]
+    makeup:
+      labour: 45
+      typical_parts: ["foundation", "palette products", "setting spray"]
+
+# ---- V1 LAUNCH OVERLAY (voiceagent product layer, 2026-10-14) ----
+launch:
+  v1_script: "Hi, you've reached [SALON NAME] — [OWNER] can't get to the phone right now. I'm [OWNER]'s AI assistant. I'll be recording this call so she can play it back. How can I help?"
+  rate_per_min_gbp: 0.50
+  owner_mobile: "[OWNER MOBILE]"
+  digest_to: "[EMAIL FOR MORNING DIGEST]"
+  whatsapp_to: "[WHATSAPP NUMBER]"
+  fish_voice_id: "[CLONED VOICE ID]"
+  fish_model: "s2.1-pro-free"

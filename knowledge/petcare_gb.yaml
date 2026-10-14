@@ -1,0 +1,111 @@
+# PetCare — pet care business kernel.
+# Doubles as voice-agent BUSINESS_CONFIG (business/agent/voice/nodes shape)
+# plus a `tradie:` block this side reads and the voice side ignores.
+business:
+  name: "{{BUSINESS_NAME}}"
+  locale: "en-GB"
+  phone: "{{PHONE}}"
+  hours:
+    monday-friday: "07:00-20:00"
+    saturday: "08:00-18:00"
+    sunday: "09:00-16:00"
+agent:
+  system_prompt: |
+    You are the after-hours agent for {{BUSINESS_NAME}}. Be warm, brief, operational.
+    After hours: take name, phone, address, pet details, service type, dates required.
+    Urgent pet emergencies → advise contacting the nearest vet and say we will call back
+    immediately. Everything else → promise a morning reply with availability and pricing.
+    Never invent prices; use only quoted ranges. Ask for pet photos when useful.
+voice:
+  edge_voice: "en-GB-RyanNeural"
+  production_note: "Qwen-Omni realtime (DashScope SG) for live calls; this prompt seeds it."
+nodes:
+  - id: service.dog_walking
+    type: service
+    name: Dog walking
+    aliases: [dog walk, walking, walk the dog, solo walk, group walk]
+    text: "Solo and group dog walks. Needs: dog name, breed, temperament, any medical needs. GPS tracking on all walks, photos sent after."
+  - id: service.pet_sitting
+    type: service
+    name: Pet sitting
+    aliases: [pet sit, cat sitting, home visit, pet visits]
+    text: "In-home pet visits. Needs: pet type, feeding schedule, keys arrangement, vet details. Visits include feeding, play, and companionship."
+  - id: service.boarding
+    type: service
+    name: Pet boarding
+    aliases: [boarding, overnight, kennel, stay]
+    text: "Overnight care in our home. Needs: pet type, duration, routine details, vet details. Meet and greet required first."
+  - id: service.puppy_care
+    type: service
+    name: Puppy care
+    aliases: [puppy, puppy walking, puppy socialisation, puppy training]
+    text: "Puppy socialisation and training support. Needs: puppy age, breed, current training level. Positive reinforcement methods."
+  - id: service.emergency_care
+    type: service
+    name: Emergency pet care
+    aliases: [emergency, urgent, last minute, pet emergency]
+    text: "Urgent pet care when you can't get home. Needs: pet type, situation, vet details. Subject to availability."
+  - id: escalation.safety
+    type: escalation
+    name: Pet emergency
+    aliases: [injured, bleeding, collapsed, not breathing, bitten]
+    text: "Advise contacting nearest emergency vet immediately. We will call back to support. Do not attempt to move an injured animal."
+  - id: policy.meet_greet
+    type: policy
+    name: Meet and greet policy
+    aliases: [meet, greeting, first meeting, trial]
+    text: "Free first meeting with your dog before any walking or boarding begins. Mandatory for all new clients."
+  - id: policy.insurance
+    type: policy
+    name: Insurance policy
+    aliases: [insurance, liability, insured]
+    text: "Fully insured for all services including public liability and pet care insurance. Certificate available on request."
+  - id: policy.keys
+    type: policy
+    name: Key management
+    aliases: [key, key collection, key drop]
+    text: "We collect and hold keys securely. Key collection and return arranged at meet and greet."
+tradie:
+  autonomy: semi_auto
+  retention_days: 90
+  preferences:
+    preferred_slots: ["morning", "afternoon"]
+    max_distance_km: 10
+    min_job_value: 12
+    takes_emergency: true
+    job_affinity:
+      dog_walking: 2
+      pet_sitting: 1
+      boarding: 1
+      puppy_care: 0
+      emergency_care: -1
+    max_typical_min: 60
+  after_hours_multiplier: 1.5
+  callout_per_km: 0.5
+  default_range: [12, 35]
+  price_book:
+    dog_walking:
+      labour: 15
+      typical_parts: []
+    pet_sitting:
+      labour: 15
+      typical_parts: []
+    boarding:
+      labour: 30
+      typical_parts: []
+    puppy_care:
+      labour: 18
+      typical_parts: []
+    emergency_care:
+      labour: 25
+      typical_parts: []
+
+# ---- V1 LAUNCH OVERLAY (voiceagent product layer, 2026-10-14) ----
+launch:
+  v1_script: "Hi, you've reached [BUSINESS NAME] — [OWNER] is out with the dogs right now. I'm [OWNER]'s AI assistant. I'll be recording this call so she can play it back. How can I help?"
+  rate_per_min_gbp: 0.50
+  owner_mobile: "[OWNER MOBILE]"
+  digest_to: "[EMAIL FOR MORNING DIGEST]"
+  whatsapp_to: "[WHATSAPP NUMBER]"
+  fish_voice_id: "[CLONED VOICE ID]"
+  fish_model: "s2.1-pro-free"
