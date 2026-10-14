@@ -1,7 +1,17 @@
 {
   "_note": "Single source for every price shown on / and in the console Plans panel. DRAFT numbers marked draft:true are placeholders for Tom to confirm.",
-  "owner": {"name": "Tom", "role": "founder", "call_minutes": 20, "booking_url_env": "TOM_BOOKING_URL"},
-  "promise": ["No subscription", "No contract", "Pay only for what you use", "Pick exactly what you need"],
+  "owner": {
+    "name": "Tom",
+    "role": "founder",
+    "call_minutes": 20,
+    "booking_url_env": "TOM_BOOKING_URL"
+  },
+  "promise": [
+    "No subscription",
+    "No contract",
+    "Pay only for what you use",
+    "Pick exactly what you need"
+  ],
   "pack": {
     "name": "Starter pack",
     "price": "Free",
@@ -12,25 +22,86 @@
       "Your prices, hours and emergency rules loaded",
       "Your phone set to send missed calls to it, and a test call together",
       "Urgent calls texted to you straight away, everything else in a 7am email",
-      "First 10 calls free"
+      "First 10 calls free",
+      "Free optional dashboard",
+      "Tech support included"
     ]
   },
-  "usage": {"name": "Answering calls", "unit_price": 0.5, "unit": "per minute it's actually talking",
-            "example": "40 missed calls a month at 2 minutes each is about £40"},
+  "usage": {
+    "name": "Answering calls",
+    "unit_price": 0.5,
+    "unit": "per minute it's actually talking",
+    "example": "40 missed calls a month at 2 minutes each is about £40"
+  },
   "addons": [
-    {"id": "website", "name": "Website", "price": "£5 one-off", "one_off": 5, "yearly": 0, "per_use": null,
-     "what": "A simple site for your business, with the same receptionist in its chat. Google and ChatGPT can read it."},
-    {"id": "domain", "name": "Your own web address and email", "price": "£5 a year, at cost", "one_off": 0, "yearly": 5, "per_use": null,
-     "what": "yourname.co.uk and you@yourname.co.uk. We charge what it costs us, nothing on top."},
-    {"id": "aftercall", "name": "After-call agent", "price": "10p per call", "one_off": 0, "yearly": 0, "per_use": 0.10, "per": "call", "draft": true,
-     "what": "After each call it texts the customer a summary, sends your quote or booking details, and asks happy customers for a Google review."},
-    {"id": "whatsapp", "name": "WhatsApp agent", "price": "20p per conversation", "one_off": 0, "yearly": 0, "per_use": 0.20, "per": "conversation", "draft": true,
-     "what": "Answers questions and booking requests on your WhatsApp. Anything urgent comes straight to you."},
-    {"id": "inbox", "name": "Email agent", "price": "10p per email", "one_off": 0, "yearly": 0, "per_use": 0.10, "per": "email", "draft": true,
-     "what": "Replies to enquiries on your email within your rules, and drafts anything tricky for you to approve."},
-    {"id": "diary", "name": "Diary sync", "price": "Free", "one_off": 0, "yearly": 0, "per_use": null,
-     "what": "Offers customers your real free times. It only sees busy or free, never your personal details."},
-    {"id": "ai", "name": "Bookings from ChatGPT and AI assistants", "price": "Free", "one_off": 0, "yearly": 0, "per_use": null,
-     "what": "When someone asks ChatGPT for a local tradesperson, it can check your times and request a booking. You still confirm."}
+    {
+      "id": "website",
+      "name": "Website",
+      "price": "£5 one-off",
+      "one_off": 5,
+      "yearly": 0,
+      "per_use": null,
+      "what": "A simple site for your business, with the same receptionist in its chat. Google and ChatGPT can read it."
+    },
+    {
+      "id": "domain",
+      "name": "Your own web address and email",
+      "price": "£5 a year, at cost",
+      "one_off": 0,
+      "yearly": 5,
+      "per_use": null,
+      "what": "yourname.co.uk and you@yourname.co.uk. We charge what it costs us, nothing on top."
+    },
+    {
+      "id": "aftercall",
+      "name": "After-call agent",
+      "price": "10p per call",
+      "one_off": 0,
+      "yearly": 0,
+      "per_use": 0.1,
+      "per": "call",
+      "draft": true,
+      "what": "After each call it texts the customer a summary, sends your quote or booking details, and asks happy customers for a Google review."
+    },
+    {
+      "id": "whatsapp",
+      "name": "Meta agent: WhatsApp, Instagram, Facebook",
+      "price": "20p per conversation",
+      "one_off": 0,
+      "yearly": 0,
+      "per_use": 0.2,
+      "per": "conversation",
+      "draft": true,
+      "what": "Answers messages on WhatsApp, Instagram and Facebook. We do the Meta setup for you. Meta's own fees passed on at cost."
+    },
+    {
+      "id": "inbox",
+      "name": "Email agent, after hours",
+      "price": "10p per email",
+      "one_off": 0,
+      "yearly": 0,
+      "per_use": 0.1,
+      "per": "email",
+      "draft": true,
+      "what": "Answers appointment and quote emails to your own address within your rules, and drafts anything tricky for you to approve."
+    },
+    {
+      "id": "diary",
+      "name": "Diary sync",
+      "price": "Free",
+      "one_off": 0,
+      "yearly": 0,
+      "per_use": null,
+      "what": "Offers customers your real free times. It only sees busy or free, never your personal details."
+    },
+    {
+      "id": "ai",
+      "name": "Bookings from ChatGPT and AI assistants",
+      "price": "Free",
+      "one_off": 0,
+      "yearly": 0,
+      "per_use": null,
+      "what": "When someone asks ChatGPT for a local tradesperson, it can check your times and request a booking. You still confirm."
+    }
   ]
 }

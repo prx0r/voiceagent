@@ -215,6 +215,7 @@ def opening(slug: str, business: str) -> str:
 
 
 INTENTS = [
+    ("pack", r"what do i get|what.s included|included|package|meta|instagram|facebook|dashboard|tech support|support|custom feature"),
     ("plans", r"else|website|google|whatsapp|email|inbox|plan|add.?on|subscription|package"),
     ("cost", r"cost|price|pay|charge|how much|expensive|minute"),
     ("prompt", r"system prompt|instructions|prompt|how does it know|trained"),
@@ -236,6 +237,10 @@ def guide_answer(slug: str, business: str, message: str, done: set[str], minutes
         ans = ("No subscription, ever. Setup is free, then it's 50p a minute only while it's talking, and the first 10 calls are free. "
                "Forty missed calls a month at two minutes each is about £40. One job won back covers that. Add-ons are optional and priced on screen.")
         panel = "plans"
+    elif intent == "pack":
+        ans = ("Every business gets the same six things: your own website, an agent that answers emails and calls after hours, a free optional dashboard, "
+               "WhatsApp, Instagram and Facebook set up through Meta, tech support from Tom, and custom features for your trade later. It's all on screen.")
+        panel = "pack"
     elif intent == "plans":
         ans = ("Pick only what you want, no subscription: a website for £5 one-off, your own web address and email for £5 a year at cost, "
                "an after-call agent, WhatsApp and email agents priced per use, and free diary sync and ChatGPT bookings. Tom can talk it through on a call.")
@@ -326,3 +331,46 @@ SITE = {
 def site(slug: str) -> dict:
     s = SITE.get(slug) or SITE["soletrader"]
     return {"why": s["why"], "must": s["must"], "scenarios": [{"label": a, "message": b} for a, b in s["scenarios"]]}
+
+
+# ---------------------------------------------------------------- what every business gets (same 6-part structure per trade)
+EMAIL_EG = {
+    "electrician": "\u201cCan you quote for an EV charger?\u201d gets the guide price, two survey times and a hold for you to confirm.",
+    "plumber": "\u201cTap leaking since last night\u201d gets stopcock advice, a visit time and a call summary in your 7am email.",
+    "heating": "\u201cBoiler service due\u201d gets your next three service slots and the customer's boiler make noted for you.",
+    "locksmith": "\u201cNeed locks changed after a break-in\u201d gets a same-day slot request and a note to bring anti-snap cylinders.",
+    "beauty": "\u201cCan I book lashes Saturday?\u201d gets free times, the patch-test rule and a hold you approve.",
+    "barber": "\u201cCan I move my 3pm?\u201d gets today's free chairs and the change, waiting for your tap.",
+    "dogwalker": "\u201cNew puppy, need lunchtime walks\u201d gets your meet-and-greet times and the dog's details collected.",
+    "msp": "\u201cOutlook won't open for anyone\u201d becomes a ticket with priority, affected users and first-line steps tried.",
+    "soletrader": "\u201cCan you look at my fence?\u201d gets a quote-visit time and asks for photos.",
+}
+FUTURE = {
+    "electrician": ["Landlord EICR renewal reminders", "Photo fault triage before you visit", "EV charger grant eligibility check", "Certificates emailed to customers"],
+    "plumber": ["Photo and video leak triage", "Annual boiler service reminders", "Insurance claim paperwork pack", "Parts list from the customer's photos"],
+    "heating": ["Service reminders every 12 months", "Landlord gas certificate tracker", "Boiler finance quotes", "Fault-code lookup by boiler model"],
+    "locksmith": ["Live ETA texts with a map link", "Proof-of-address check before a lockout", "Insurance-approved lock certificates", "Customer key register"],
+    "beauty": ["Deposits taken at booking", "Patch-test tracking per client", "Waitlist that fills cancellations", "Aftercare texts after each treatment"],
+    "barber": ["Live wait time on your site", "Cancellations auto-filled from a waitlist", "Loyalty stamps by text", "Book from your Instagram gallery"],
+    "dogwalker": ["Walk reports with photos and route", "Vaccination and vet details on file", "Holiday boarding calendar", "Key-holding log"],
+    "msp": ["Tickets straight into your PSA (Halo, ConnectWise)", "Status page updated from outage calls", "Phishing report triage", "New-starter checklist automation"],
+    "soletrader": ["Quotes from customer photos", "Invoice chasing by text", "Google review requests after jobs", "Job sheets sent to customers"],
+}
+
+
+def package(slug: str) -> list[dict]:
+    s = SITE.get(slug) or SITE["soletrader"]
+    return [
+        {"id": "website", "name": "Your own website", "price": "£5 one-off",
+         "what": "Built for why your customers visit: " + "; ".join(x[0].lower() + x[1:] for x in s["must"]) + ". Google and ChatGPT can read it, and the receptionist sits in its chat."},
+        {"id": "email", "name": "Agent-managed email and calls, after hours", "price": "Per use · own address £5 a year",
+         "what": "Missed calls and emails to your own address answered by your agent: appointment requests, quotes and call summaries. It holds times for you to confirm and never books on its own. " + EMAIL_EG.get(slug, EMAIL_EG["soletrader"])},
+        {"id": "dashboard", "name": "Dashboard (optional)", "price": "Free",
+         "what": "See calls, leads, urgent alerts, diary holds and AI-assistant requests in one place. Prefer texts and a 7am email? You never have to open it."},
+        {"id": "meta", "name": "Meta agent onboarding (WhatsApp, Instagram, Facebook)", "price": "Setup included · 20p per conversation",
+         "what": "We set up or verify your Meta Business account, connect a WhatsApp Business number, link your Facebook page and Instagram messages, and get booking-confirmation and reminder messages approved by Meta. Meta's checks usually take 1 to 3 days. Meta's own message fees are passed on at cost."},
+        {"id": "support", "name": "Tech support", "price": "Included",
+         "what": "Tom sorts it on WhatsApp or a call: changing prices or hours, phone divert problems, domain and email setup, anything that stops working."},
+        {"id": "custom", "name": "Custom features for your business", "price": "Quoted",
+         "what": "Coming next, built around how you work:", "examples": FUTURE.get(slug, FUTURE["soletrader"])},
+    ]

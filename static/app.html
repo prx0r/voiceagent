@@ -223,12 +223,13 @@ pre{white-space:pre-wrap;font:12.5px/1.55 var(--mono);color:var(--dim);backgroun
   </main>
   <aside id="side">
     <div class="tabs" id="tabs">
-      <button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Your phone</button><button data-t="agents">AI agents</button><button data-t="plans">Prices</button><button data-t="prompt">Instructions</button>
+      <button data-t="website">Website</button><button data-t="calendar">Diary</button><button data-t="phone">Your phone</button><button data-t="pack">What you get</button><button data-t="agents">AI agents</button><button data-t="plans">Prices</button><button data-t="prompt">Instructions</button>
       <button class="x ib" onclick="closeSide()" aria-label="Close" id="sidex"></button>
     </div>
     <div class="pane" id="p-website"><div class="frame"><div class="bar"><span id="lockic"></span><span id="url"></span><a id="openfull" target="_blank" rel="noopener" title="Open full site"></a></div><iframe id="site" title="Customer website preview"></iframe></div></div>
     <div class="pane" id="p-calendar"></div>
     <div class="pane" id="p-phone"></div>
+    <div class="pane" id="p-pack"></div>
     <div class="pane" id="p-agents"></div>
     <div class="pane" id="p-plans"></div>
     <div class="pane" id="p-prompt"></div>
@@ -282,7 +283,7 @@ async function select(slug){
   if(slug!==CUR)return;
   if(!s.msgs.length&&!BOOT[slug]){s.msgs.push({r:'sys',ic:'alert',t:'The demo is waking up. Pick the trade again in a moment.'})}
   if(!s.msgs.length&&BOOT[slug]){const b=BOOT[slug];s.msgs.push({r:'g',t:b.opening,stats:b.stats,chips:b.prompts})}
-  setMode(s.mode,true);paint();paintPhone();paintPlans();paintPrompt();paintRail();paintAgents();tab(TABS);paintCal();
+  setMode(s.mode,true);paint();paintPhone();paintPlans();paintPrompt();paintRail();paintAgents();paintPack();tab(TABS);paintCal();
 }
 
 /* ---------- thread ---------- */
@@ -375,7 +376,7 @@ async function guide(t){
   if(j.session_id)s.gsid=j.session_id;
   if(j.intent&&j.intent!=='general'&&!s.done.includes(j.intent))s.done.push(j.intent);
   L.push({r:'g',t:j.answer,chips:funnel(slug)});
-  if(j.panel==='signup'){L[L.length-1].form=1}
+  if(j.panel==='signup'){Tom.open(CUR)}
   else if(j.panel&&slug===CUR)openSide(j.panel,true);
   if(slug===CUR)paint();
 }
@@ -412,8 +413,8 @@ function paintPhone(){
 function paintPlans(){const el=$('#p-plans');if(!el.dataset.r){el.dataset.r=1;el.innerHTML='<div class="pad"><div class="ph">What it costs</div><div id="pz"></div></div>';Pricing.render(el.querySelector('#pz'),{compact:1})}}
 function paintRail(){
   const t=T(),b=BOOT[CUR];if(!b)return;const sc=(b.site&&b.site.scenarios)||[],sv=(b.services||[]).slice(0,6);
-  const GQ=['What would it cost me?','What lands on my phone at 2am?','How does it use my diary?'];
-  const P=[['website','globe','Website'],['calendar','calendar','Diary'],['phone','phone','Alerts'],['agents','bot','AI agents'],['plans','tag','Prices'],['prompt','file','Rules']];
+  const GQ=['What do I get?','What would it cost me?','What lands on my phone at 2am?'];
+  const P=[['pack','check','What you get'],['website','globe','Website'],['calendar','calendar','Diary'],['phone','phone','Alerts'],['agents','bot','AI agents'],['plans','tag','Prices'],['prompt','file','Rules']];
   const n=st().alerts.length;
   $('#rail').innerHTML=`<div class="biz"><span class="ic">${icon(CUR,18)}</span><div><b>${esc(t.business)}</b><span>${esc(t.label)} · demo</span></div></div>
   <a class="nb back" href="/">${icon('back',14)}All trades</a>
@@ -426,6 +427,12 @@ function paintRail(){
   $('#rail').querySelectorAll('[data-sv]').forEach(el=>el.onclick=()=>{const nm=sv[+el.dataset.sv][0];runChip({kind:'roleplay',text:`How much is ${nm.toLowerCase().replace(/^(\w)/,c=>c)} and when could you do it?`})});
   $('#rail').querySelectorAll('[data-gq]').forEach(el=>el.onclick=()=>{setMode('guide');guide(GQ[+el.dataset.gq])});
   $('#rail').querySelectorAll('[data-p]').forEach(el=>{el.onclick=()=>openSide(el.dataset.p);el.classList.toggle('on',el.dataset.p===TABS)});
+}
+function paintPack(){
+  const b=BOOT[CUR];if(!b||!b.package)return;
+  $('#p-pack').innerHTML=`<div class="pad"><div class="ph">What ${esc(T().business)} gets</div><p style="margin:0 0 12px;color:var(--dim);font-size:13.5px">No subscription. Free setup with Tom, then pay only for what you use.</p>`+
+  b.package.map((x,i)=>`<div class="plan${i===0?' main':''}"><div class="hd"><b>${i+1}. ${esc(x.name)}</b><span class="pr">${esc(x.price)}</span></div><p>${esc(x.what)}</p>${x.examples?`<ul class="why" style="margin:6px 0 0">${x.examples.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`:''}</div>`).join('')+
+  `<div style="display:flex;gap:8px;margin-top:6px"><button class="btn" onclick="Tom.open(CUR)">Book a call with Tom</button><button class="btn ghost" onclick="openSide('plans')">See prices</button></div></div>`;
 }
 function paintAgents(){
   const b=BOOT[CUR];if(!b)return;const url=location.origin+b.mcp,si=b.site||{why:[],must:[]};
