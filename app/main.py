@@ -70,6 +70,12 @@ def _re_urgent(msg: str) -> bool:
                            r"burst|leak|flood|gas|sparks?|burning|smoke|offline|down|hacked|injur|bleed|tonight|now)\b", msg))
 
 
+def _re_symptom(msg: str) -> bool:
+    import re as _re
+    return bool(_re.search(r"(?i)\b(trip(s|ping)?|keeps|won'?t|not working|stopped|broken|faulty|leak(s|ing)?|"
+                           r"no (power|heating|hot water)|dripping|blocked|offline|can'?t)\b", msg or ""))
+
+
 def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str = "") -> str:
     """No-LLM demo reply: receptionist tone, built only from graph evidence."""
     ids = [e.get("id", "") for e in (evidence or [])]
@@ -79,7 +85,16 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
                        and "emergency" in (n.get("id", "") + n.get("name", "")).lower()), None)
     if not esc_n and urgent_svc and _re_urgent(message):
         esc_n = urgent_svc
+    import re as _r0
+    if esc_n and not _re_urgent(message) and _r0.search(r"(?i)\b(how much|price|cost|quote|fit|install|book)\b", message):
+        esc_n = None  # a pricing/booking question that merely mentions a plumbing word is not an emergency
     svc = next((n for n in nodes if n.get("type") == "service"), None)
+    # A symptom ("keeps tripping", "won't work", "leaking") is a repair job, not an upgrade sale.
+    if _re_symptom(message):
+        fix = next((n for n in nodes if n.get("type") == "service" and any(
+            k in (n.get("id", "") + " " + n.get("name", "")).lower()
+            for k in ("fault", "repair", "leak", "fix", "unblock", "diagnos", "support"))), None)
+        svc = fix or svc
     pol = next((n for n in nodes if n.get("type") in ("policy", "faq")), None)
     from .industries import _clean
     import re as _re
@@ -114,9 +129,12 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
         elif price_q and pol is not None and "pric" in (pol.get("id", "") + pol.get("name", "")).lower():
             line += " " + _clean(pol.get("text", ""), biz).split(". ")[0].rstrip(".") + "."
         if need:
-            lead = "To get you booked in" if pa else "So the team can quote properly"
-            line += f" {lead}, could you tell me {need.lower()}?"
-        if first and len(first) < 90 and '—' not in first and not first.lower().startswith(("home", svc.get("name", "").lower()[:6])):
+            parts = [x.strip().lower() for x in _re.split(r",|\band\b", need) if x.strip()]
+            joined = parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+            lead = "To get you booked in" if pa else "So the team can come prepared"
+            line += f" {lead}, it helps to know: {joined}."
+        if (first and len(first) < 90 and len(first.split()) >= 4 and '—' not in first
+                and not first.lower().startswith(("home", svc.get("name", "").lower()[:6]))):
             line += f" {first}."
         tail = (" And your name and best number, and you'll hear back first thing with times." if need
                 else " Can I take your name and best number? You'll hear back first thing with times.")
