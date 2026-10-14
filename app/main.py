@@ -352,6 +352,11 @@ async def chat(inp: ChatIn):
         context = (context + "\n\n" + _con.calendar_context(inp.trade)).strip()
     if kern and not llm.enabled:
         tri_urgent = None if not tri else (tri["output"] or {}).get("action") == "alert_owner_now"
+        if tri_urgent is False and evidence:
+            # Non-urgent call: don't let an emergency service node answer a routine ask.
+            calm = [e for e in evidence if "emergenc" not in str(e).lower()]
+            if calm:
+                evidence = calm
         ans = _receptionist_fallback(inp.message, evidence, kern[2], g, inp.trade, urgent=tri_urgent)
         if wants_slot:
             import re as _r2
@@ -361,6 +366,14 @@ async def chat(inp: ChatIn):
             ans = (ans + " " + _con.slots_sentence(inp.trade, inp.message)).strip()
         if tri and tri.get("status") == "complete":
             act, it = tri["output"].get("action"), tri["output"].get("intent")
+            if act == "alert_owner_now" and tri["output"].get("vulnerable"):
+                ans = ans.replace("right now.", "right now, and I've flagged that someone vulnerable is affected.", 1)
+            elif act == "reschedule":
+                ans = ("No problem, I can move that for you. What name is the booking under? "
+                       + _con.slots_sentence(inp.trade, inp.message)).strip()
+            elif act == "give_price" and "£" not in ans:
+                ans = (f"Prices depend on the job, so {kern[2]} confirms an exact figure before any work starts. "
+                       "What's the job, and your name and best number?")
             if act == "drop_spam":
                 ans = f"Thanks, but {kern[2]} doesn't take sales calls on this line. Goodbye."
             elif act == "take_message" and (it == "complaint" or (tri.get("call") or {}).get("wants_human")):
