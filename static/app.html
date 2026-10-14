@@ -52,6 +52,8 @@ a{color:inherit}
 .stagehead{display:flex;align-items:center;gap:12px;min-width:0}
 .stagehead h1{font-size:15px;font-weight:650;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .stagehead h1 em{font-style:normal;color:var(--dim);font-weight:500}
+.stagehead h1{flex:0 1 auto;min-width:120px}
+@media(max-width:1440px){.stagehead h1 em{display:none}}
 .seg{display:inline-flex;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:3px}
 .seg button{border:0;background:transparent;color:var(--dim);padding:5px 12px;border-radius:7px;font-size:12.5px}
 .seg button.on{background:var(--bg4);color:var(--text)}
@@ -123,14 +125,14 @@ iframe{flex:1;width:100%;border:0;background:#fff}
 
 /* ---------- global chat bar (bottom) ---------- */
 #chat{grid-column:2/4;border-top:1px solid var(--line);background:rgba(12,13,16,.96);backdrop-filter:blur(10px);position:relative}
-#log{display:none;max-height:min(42vh,420px);overflow-y:auto;padding:14px 18px 4px;border-bottom:1px solid var(--line)}
+#log{display:none;max-height:min(40vh,400px);overflow-y:auto;padding:14px max(18px,calc((100% - 880px)/2)) 4px;border-bottom:1px solid var(--line)}
 #chat.open #log{display:block}
 .loghd{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--dim);margin-bottom:8px}
 .loghd .sp{flex:1}
 .loghd button{background:transparent;border:0;color:var(--dim);font-size:12px}
 .loghd button:hover{color:var(--text)}
 .msg{display:flex;margin:8px 0}
-.msg .b{max-width:min(720px,80%);padding:9px 13px;border-radius:14px;font-size:13.5px;white-space:pre-wrap}
+.msg .b{max-width:min(600px,78%);padding:9px 13px;border-radius:14px;font-size:13.5px;white-space:pre-wrap}
 .msg.u{justify-content:flex-end}.msg.u .b{background:var(--acc);color:#1a1204;border-bottom-right-radius:5px}
 .msg.a .b{background:var(--bg3);border:1px solid var(--line2);border-bottom-left-radius:5px}
 .msg.a .who{font-size:11px;color:var(--dim);margin-bottom:2px}
@@ -239,6 +241,9 @@ async function boot(){
   select(DATA.industries.find(i=>i.slug===want)?want:DATA.industries[0].slug,true);
   paintSpeak();
 }
+// stats that name a specific trade only show on that trade (no "electrician" stat on the plumber page)
+const PROOF_TRADE={plumb:['plumber','heating'],electric:['electrician']};
+function proofFor(slug,list){return list.filter(p=>{const k=Object.keys(PROOF_TRADE).find(k=>p.text.toLowerCase().includes(k));return !k||PROOF_TRADE[k].includes(slug)||slug==='soletrader'})}
 function T(){return DATA.industries.find(i=>i.slug===CUR)}
 
 function paintRail(){
@@ -271,7 +276,7 @@ function paintOwner(){
   $('#owner').innerHTML=`
   <div class="eyebrow">${esc(lead)}</div>
   <h2>${esc(t.tagline)}</h2>
-  <p class="lede">That's your site on the left, built from your trade's playbook. Ring it from the bar below as if you were your own worst customer.</p>
+  <p class="lede">That's your site in the middle, built from your trade's playbook. Ring it from the bar below as if you were your own worst customer.</p>
 
   <div class="sec"><h3>Try a call</h3><div class="chips">${(PROMPTS[t.slug]||PROMPTS.soletrader).map(([p,e])=>`<button class="chip${e?' em':''}" data-p="${esc(p)}">${e?'🚨 ':''}${esc(p)}</button>`).join('')}</div></div>
 
@@ -288,7 +293,7 @@ function paintOwner(){
     <div class="vs" id="c-vs"></div>
   </div></div>
 
-  <div class="sec"><h3>Why it pays</h3><div class="stats">${(D.proof||[]).map(p=>`<div class="stat"><b>${esc(p.stat)}</b><span>${esc(p.text)}</span></div>`).join('')}</div></div>
+  <div class="sec"><h3>Why it pays</h3><div class="stats">${proofFor(t.slug,D.proof||[]).map(p=>`<div class="stat"><b>${esc(p.stat)}</b><span>${esc(p.text)}</span></div>`).join('')}</div></div>
 
   ${t.services.length?`<div class="sec"><h3>Your playbook covers</h3><div class="card ships">${t.services.slice(0,5).map(s=>`<div class="ship"><span>✓</span><div><b>${esc(s.name)}</b><p>${esc(s.text)}</p></div></div>`).join('')}</div></div>`:''}
 

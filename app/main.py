@@ -70,7 +70,7 @@ def _re_urgent(msg: str) -> bool:
                            r"burst|leak|flood|gas|sparks?|burning|smoke|offline|down|hacked|injur|bleed|tonight|now)\b", msg))
 
 
-def _receptionist_fallback(message: str, evidence: list, biz: str, g) -> str:
+def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str = "") -> str:
     """No-LLM demo reply: receptionist tone, built only from graph evidence."""
     ids = [e.get("id", "") for e in (evidence or [])]
     nodes = [g.nodes.get(i, {}) for i in ids]
@@ -104,17 +104,25 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g) -> str:
     if svc:
         rest, need = needs(svc)
         first = rest.split(". ")[0].rstrip(".") if rest else ""
-        line = f"Yes, we can help with {svc.get('name', 'that').lower()}."
+        def lc(x):  # keep acronyms: "EV charger" stays, "Leak repair" -> "leak repair"
+            return " ".join(w if w[:2].isupper() else w.lower() for w in x.split())
+        line = f"Yes, we can help with {lc(svc.get('name', 'that'))}."
         price_q = _re.search(r"(?i)\b(how much|price|cost|quote|charge)\b", message)
-        if price_q and pol is not None and "pric" in (pol.get("id", "") + pol.get("name", "")).lower():
+        pa = _price_answer(slug, message + " " + svc.get("name", "")) if price_q else ""
+        if pa:
+            line += " " + pa
+        elif price_q and pol is not None and "pric" in (pol.get("id", "") + pol.get("name", "")).lower():
             line += " " + _clean(pol.get("text", ""), biz).split(". ")[0].rstrip(".") + "."
         if need:
-            line += f" So the team can quote properly, could you tell me {need.lower()}?"
+            lead = "To get you booked in" if pa else "So the team can quote properly"
+            line += f" {lead}, could you tell me {need.lower()}?"
         if first and len(first) < 90 and '—' not in first and not first.lower().startswith(("home", svc.get("name", "").lower()[:6])):
             line += f" {first}."
         tail = (" And your name and best number, and you'll hear back first thing with times." if need
                 else " Can I take your name and best number? You'll hear back first thing with times.")
         return line + tail
+    if _re.search(r"(?i)\b(how much|price|cost|charge)\b", message) and _price_answer(slug, message):
+        return _price_answer(slug, message) + " Want me to get you booked in? I just need your name and number."
     if pol:
         return (f"{_clean(pol.get('text', ''), biz)} "
                 "Want me to pass your details on so they can confirm properly?")
@@ -128,6 +136,45 @@ SAMPLE_BIZ = {
     "beauty": "Glow Studio", "barber": "Fade Factory",
     "dogwalker": "Happy Tails", "msp": "Nimbus IT",
 }
+
+# Published guide prices for the SAMPLE businesses on the demo sites (illustrative,
+# inc. VAT). A real customer's site uses their own list from onboarding.
+SAMPLE_PRICES = {
+    "electrician": [["Callout and first hour", "£85"], ["Fault finding", "from £95"],
+                    ["Extra double socket", "from £120"], ["EV charger installed", "from £895"],
+                    ["Consumer unit upgrade", "from £550"], ["EICR safety report", "from £160"]],
+    "plumber": [["Callout and first hour", "£80"], ["Leak repair", "from £95"],
+                ["Annual boiler service", "£89"], ["Tap or toilet repair", "from £75"],
+                ["Emergency out of hours", "from £150"]],
+    "heating": [["Boiler service", "£89"], ["Boiler repair visit", "from £110"],
+                ["Power flush", "from £395"], ["Gas safety certificate", "£75"],
+                ["Emergency callout", "from £150"]],
+    "locksmith": [["Lockout, daytime", "from £79"], ["Lockout, after 6pm", "from £119"],
+                  ["Lock change (euro cylinder)", "from £95"], ["Anti-snap upgrade", "from £120"]],
+    "beauty": [["Gel manicure", "£32"], ["Gel pedicure", "£38"], ["Lash lift and tint", "£45"],
+               ["Brow shape and tint", "£22"], ["Facial, 60 min", "£55"]],
+    "barber": [["Skin fade", "£22"], ["Scissor cut", "£24"], ["Beard trim", "£12"],
+               ["Fade and beard", "£30"], ["Kids cut (under 12)", "£15"]],
+    "dogwalker": [["Solo walk, 60 min", "£18"], ["Group walk, 60 min", "£14"],
+                  ["Puppy visit, 30 min", "£12"], ["Home boarding, per night", "£40"]],
+    "msp": [["Managed IT, per user", "£45 a month"], ["Remote support, per hour", "£75"],
+            ["On-site visit", "from £120"], ["Microsoft 365 migration", "from £850"]],
+    "soletrader": [["Callout", "from £60"], ["Hourly rate", "from £45"], ["Free quote visit", "£0"]],
+}
+
+
+def _price_answer(slug: str, message: str) -> str:
+    import re as _re
+    words = set(_re.findall(r"[a-z]{3,}", message.lower())) - {"how", "much", "price", "cost", "the", "for", "and", "you", "your", "does"}
+    best = None
+    for name, price in SAMPLE_PRICES.get(slug, []):
+        hit = len(words & set(_re.findall(r"[a-z]{3,}", name.lower())))
+        if hit and (best is None or hit > best[0]):
+            best = (hit, name, price)
+    if best:
+        return f"Our guide price for {' '.join(w if w[:2].isupper() else w.lower() for w in best[1].split())} is {best[2]}, and the exact figure is confirmed before any work starts."
+    return ""
+
 
 CUSTOMER_TAGLINE = {
     "electrician": "Qualified electricians for homes and small businesses, from new sockets to emergency faults.",
@@ -174,6 +221,7 @@ def api_industries():
     for i in d["industries"]:
         i["business"] = SAMPLE_BIZ.get(i["slug"], "Sample & Sons")
         i["area"] = "Manchester"
+        i["price_list"] = SAMPLE_PRICES.get(i["slug"], [])
     return d
 
 @app.get("/health")
@@ -199,7 +247,7 @@ async def chat(inp: ChatIn):
     else:
         sys = business.get("agent",{}).get("system_prompt", "You are a precise customer support agent.")
     if kern and not llm.enabled:
-        result = {"answer": _receptionist_fallback(inp.message, evidence, kern[2], g),
+        result = {"answer": _receptionist_fallback(inp.message, evidence, kern[2], g, inp.trade),
                   "tool": None, "tool_args": {}, "confidence": 0.5}
     else:
         result = await llm.respond(sys, hist[:-1], inp.message, context, tools.descriptions())
