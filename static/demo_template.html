@@ -104,6 +104,22 @@ label.f input{border:1px solid var(--line);border-radius:12px;padding:12px 14px;
 label.f input:focus{border-color:#a3a3a3;box-shadow:0 0 0 4px rgba(0,0,0,.05)}
 #slots{margin-top:14px}
 .day{margin:10px 0 4px;font-size:13px;font-weight:650;color:var(--ink2)}
+.tool{border:1px solid var(--line);border-radius:20px;padding:24px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.04),0 24px 60px -30px rgba(0,0,0,.18)}
+.tt-hd{display:flex;gap:14px;align-items:flex-start;margin-bottom:18px}.tt-hd h3{margin:0;font-size:19px;font-weight:600;letter-spacing:-.015em}.tt-hd p{margin:2px 0 0;color:var(--ink2);font-size:15px}
+.tt-ic{width:40px;height:40px;border-radius:11px;background:var(--acc-bg);color:var(--acc-d);display:flex;align-items:center;justify-content:center;flex:0 0 40px}
+.tt-opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.tt-opt{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--line);background:#fff;border-radius:12px;padding:12px 14px;font:inherit;font-size:14.5px;color:var(--ink);cursor:pointer;transition:border-color .15s,background .15s}
+.tt-opt:hover{border-color:#cfcfcf;background:var(--soft)}.tt-opt.on{border-color:var(--ink);background:var(--soft)}
+.lv{width:8px;height:8px;border-radius:50%;flex:0 0 8px;background:#a3a3a3}.lv.urgent{background:var(--bad)}.lv.soon{background:#f59e0b}.lv.routine{background:var(--ok)}
+.tt-out{margin-top:16px;padding:16px 18px;border-radius:14px;background:var(--soft);animation:ttin .25s ease}.tt-out p{margin:8px 0 14px;color:var(--ink2);font-size:15px;line-height:1.55}
+@keyframes ttin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.tt-badge{display:inline-block;font-size:12.5px;font-weight:500;padding:3px 10px;border-radius:999px;background:#e8f7ee;color:#116a35}.tt-badge.urgent{background:#fdecec;color:#a01818}.tt-badge.soon{background:#fff4dc;color:#8a5a00}
+.tt-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.tool select{border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;font:inherit;font-size:15px;color:var(--ink);font-weight:400;appearance:auto}
+.tt-total{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line);flex-wrap:wrap}
+.tt-total small{display:block;color:var(--ink3);font-size:12.5px}.tt-total b{font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-right:10px}.tt-x{color:var(--ink2);font-size:14px}
+.tt-note{margin:12px 0 0;color:var(--ink3);font-size:13.5px}
+.tt-slots{margin-top:12px;display:flex;flex-wrap:wrap}.slot.off{opacity:.35;text-decoration:line-through;cursor:not-allowed}
 .slot{border:1px solid var(--line);background:#fff;border-radius:10px;padding:7px 12px;margin:3px 4px 3px 0;font-size:14px;cursor:pointer}
 .slot:hover{border-color:var(--ink);background:var(--soft)}
 .msgok{color:var(--ok);font-size:14px;margin-top:10px}.msgbad{color:var(--bad);font-size:14px;margin-top:10px}.msgdim{color:var(--ink3);font-size:13.5px;margin-top:10px}
@@ -153,7 +169,7 @@ html{scroll-padding-top:84px}
 <div class="ribbon" id="ribbon"><b>Free preview</b> · built for {{BUSINESS}} by Answered · calls, chat and bookings below are live</div>
 <nav><div class="wrap">
   <a class="brand" href="#"><span class="mark" data-ic="{{TRADE}}"></span><span><b>{{BUSINESS}}</b><small>{{TRADE_LABEL}} · {{AREA}}</small></span></a>
-  <div class="links"><a href="#services">Services</a><a href="#pricing">Pricing</a><a href="#book">Book</a></div>
+  <div class="links"><a href="#help">Quick help</a><a href="#services">Services</a><a href="#pricing">Pricing</a><a href="#book">Book</a></div>
   <button class="b pri sm b247" style="margin-left:auto;flex-shrink:0" onclick="openChat()"><span data-ic="phone" data-s="14"></span><span class="t">24/7 line</span></button>
 </div></nav>
 
@@ -185,6 +201,8 @@ html{scroll-padding-top:84px}
   <p class="intro">Tell us what you need and we'll come back with times and a straight price.</p>
   <div class="grid" id="services-grid"></div>
 </div></section>
+
+<section id="help" style="padding-top:0"><div class="wrap"><div class="tool" id="tradetool"></div></div></section>
 
 <section style="padding-top:0"><div class="wrap">
   <div class="emerg"><div class="ic" data-ic="alert" data-s="24"></div><div><h3>Something urgent?</h3><p id="emtext">Ring any time. Urgent jobs go straight to the on-call engineer, even at 2am.</p></div><button class="b pri" onclick="openChat()">Talk to us now</button></div>
@@ -231,6 +249,7 @@ html{scroll-padding-top:84px}
 </div>
 
 <script src="/static/ui.js"></script>
+<script src="/static/tools.js"></script>
 <script>
 const SLUG="{{SLUG}}", TRADE="{{TRADE}}", BIZ="{{BUSINESS}}";
 const EMBED=new URLSearchParams(location.search).has('embed');
@@ -288,6 +307,8 @@ async function ask(t){
   try{const j=await (await fetch('/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:t,trade:TRADE,session_id:SID})})).json();SID=j.session_id;a=j.answer||a}catch(e){}
   typing.textContent=a;log.scrollTop=1e9;return a;
 }
+window.askFromTool=async t=>{if(EMBED&&parent!==window){parent.postMessage({type:'answered-ask',text:t},'*');return}openChat();addMsg('u',t);await ask(t)};
+renderTradeTool(document.getElementById('tradetool'),TRADE);
 document.getElementById('chatform').onsubmit=async e=>{e.preventDefault();const q=document.getElementById('chatq');const t=q.value.trim();if(!t)return;q.value='';addMsg('u',t);await ask(t)};
 let LIVE=false,RECOG=null;
 function speak(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t.slice(0,400));u.lang='en-GB';u.rate=1.02;speechSynthesis.speak(u)}catch(e){}}

@@ -67,7 +67,8 @@ def _trade_kernel(slug: str):
 def _re_urgent(msg: str) -> bool:
     import re as _re
     return bool(_re.search(r"(?i)\b(locked out|lockout|urgent|emergency|no heating|no hot water|"
-                           r"burst|leak|flood|gas|sparks?|burning|smoke|offline|down|hacked|injur|bleed|tonight|now)\b", msg))
+                           r"burst|leak|flood|gas|spark\w*|burning|smoke|offline|down|hacked|injur\w*|bleed\w*|tonight|no power|"
+                           r"phishing|ransom\w*|priority 1|water everywhere|ceiling|break-?in)\b", msg))
 
 
 def _re_symptom(msg: str) -> bool:
@@ -86,6 +87,10 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
     if not esc_n and urgent_svc and _re_urgent(message):
         esc_n = urgent_svc
     import re as _r0
+    if esc_n and not _re_urgent(message):
+        esc_n = None  # an escalation node in the evidence isn't enough; the caller has to sound urgent
+    if not esc_n and _re_urgent(message) and not _r0.search(r"(?i)\b(how much|price|cost|quote)\b", message):
+        esc_n = {"text": ""}
     if esc_n and not _re_urgent(message) and _r0.search(r"(?i)\b(how much|price|cost|quote|fit|install|book)\b", message):
         esc_n = None  # a pricing/booking question that merely mentions a plumbing word is not an emergency
     svc = next((n for n in nodes if n.get("type") == "service"), None)
@@ -114,6 +119,9 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
         tip = f" Meanwhile, please {safety[0].lower() + safety[1:]}" if safety else ""
         if tip and not tip.endswith("."):
             tip += "."
+        if _re.search(r"(?i)\bgas\b", message):
+            tip = (" Please leave the property, don't touch any switches, and ring the National Gas Emergency line"
+                   " on 0800 111 999 now.")
         return (f"That sounds urgent, so I'm alerting whoever's on call right now.{tip} "
                 "What's your name, the address, and the best number to ring you on?")
     if svc:
@@ -122,7 +130,9 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
         def lc(x):  # keep acronyms: "EV charger" stays, "Leak repair" -> "leak repair"
             return " ".join(w if w[:2].isupper() else w.lower() for w in x.split())
         line = f"Yes, we can help with {lc(svc.get('name', 'that'))}."
-        price_q = _re.search(r"(?i)\b(how much|price|cost|quote|charge)\b", message)
+        when = _re.search(r"\b([01]?\d|2[0-3]):[0-5]\d\b", message)
+        booking = _re.search(r"(?i)\b(book|appointment|slot)\b", message)
+        price_q = _re.search(r"(?i)\b(how much|price|cost|quote|charge)\b", message) or booking
         pa = _price_answer(slug, message + " " + svc.get("name", "")) if price_q else ""
         if pa:
             line += " " + pa
@@ -136,6 +146,8 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
         if (first and len(first) < 90 and len(first.split()) >= 4 and '—' not in first
                 and not first.lower().startswith(("home", svc.get("name", "").lower()[:6]))):
             line += f" {first}."
+        if booking and when:
+            line += f" I'll hold {when.group(0)} for you and the confirmation comes by text."
         tail = (" And your name and best number, and you'll hear back first thing with times." if need
                 else " Can I take your name and best number? You'll hear back first thing with times.")
         return line + tail

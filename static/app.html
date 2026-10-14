@@ -372,6 +372,7 @@ function paintLog(){
 }
 function hideLog(){$('#chat').classList.remove('open')}
 function resetLog(){LOGS[CUR]=[];delete SID[CUR];try{speechSynthesis.cancel()}catch(e){};paintLog()}
+addEventListener('message',e=>{if(e.source===$('#site').contentWindow&&e.data&&e.data.type==='answered-ask'&&typeof e.data.text==='string')send(e.data.text.slice(0,400))});
 async function send(text){
   const q=$('#q'),t=(text??q.value).trim();if(!t)return;q.value='';
   const slug=CUR,L=(LOGS[slug]=LOGS[slug]||[]);
