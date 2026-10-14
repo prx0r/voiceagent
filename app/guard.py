@@ -14,11 +14,13 @@ from pathlib import Path
 AUDIT = Path(__file__).parent.parent / "var" / "guard.jsonl"
 
 # (pattern, reason). Tight on purpose — over-broad kills legit answers.
+# Persona patterns rely on a Capitalised name, so they run case-SENSITIVE
+# (with [Ii]); IGNORECASE made "I'm alerting the engineer" a persona claim.
 TRIPS = [
-    (r"\bi['’]m the (?!support\b)([A-Z][a-z]+)\b", "persona-claim"),
-    (r"\bi['’]m (still )?([A-Z][a-z]+),?\s+(the|your)\b",
+    (r"\b[Ii]['’]m the (?!support\b)([A-Z][a-z]+)\b", "persona-claim"),
+    (r"\b[Ii]['’]m (still )?([A-Z][a-z]+),?\s+(the|your)\b",
      "persona-claim"),
-    (r"\bi['’]m (still )?(?!Sorry|Happy|Glad|Afraid|Here|Unable|"
+    (r"\b[Ii]['’]m (still )?(?!Sorry|Happy|Glad|Afraid|Here|Unable|"
      r"a customer support agent\b)([A-Z][a-z]+)[.,]",
      "persona-claim"),
     (r"\bno rules\b", "rules-rejection"),
@@ -36,7 +38,8 @@ def check(answer: str) -> dict:
     found = []
     for pat, reason in TRIPS:
         try:
-            if re.search(pat, answer or "", re.IGNORECASE):
+            flags = 0 if reason == "persona-claim" else re.IGNORECASE
+            if re.search(pat, answer or "", flags):
                 found.append(reason)
         except re.error:
             continue

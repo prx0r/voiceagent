@@ -123,7 +123,12 @@ def industries() -> dict:
                                  if "emergency" in (n.get("id", "") or "")), ""), biz)
         script = _clean((pack.get("launch", {}) or {}).get("v1_script", ""), biz)
         prompt = _clean(str((pack.get("agent", {}) or {}).get("system_prompt", ""))[:400], biz)
+        hours = (pack.get("business", {}) or {}).get("hours", {}) or {}
+        escal = [{"name": n.get("name", ""), "aliases": (n.get("aliases") or [])[:4]}
+                 for n in nodes if n.get("type") == "escalation"]
         out.append({"slug": t["slug"], "label": t["label"], "icon": t["icon"],
+                    "hours": {str(k): str(v) for k, v in hours.items()},
+                    "escalations": escal,
                     "tagline": t["tagline"], "services": services,
                     "pricing": pricing, "emergency": emergency,
                     "script": script, "prompt": prompt})

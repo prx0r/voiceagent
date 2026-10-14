@@ -30,10 +30,11 @@ class ChatIn(BaseModel):
     session_id: str | None = None
     locale: str | None = None
     speak: bool = False
+    trade: str | None = None  # demo: answer as that trade's sample business
 
 @app.get("/")
 def home():
-    return FileResponse("static/grid.html")
+    return FileResponse("static/app.html")
 
 @app.get("/kernel")
 def kernel():
@@ -43,12 +44,103 @@ def kernel():
 def grid():
     return FileResponse("static/grid.html")
 
+_TRADE_CACHE: dict = {}
+
+
+def _trade_kernel(slug: str):
+    """(business config, graph, sample name) for a demo trade, cached."""
+    if slug in _TRADE_CACHE:
+        return _TRADE_CACHE[slug]
+    from . import industries as site_data
+    meta = next((t for t in site_data.TRADES if t["slug"] == slug), None)
+    if not meta:
+        return None
+    try:
+        cfg = site_data.load_pack(meta["file"])
+    except OSError:
+        return None
+    name = SAMPLE_BIZ.get(slug, "Sample & Sons")
+    _TRADE_CACHE[slug] = (cfg, KnowledgeGraph(cfg), name)
+    return _TRADE_CACHE[slug]
+
+
+def _re_urgent(msg: str) -> bool:
+    import re as _re
+    return bool(_re.search(r"(?i)\b(locked out|lockout|urgent|emergency|no heating|no hot water|"
+                           r"burst|leak|flood|gas|sparks?|burning|smoke|offline|down|hacked|injur|bleed|tonight|now)\b", msg))
+
+
+def _receptionist_fallback(message: str, evidence: list, biz: str, g) -> str:
+    """No-LLM demo reply: receptionist tone, built only from graph evidence."""
+    ids = [e.get("id", "") for e in (evidence or [])]
+    nodes = [g.nodes.get(i, {}) for i in ids]
+    esc_n = next((n for n in nodes if n.get("type") == "escalation"), None)
+    urgent_svc = next((n for n in nodes if n.get("type") == "service"
+                       and "emergency" in (n.get("id", "") + n.get("name", "")).lower()), None)
+    if not esc_n and urgent_svc and _re_urgent(message):
+        esc_n = urgent_svc
+    svc = next((n for n in nodes if n.get("type") == "service"), None)
+    pol = next((n for n in nodes if n.get("type") in ("policy", "faq")), None)
+    from .industries import _clean
+    import re as _re
+
+    def needs(n):
+        """'X. Needs: a, b. Typical...' -> ('X.', 'a, b')"""
+        t = _clean(n.get("text", ""), biz)
+        m = _re.search(r"Needs?:\s*([^.]+)\.?", t)
+        rest = _re.sub(r"\s*Needs?:\s*[^.]+\.?", "", t).strip()
+        return rest, (m.group(1).strip() if m else "")
+    if esc_n:
+        t = _clean(esc_n.get("text", ""), biz)
+        safety = " ".join(x.strip() for x in _re.split(r"(?<=\.)\s+", t)
+                          if _re.match(r"(?i)\s*tell (the )?(customer|caller)", x))
+        safety = _re.sub(r"(?i)^tell (the )?(customer|caller) (to )?", "", safety).strip()
+        safety = _re.sub(r"\band not to\b", "and don't", safety).replace("/", " or ")
+        tip = f" Meanwhile, please {safety[0].lower() + safety[1:]}" if safety else ""
+        if tip and not tip.endswith("."):
+            tip += "."
+        return (f"That sounds urgent, so I'm alerting whoever's on call right now.{tip} "
+                "What's your name, the address, and the best number to ring you on?")
+    if svc:
+        rest, need = needs(svc)
+        first = rest.split(". ")[0].rstrip(".") if rest else ""
+        line = f"Yes, we can help with {svc.get('name', 'that').lower()}."
+        price_q = _re.search(r"(?i)\b(how much|price|cost|quote|charge)\b", message)
+        if price_q and pol is not None and "pric" in (pol.get("id", "") + pol.get("name", "")).lower():
+            line += " " + _clean(pol.get("text", ""), biz).split(". ")[0].rstrip(".") + "."
+        if need:
+            line += f" So the team can quote properly, could you tell me {need.lower()}?"
+        if first and len(first) < 90 and '—' not in first and not first.lower().startswith(("home", svc.get("name", "").lower()[:6])):
+            line += f" {first}."
+        tail = (" And your name and best number, and you'll hear back first thing with times." if need
+                else " Can I take your name and best number? You'll hear back first thing with times.")
+        return line + tail
+    if pol:
+        return (f"{_clean(pol.get('text', ''), biz)} "
+                "Want me to pass your details on so they can confirm properly?")
+    return (f"Thanks for calling {biz}. Nobody can pick up right now, but I'll make sure this reaches them first thing. "
+            "What's your name, your number, and a line about the job?")
+
+
 SAMPLE_BIZ = {
     "electrician": "Dave's Electrical", "plumber": "Flowright Plumbing",
     "heating": "CosyHeat", "locksmith": "Keyline Locks",
     "beauty": "Glow Studio", "barber": "Fade Factory",
     "dogwalker": "Happy Tails", "msp": "Nimbus IT",
 }
+
+CUSTOMER_TAGLINE = {
+    "electrician": "Qualified electricians for homes and small businesses, from new sockets to emergency faults.",
+    "plumber": "Leaks, blockages, taps and bathrooms, fixed properly and priced up front.",
+    "heating": "Boiler repairs, servicing and installs that keep your home warm all winter.",
+    "locksmith": "Lockouts, lock changes and security upgrades, with fast local response.",
+    "beauty": "Nails, lashes and brows in a calm, friendly studio. Book in seconds.",
+    "barber": "Sharp fades, classic cuts and beard work. Walk in or book ahead.",
+    "dogwalker": "Reliable walks, visits and sitting from people who love dogs as much as you do.",
+    "msp": "Friendly IT support for small offices: fixes, security and new starters handled.",
+    "soletrader": "Local, reliable and straight-talking. Tell us about the job.",
+}
+
 
 @app.get("/demo/{trade}")
 def demo_site(trade: str):
@@ -62,10 +154,14 @@ def demo_site(trade: str):
     html = open("static/demo_template.html", encoding="utf-8").read()
     for k, v in {"BUSINESS": biz, "TRADE_LABEL": meta["label"],
                  "TRADE": slug, "ICON": meta["icon"],
-                 "TAGLINE": meta["tagline"], "AREA": area,
+                 "TAGLINE": CUSTOMER_TAGLINE.get(slug, meta["tagline"]), "AREA": area,
                  "SLUG": slug}.items():
         html = html.replace("{{" + k + "}}", v)
     return HTMLResponse(html)
+
+@app.get("/app")
+def app_shell():
+    return FileResponse("static/app.html")
 
 @app.get("/site")
 def site():
@@ -74,7 +170,11 @@ def site():
 @app.get("/api/industries")
 def api_industries():
     from . import industries as site_data
-    return site_data.industries()
+    d = site_data.industries()
+    for i in d["industries"]:
+        i["business"] = SAMPLE_BIZ.get(i["slug"], "Sample & Sons")
+        i["area"] = "Manchester"
+    return d
 
 @app.get("/health")
 def health():
@@ -84,10 +184,25 @@ def health():
 async def chat(inp: ChatIn):
     sid = inp.session_id or str(uuid.uuid4())
     store.add_message(sid, "user", inp.message, {"locale": inp.locale})
-    context, evidence = graph.context(inp.message)
+    kern = _trade_kernel(inp.trade) if inp.trade else None
+    g = kern[1] if kern else graph
+    context, evidence = g.context(inp.message)
     hist = store.history(sid, 10)
-    sys = business.get("agent",{}).get("system_prompt", "You are a precise customer support agent.")
-    result = await llm.respond(sys, hist[:-1], inp.message, context, tools.descriptions())
+    if kern:
+        cfg, _, biz_name = kern
+        pack_name = str((cfg.get("business", {}) or {}).get("name", ""))
+        sys = str((cfg.get("agent", {}) or {}).get("system_prompt", "You are a warm after-hours receptionist."))
+        if pack_name:
+            sys = sys.replace(pack_name, biz_name)
+        from .industries import _clean
+        sys = _clean(sys, biz_name) + " Keep replies to two or three short spoken sentences."
+    else:
+        sys = business.get("agent",{}).get("system_prompt", "You are a precise customer support agent.")
+    if kern and not llm.enabled:
+        result = {"answer": _receptionist_fallback(inp.message, evidence, kern[2], g),
+                  "tool": None, "tool_args": {}, "confidence": 0.5}
+    else:
+        result = await llm.respond(sys, hist[:-1], inp.message, context, tools.descriptions())
     tool_result = None
     # Output guard FIRST: a jailbroken turn must not reach tools either.
     from .guard import enforce as _enforce
