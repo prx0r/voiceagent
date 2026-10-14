@@ -1,5 +1,5 @@
 from __future__ import annotations
-import os, uuid
+import os, uuid, json
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, HTMLResponse
@@ -81,21 +81,22 @@ def _re_symptom(msg: str) -> bool:
                            r"no (power|heating|hot water)|dripping|blocked|offline|can'?t|pressure|fault code|error code|flicker\w*)\b", msg or ""))
 
 
-def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str = "") -> str:
+def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str = "", urgent: bool | None = None) -> str:
+    _urg = (lambda m: urgent) if urgent is not None else _re_urgent
     """No-LLM demo reply: receptionist tone, built only from graph evidence."""
     ids = [e.get("id", "") for e in (evidence or [])]
     nodes = [g.nodes.get(i, {}) for i in ids]
     esc_n = next((n for n in nodes if n.get("type") == "escalation"), None)
     urgent_svc = next((n for n in nodes if n.get("type") == "service"
                        and "emergency" in (n.get("id", "") + n.get("name", "")).lower()), None)
-    if not esc_n and urgent_svc and _re_urgent(message):
+    if not esc_n and urgent_svc and _urg(message):
         esc_n = urgent_svc
     import re as _r0
-    if esc_n and not _re_urgent(message):
+    if esc_n and not _urg(message):
         esc_n = None  # an escalation node in the evidence isn't enough; the caller has to sound urgent
-    if not esc_n and _re_urgent(message) and not _r0.search(r"(?i)\b(how much|price|cost|quote)\b", message):
+    if not esc_n and _urg(message) and not _r0.search(r"(?i)\b(how much|price|cost|quote)\b", message):
         esc_n = {"text": ""}
-    if esc_n and not _re_urgent(message) and _r0.search(r"(?i)\b(how much|price|cost|quote|fit|install|book)\b", message):
+    if esc_n and not _urg(message) and _r0.search(r"(?i)\b(how much|price|cost|quote|fit|install|book)\b", message):
         esc_n = None  # a pricing/booking question that merely mentions a plumbing word is not an emergency
     svc = next((n for n in nodes if n.get("type") == "service"), None)
     # A symptom ("keeps tripping", "won't work", "leaking") is a repair job, not an upgrade sale.
@@ -335,19 +336,36 @@ async def chat(inp: ChatIn):
     else:
         sys = business.get("agent",{}).get("system_prompt", "You are a precise customer support agent.")
     from . import console as _con
+    from . import workflows as _wf
+    tri = _wf.triage(inp.trade, kern[2], inp.message) if kern else None
+    if tri and tri.get("status") == "complete":
+        context = (context + f"\n\nTRIAGE (Jev, typed): {json.dumps(tri.get('output'))}").strip()
+    elif tri:
+        tri = {**tri, "output": {"action": "take_message", "priority": "p3", "intent": "unclear"}}
     wants_slot = bool(kern) and bool(__import__("re").search(
         r"(?i)\b(when|come|available|availability|slots?|today|tonight|tomorrow|afternoon|morning|this week|next week|book|appointment|visit|free)\b", inp.message)) \
-        and not _re_urgent(inp.message) and not __import__("re").search(r"\b([01]?\d|2[0-3]):[0-5]\d\b", inp.message)
+        and not (_re_urgent(inp.message) if not tri else tri["output"]["action"] == "alert_owner_now") and not __import__("re").search(r"\b([01]?\d|2[0-3]):[0-5]\d\b", inp.message)
+    if tri:
+        wants_slot = tri["output"].get("action") in ("offer_slots", "check_diary", "reschedule") \
+            and not __import__("re").search(r"\b([01]?\d|2[0-3]):[0-5]\d\b", inp.message)
     if kern:
         context = (context + "\n\n" + _con.calendar_context(inp.trade)).strip()
     if kern and not llm.enabled:
-        ans = _receptionist_fallback(inp.message, evidence, kern[2], g, inp.trade)
+        tri_urgent = None if not tri else (tri["output"] or {}).get("action") == "alert_owner_now"
+        ans = _receptionist_fallback(inp.message, evidence, kern[2], g, inp.trade, urgent=tri_urgent)
         if wants_slot:
             import re as _r2
             ans = _r2.sub(r"(?i)[,\s]*(and )?you'll hear back first thing with times\.?", ".", ans).strip()
             ans = _r2.sub(r"\.\.+", ".", ans).replace("?.", "?")
             ans = _r2.sub(r"\s*Want me to get you booked in\? I just need your name and number\.?", "", ans).strip()
             ans = (ans + " " + _con.slots_sentence(inp.trade, inp.message)).strip()
+        if tri and tri.get("status") == "complete":
+            act, it = tri["output"].get("action"), tri["output"].get("intent")
+            if act == "drop_spam":
+                ans = f"Thanks, but {kern[2]} doesn't take sales calls on this line. Goodbye."
+            elif act == "take_message" and (it == "complaint" or (tri.get("call") or {}).get("wants_human")):
+                ans = (("I'm sorry to hear that. " if it == "complaint" else "") +
+                       "I'll pass this straight to the owner, who'll ring you back personally. What's your name and best number?")
         result = {"answer": ans, "tool": None, "tool_args": {}, "confidence": 0.5}
     else:
         result = await llm.respond(sys, hist[:-1], inp.message, context, tools.descriptions())
@@ -392,7 +410,7 @@ async def chat(inp: ChatIn):
             audio_url = "/tts/" + os.path.basename(path)
         except Exception as e:
             audio_url = None
-    return {"session_id": sid, "answer": result.get("answer"), "evidence": evidence, "tool": result.get("tool"), "tool_result": tool_result, "confidence": result.get("confidence"), "audio_url": audio_url}
+    return {"session_id": sid, "answer": result.get("answer"), "evidence": evidence, "triage": tri if kern else None, "tool": result.get("tool"), "tool_result": tool_result, "confidence": result.get("confidence"), "audio_url": audio_url}
 
 @app.get("/tts/{filename}")
 def tts(filename: str):

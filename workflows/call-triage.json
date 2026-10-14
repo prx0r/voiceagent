@@ -1,0 +1,171 @@
+{
+  "v": 2,
+  "name": "answered-call-triage",
+  "schemas": {
+    "Input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trade",
+        "business",
+        "message"
+      ],
+      "properties": {
+        "trade": {
+          "type": "string",
+          "minLength": 1
+        },
+        "business": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "local_time": {
+          "type": "string"
+        }
+      }
+    },
+    "Call": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "intent",
+        "urgent",
+        "safety_advice",
+        "vulnerable",
+        "wants_human",
+        "spam"
+      ],
+      "properties": {
+        "intent": {
+          "type": "string",
+          "description": "What does the caller in `message` want from this `trade` business?",
+          "enum": [
+            "emergency",
+            "booking",
+            "reschedule",
+            "price",
+            "complaint",
+            "existing_job",
+            "other"
+          ],
+          "criteria": {
+            "emergency": "Active damage, danger, lockout, outage or injury happening now.",
+            "booking": "Wants a visit, appointment or slot at a normal time.",
+            "reschedule": "Wants to move or cancel an existing appointment.",
+            "price": "Asking what something costs or for a quote.",
+            "complaint": "Unhappy about past work, a no-show or a charge.",
+            "existing_job": "Following up on a job already booked or in progress.",
+            "other": "Anything else, including general questions."
+          }
+        },
+        "urgent": {
+          "type": "boolean",
+          "description": "Given the `trade`, should the on-call person be woken or alerted right now, rather than at 7am?"
+        },
+        "safety_advice": {
+          "type": "boolean",
+          "description": "Should the caller be given immediate safety advice before anything else (stopcock, isolate electrics, leave the property, ring 999 or the gas emergency line)?"
+        },
+        "vulnerable": {
+          "type": "boolean",
+          "description": "Does `message` mention a vulnerable person affected: a baby, child, elderly or disabled person, or a medical condition?"
+        },
+        "wants_human": {
+          "type": "boolean",
+          "description": "Does the caller explicitly ask to speak to a person or the owner?"
+        },
+        "spam": {
+          "type": "boolean",
+          "description": "Is `message` a sales pitch, robocall or spam rather than a customer?"
+        }
+      }
+    },
+    "Result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "priority",
+        "intent",
+        "safety_advice",
+        "vulnerable"
+      ],
+      "properties": {
+        "action": {
+          "type": "string",
+          "enum": [
+            "alert_owner_now",
+            "offer_slots",
+            "check_diary",
+            "give_price",
+            "reschedule",
+            "take_message",
+            "drop_spam"
+          ]
+        },
+        "priority": {
+          "type": "string",
+          "enum": [
+            "p1",
+            "p2",
+            "p3"
+          ]
+        },
+        "intent": {
+          "type": "string"
+        },
+        "safety_advice": {
+          "type": "boolean"
+        },
+        "vulnerable": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "input": {
+    "schemaId": "Input"
+  },
+  "output": {
+    "schemaId": "Result",
+    "path": "result"
+  },
+  "root": {
+    "node": "chain",
+    "steps": [
+      {
+        "node": "judge",
+        "label": "understand-call",
+        "state": {
+          "trade": "{trade}",
+          "business": "{business}",
+          "message": "{message}",
+          "local_time": "{local_time}"
+        },
+        "out": "Call",
+        "as": "call"
+      },
+      {
+        "node": "escalate",
+        "label": "unclear-intent",
+        "when": {
+          "predicate": "lt",
+          "path": "call$answers.confidence.intent",
+          "n": 0.55
+        },
+        "kind": "human_review",
+        "stage": "triage",
+        "summary": "Not sure what the caller wants. Take a message and flag it in the digest."
+      },
+      {
+        "node": "code",
+        "label": "policy",
+        "code": "s => { const c = s.call; const urgent = c.intent === 'emergency' || (c.urgent && c.intent === 'existing_job'); const action = c.spam ? 'drop_spam' : urgent ? 'alert_owner_now' : (c.wants_human || c.intent === 'complaint') ? 'take_message' : c.intent === 'booking' ? 'offer_slots' : c.intent === 'existing_job' ? 'check_diary' : c.intent === 'reschedule' ? 'reschedule' : c.intent === 'price' ? 'give_price' : 'take_message'; return { result: { action, priority: urgent ? 'p1' : (c.intent === 'complaint' || c.wants_human) ? 'p2' : 'p3', intent: c.intent, safety_advice: !!c.safety_advice && urgent, vulnerable: !!c.vulnerable } }; }"
+      }
+    ]
+  }
+}
