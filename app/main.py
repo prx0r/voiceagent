@@ -184,6 +184,10 @@ def _receptionist_fallback(message: str, evidence: list, biz: str, g, slug: str 
         tip = f" Meanwhile, please {safety[0].lower() + safety[1:]}" if safety else ""
         if tip and not tip.endswith("."):
             tip += "."
+        if not tip and slug and slug != "soletrader":
+            from .mcp import SAFETY
+            if slug in SAFETY:
+                tip = " " + SAFETY[slug]
         if _re.search(r"(?i)\bgas\b", message):
             tip = (" Please leave the property, don't touch any switches, and ring the National Gas Emergency line"
                    " on 0800 111 999 now.")
@@ -299,7 +303,38 @@ def demo_site(trade: str):
                  "TAGLINE": CUSTOMER_TAGLINE.get(slug, meta["tagline"]), "AREA": area,
                  "SLUG": slug}.items():
         html = html.replace("{{" + k + "}}", v)
+    html = html.replace("</head>", _agent_discovery(slug, biz, area) + "</head>", 1)
     return HTMLResponse(html)
+
+
+def _agent_discovery(slug: str, biz: str, area: str) -> str:
+    """JSON-LD + link rels so AI assistants find the business's MCP receptionist from its website."""
+    ld = {"@context": "https://schema.org", "@type": "LocalBusiness", "name": biz, "areaServed": area,
+          "url": f"/demo/{slug}",
+          "makesOffer": [{"@type": "Offer", "name": n, "description": f"Guide price {p}"} for n, p in SAMPLE_PRICES.get(slug, [])],
+          "potentialAction": {"@type": "ReserveAction", "name": "Request a booking via MCP",
+                              "target": {"@type": "EntryPoint", "urlTemplate": f"/mcp/{slug}",
+                                         "encodingType": "application/json", "contentType": "application/json"}}}
+    return (f'<link rel="mcp" href="/mcp/{slug}"><link rel="alternate" type="text/plain" href="/demo/{slug}/llms.txt" title="llms.txt">'
+            f'<script type="application/ld+json">{json.dumps(ld)}</script>')
+
+
+@app.get("/demo/{trade}/llms.txt")
+def demo_llms(trade: str):
+    from fastapi.responses import PlainTextResponse
+    from . import console as con
+    kern = _trade_kernel(trade)
+    if not kern:
+        raise HTTPException(404, "unknown trade")
+    biz, si = kern[2], con.site(trade)
+    lines = [f"# {biz}", "", f"> {CUSTOMER_TAGLINE.get(trade, '')} Manchester. Phone answered 24/7.", "",
+             "## For AI assistants",
+             f"- MCP receptionist (streamable HTTP): /mcp/{trade}",
+             "- Tools: get_business_info, list_services, check_availability, request_booking, report_emergency, leave_message",
+             "- Bookings are requests until the business confirms by text. Guide prices only.", "",
+             "## Services and guide prices"] + [f"- {n}: {p}" for n, p in SAMPLE_PRICES.get(trade, [])] + \
+            ["", "## What customers usually need"] + [f"- {w}" for w in si["why"]]
+    return PlainTextResponse("\n".join(lines) + "\n")
 
 @app.get("/app")
 def app_shell():
