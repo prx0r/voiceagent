@@ -430,6 +430,23 @@ async def console_guide(inp: GuideIn):
     return out
 
 
+class SalesIn(BaseModel):
+    message: str = ""
+    history: list[dict] = []
+
+
+@app.get("/api/sales")
+def sales_hello():
+    from . import sales
+    return {"answer": sales.GREETING}
+
+
+@app.post("/api/sales")
+async def sales_turn(inp: SalesIn):
+    from . import sales
+    return await sales.answer(inp.message, inp.history or [])
+
+
 @app.get("/health")
 def health():
     return {"ok": True, "business": business.get("business",{}).get("name"), "llm": llm.enabled, "nodes": len(graph.nodes)}

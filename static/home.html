@@ -61,6 +61,21 @@ body .tomb{background:var(--ink)!important;color:#fff!important}
 
 body .pz .est{background:#f4f4f7;color:#16181f}
 body #tomm{background:rgba(10,10,15,.4)}body #tomm .card{background:#fff;color:#16181f;border-color:rgba(16,18,24,.12)}body #tomm input{background:#f4f4f7;color:#16181f}body .tomb{background:#16181f;color:#fff}
+
+#call{position:fixed;inset:0;z-index:95;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.86);backdrop-filter:blur(18px);padding:16px}
+#call.on{display:flex}
+#call .box{width:min(520px,100%);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center}
+#call .who{font-weight:500;font-size:20px;letter-spacing:-.01em}#call .st{font:13px var(--mono);color:var(--muted)}
+.orb{width:116px;height:116px;border-radius:50%;margin:18px 0 10px;background:radial-gradient(circle at 35% 30%,#fde7b0,#f5a524 48%,#b45309);box-shadow:0 20px 60px -10px rgba(217,119,6,.45);transition:transform .25s var(--ease)}
+.orb.talk{animation:pulse 1s ease-in-out infinite}.orb.listen{transform:scale(.92);box-shadow:0 0 0 10px rgba(217,119,6,.12),0 20px 60px -10px rgba(217,119,6,.45)}
+@keyframes pulse{50%{transform:scale(1.07)}}
+#ctr{width:100%;max-height:34vh;overflow:auto;text-align:left;margin:14px 0;border-top:1px solid var(--rule)}
+#ctr p{margin:0;padding:9px 2px;border-bottom:1px solid var(--rule);font-size:15px}#ctr b{display:block;font:500 12px var(--mono);color:var(--muted);margin-bottom:2px}
+#cin{display:none;width:100%;gap:8px;margin-bottom:12px}#cin.on{display:flex}
+#cin input{flex:1;border:1px solid var(--rule);border-radius:999px;padding:11px 16px;font:inherit;background:var(--plate);outline:none}
+.cbt{display:flex;gap:10px;justify-content:center}
+.cbt button{border-radius:999px;padding:11px 20px;font-weight:500;box-shadow:inset 0 0 0 1px var(--rule)}.cbt .end{background:#dc2626;color:#fff;box-shadow:none}
+.cnote{font:12px var(--mono);color:var(--muted);margin-top:12px}
 @media (max-width:980px){
   html,body{overflow:auto}
   #pg{height:auto;grid-template-rows:60px auto auto;padding:0 18px}
@@ -78,14 +93,14 @@ body #tomm{background:rgba(10,10,15,.4)}body #tomm .card{background:#fff;color:#
   <a class="logo" href="/"><i></i>Answered</a>
   <a class="nav" href="#try" onclick="document.getElementById('grid').scrollIntoView({behavior:'smooth'})">Try it</a>
   <button class="nav" onclick="openPrices()">Prices</button>
-  <span class="sp"></span><button class="pill sm" onclick="Tom.open()">Book a call with Tom</button>
+  <span class="sp"></span><button class="nav" onclick="openCall()">Call our AI</button><button class="pill sm" onclick="Tom.open()">Book a call with Tom</button>
 </header>
 <main>
   <section>
     <p class="kick"><b>●</b> Cheap AI help and tech support for UK small businesses</p>
     <h1>No bullshit AI for your business.</h1>
     <p class="sub">We set up AI that actually saves you time: it answers your phone, replies to messages and keeps your website working. A real person, Tom, sets it up with you and stays on hand when something breaks.</p>
-    <div class="ctas"><button class="pill" onclick="Tom.open()">Book a free call with Tom</button><button class="pill ghost" onclick="openPrices()">See prices</button></div>
+    <div class="ctas"><button class="pill" onclick="openCall()">Call our AI</button><button class="pill ghost" onclick="Tom.open()">Book a free call with Tom</button><button class="pill ghost" onclick="openPrices()">See prices</button></div>
     <div class="facts"><div><b>Free</b>setup with Tom</div><div><b>£0</b>a month, no subscription</div><div><b>50p</b>a minute, only while it talks</div></div>
   </section>
   <section>
@@ -104,6 +119,14 @@ body #tomm{background:rgba(10,10,15,.4)}body #tomm .card{background:#fff;color:#
 <footer><span>Answered · UK · demo businesses only, nothing here books or charges anyone</span><a href="/v2">Minimal version</a></footer>
 </div>
 <div id="prm" role="dialog" aria-label="Prices"><div class="card2"><div class="top"><h3>Pick exactly what you need</h3><button class="x" onclick="closePrices()">Close</button></div><div id="pz"></div></div></div>
+<div id="call" role="dialog" aria-label="Call our AI"><div class="box">
+<div class="who">Answered</div><div class="st"><span id="cst">Connecting…</span> · <span id="cdur">0:00</span></div>
+<div class="orb" id="orb"></div>
+<div id="ctr"></div>
+<form id="cin"><input id="cq" placeholder="Type what you'd say…" autocomplete="off"><button class="pill sm">Send</button></form>
+<div class="cbt"><button id="cmute" onclick="cMute()">Mute</button><button class="end" onclick="endCall()">End call</button></div>
+<div class="cnote">You're talking to an AI. Allow your mic, or type if your browser can't listen.</div>
+</div></div>
 <script src="/static/pricing.js"></script>
 <script>
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -116,7 +139,44 @@ let PR=0;
 function openPrices(){document.getElementById('prm').classList.add('on');if(!PR){PR=1;Pricing.render(document.getElementById('pz'))}}
 function closePrices(){document.getElementById('prm').classList.remove('on')}
 document.getElementById('prm').addEventListener('click',e=>{if(e.target.id==='prm')closePrices()});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closePrices()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(C)endCall();else closePrices()}});
+/* ---- Call our AI (browser voice) ---- */
+let C=null;
+const SRc=window.SpeechRecognition||window.webkitSpeechRecognition;
+function gbVoice(){const v=speechSynthesis.getVoices();return v.find(x=>/en-GB/i.test(x.lang)&&/Natural|Google|Sonia|Ryan|Libby/i.test(x.name))||v.find(x=>/en-GB/i.test(x.lang))||null}
+function cLine(w,t){const d=document.getElementById('ctr');d.insertAdjacentHTML('beforeend',`<p><b>${esc(w)}</b>${esc(t)}</p>`);d.scrollTop=1e9}
+function cState(t,o){document.getElementById('cst').textContent=t;document.getElementById('orb').className='orb'+(o?' '+o:'')}
+async function openCall(){
+  C={start:Date.now(),h:[],muted:false,busy:false,rec:null};document.getElementById('ctr').innerHTML='';
+  document.getElementById('call').classList.add('on');document.getElementById('cin').classList.toggle('on',!SRc);
+  C.timer=setInterval(()=>{if(!C)return;const s=Math.floor((Date.now()-C.start)/1000);document.getElementById('cdur').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`},500);
+  cState('Connecting…');let g="Hi, you're through to Answered. I'm the AI. Ask me what we do, what it costs, or how setup works.";
+  try{g=(await (await fetch('/api/sales')).json()).answer||g}catch(e){}
+  setTimeout(()=>cSay(g),500);
+}
+function cSay(t){
+  if(!C)return;cLine('Answered AI',t);C.h.push({r:'a',t});cState('Speaking','talk');
+  const done=()=>{if(C)cListen()};
+  try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';const v=gbVoice();if(v)u.voice=v;u.rate=1.04;u.onend=done;u.onerror=done;speechSynthesis.speak(u)}catch(e){done()}
+}
+function cListen(){
+  if(!C)return;if(!SRc){cState('Your turn, type below','listen');document.getElementById('cq').focus();return}
+  if(C.muted){cState('Muted');return}
+  cState('Listening…','listen');const r=new SRc();r.lang='en-GB';r.interimResults=false;C.rec=r;let got=false;
+  r.onresult=e=>{got=true;cHeard(e.results[0][0].transcript)};r.onerror=()=>{};
+  r.onend=()=>{if(C&&!got&&!C.muted&&!C.busy)setTimeout(cListen,250)};try{r.start()}catch(e){}
+}
+async function cHeard(t){
+  if(!C||!t.trim())return;C.busy=true;cLine('You',t);cState('Thinking…');
+  let a="Sorry, I lost you for a second. Could you say that again?";
+  try{const c=new AbortController(),to=setTimeout(()=>c.abort(),15000);const j=await (await fetch('/api/sales',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:t,history:C.h}),signal:c.signal})).json();clearTimeout(to);a=j.answer||a}catch(e){}
+  if(!C)return;C.h.push({r:'u',t});C.busy=false;cSay(a);
+}
+document.getElementById('cin').onsubmit=e=>{e.preventDefault();const v=document.getElementById('cq').value.trim();document.getElementById('cq').value='';if(v)cHeard(v)};
+function cMute(){if(!C)return;C.muted=!C.muted;document.getElementById('cmute').textContent=C.muted?'Unmute':'Mute';if(C.muted){try{C.rec&&C.rec.abort()}catch(e){};cState('Muted')}else cListen()}
+function endCall(){if(!C)return;const c=C;C=null;clearInterval(c.timer);try{speechSynthesis.cancel();c.rec&&c.rec.abort()}catch(e){};document.getElementById('call').classList.remove('on')}
+try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
+
 (async()=>{
   let d=null;for(let k=0;k<4&&!d;k++){try{const c=new AbortController(),t=setTimeout(()=>c.abort(),8000);d=(await (await fetch('/api/industries',{signal:c.signal})).json()).industries;clearTimeout(t)}catch(e){await new Promise(r=>setTimeout(r,600*(k+1)))}}
   const g=document.getElementById('grid');
