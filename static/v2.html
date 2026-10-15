@@ -98,7 +98,9 @@ paintTheme();
 
 async function j(u,o,ms=8000){for(let k=0;k<4;k++){const c=new AbortController(),t=setTimeout(()=>c.abort(),k?ms*2:ms);try{const r=await fetch(u,{...(o||{}),signal:c.signal,cache:'no-store'});clearTimeout(t);if(r.ok)return await r.json()}catch(e){clearTimeout(t)}await new Promise(r=>setTimeout(r,600*(k+1)))}return null}
 const slug=(location.pathname.match(/^\/v2\/([a-z]+)/)||[])[1];
-slug?trade(slug):home();
+window.addEventListener('error',e=>{const r=$('#root');if(r&&/Loading…/.test(r.textContent))r.insertAdjacentHTML('beforeend',`<p class="err">Something broke: ${esc(e.message)}. Refresh to try again.</p>`)});
+window.addEventListener('unhandledrejection',e=>{const r=$('#root');if(r&&/Loading…/.test(r.textContent))r.insertAdjacentHTML('beforeend',`<p class="err">Something broke: ${esc(e.reason&&e.reason.message||e.reason)}. Refresh to try again.</p>`)});
+setTimeout(()=>slug?trade(slug):home(),0);
 
 /* ---------- home ---------- */
 async function home(){
