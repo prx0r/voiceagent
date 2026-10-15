@@ -96,7 +96,7 @@ function flip(){const d=document.documentElement.classList.toggle('dark');try{lo
 function paintTheme(){const d=document.documentElement.classList.contains('dark');$('#theme').innerHTML=d?'light / <b>dark</b>':'<b>light</b> / dark'}
 paintTheme();
 
-async function j(u,o){for(let k=0;k<3;k++){try{const r=await fetch(u,o);if(r.ok)return await r.json()}catch(e){}await new Promise(r=>setTimeout(r,500*(k+1)))}return null}
+async function j(u,o,ms=8000){for(let k=0;k<4;k++){const c=new AbortController(),t=setTimeout(()=>c.abort(),k?ms*2:ms);try{const r=await fetch(u,{...(o||{}),signal:c.signal,cache:'no-store'});clearTimeout(t);if(r.ok)return await r.json()}catch(e){clearTimeout(t)}await new Promise(r=>setTimeout(r,600*(k+1)))}return null}
 const slug=(location.pathname.match(/^\/v2\/([a-z]+)/)||[])[1];
 slug?trade(slug):home();
 
