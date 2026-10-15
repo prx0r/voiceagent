@@ -45,6 +45,18 @@ def api_pricing():
     return p
 
 
+@app.get("/v2")
+def home_v2():
+    return FileResponse("static/v2.html")
+
+
+@app.get("/v2/{trade}")
+def trade_v2(trade: str):
+    if not _trade_kernel(trade):
+        raise HTTPException(404, "unknown trade")
+    return FileResponse("static/v2.html")
+
+
 @app.get("/t/{trade}")
 def trade_console(trade: str):
     if not _trade_kernel(trade):
@@ -484,6 +496,17 @@ async def chat(inp: ChatIn):
             elif act == "take_message" and (it == "complaint" or (tri.get("call") or {}).get("wants_human")):
                 ans = (("I'm sorry to hear that. " if it == "complaint" else "") +
                        "I'll pass this straight to the owner, who'll ring you back personally. What's your name and best number?")
+        # Follow-up: the caller is answering our "name, address, number?" question. Confirm, don't restart.
+        import re as _r3
+        prev = next((h["content"] for h in reversed(hist[:-1]) if h["role"] == "assistant"), "")
+        gave_num = bool(_r3.search(r"(?:\+?44|0)\s?\d[\d\s]{8,12}\d", inp.message))
+        if prev and _r3.search(r"(?i)name.*(number|ring you)", prev) and gave_num and not _re_urgent(inp.message):
+            if "alerting whoever's on call" in prev:
+                ans = (f"Thanks, I've got that and passed it straight to {kern[2]}, who'll ring you back shortly. "
+                       "Keep away from the problem until then, and ring 999 if it gets worse.")
+            else:
+                ans = (f"Thanks, that's noted. {kern[2]} will ring you back first thing to confirm. "
+                       "Is there anything else I should pass on?")
         result = {"answer": ans, "tool": None, "tool_args": {}, "confidence": 0.5}
     else:
         result = await llm.respond(sys, hist[:-1], inp.message, context, tools.descriptions())

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en-GB"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Answered: picks up when you can't</title>
+<meta name="description" content="Answers your phone in your voice when you can't. No subscription. Free setup with Tom. 50p a minute only while it's talking.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script>try{if(localStorage.v2theme==='dark')document.documentElement.classList.add('dark')}catch(e){}</script>
+<style>
+:root{--page:#fafafc;--surface:#fff;--plate:#f3f3f8;--plate2:#ebecf4;--ink:#16181f;--ink2:#3b3e49;--muted:#5b5f6b;--rule:#e2e3ea;--acc:#d97706;--ok:#16a34a;--bad:#dc2626;
+--sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;--mono:"Geist Mono",ui-monospace,Menlo,monospace;--ease:cubic-bezier(.23,1,.32,1)}
+html.dark{--page:#0d0e13;--surface:#16181f;--plate:#181a22;--plate2:#20222c;--ink:#ecedf3;--ink2:#c5c7d1;--muted:#9a9eab;--rule:#24262f;--acc:#f5a524;--ok:#45c27a;--bad:#f87171}
+*{box-sizing:border-box}
+html{background:var(--page)}
+body{margin:0;background:var(--page);color:var(--ink);font:16px/1.55 var(--sans);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+a{color:inherit}button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;padding:0}
+.wrap{max-width:680px;margin:0 auto;padding:28px 24px 64px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:72px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:600;text-decoration:none;letter-spacing:-.01em}
+.logo i{width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.theme{font:13px var(--mono);color:var(--muted)}.theme b{font-weight:400;color:var(--ink)}
+h1{font-size:clamp(30px,5vw,42px);line-height:1.08;letter-spacing:-.025em;font-weight:500;margin:0 0 18px}
+.lede{color:var(--ink2);margin:0 0 14px;max-width:560px}
+.lede a{text-underline-offset:3px}
+.cta{display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:var(--ink);color:var(--page);border-radius:999px;padding:11px 20px;font-weight:500;font-size:15px;transition:transform .2s var(--ease)}
+.cta:hover{transform:translateY(-1px)}
+.ghost{display:inline-flex;margin-left:6px;color:var(--muted);font-size:15px;padding:11px 8px;text-decoration:underline;text-underline-offset:3px}
+h2{font:500 13px var(--mono);color:var(--muted);text-transform:none;margin:64px 0 10px;display:flex;gap:10px}
+h2 b{color:var(--ink);font-weight:500}
+ol.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+ol.list>li{border-bottom:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;align-items:baseline;gap:12px;width:100%;padding:14px 10px;text-align:left;text-decoration:none;border-radius:10px;transition:background .2s var(--ease)}
+a.row:hover,button.row:hover{background:var(--plate)}
+.row .t{font-weight:500;min-width:0}.row .t small{display:block;font-weight:400;color:var(--muted);font-size:14px;margin-top:1px}
+.row .r{font:14px var(--mono);color:var(--muted);text-align:right;max-width:38%}
+.row .r.ar{transition:transform .3s var(--ease)}a.row:hover .r.ar,button.row:hover .r.ar{transform:translateX(3px);color:var(--ink)}
+.n{font:13px var(--mono);color:var(--muted);display:inline-flex}
+.dg{display:inline-block;height:1.5em;line-height:1.5em;overflow:hidden}
+.dg span{display:block;transition:transform .7s var(--ease)}
+.dg span i{display:block;font-style:normal}
+.row:hover .n{color:var(--acc)}
+.more{grid-column:2/-1;color:var(--muted);font-size:14.5px;display:none;margin-top:4px}
+li.open .more{display:block}
+.more ul{margin:6px 0 0;padding-left:18px}
+/* chat */
+#chat{display:none;margin-top:18px;background:var(--surface);border:1px solid var(--rule);border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+#chat.on{display:block}
+.ch{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--rule);font-size:13px;color:var(--muted)}
+.ch .live{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.ch button{margin-left:auto;font:12.5px var(--mono);color:var(--muted)}
+#msgs{padding:16px;display:flex;flex-direction:column;gap:12px;max-height:440px;overflow:auto}
+.m{max-width:85%;padding:10px 14px;border-radius:16px;font-size:15px;white-space:pre-wrap}
+.m.u{align-self:flex-end;background:var(--ink);color:var(--page);border-bottom-right-radius:6px}
+.m.a{align-self:flex-start;background:var(--plate);border-bottom-left-radius:6px}
+.m.a .who{display:block;font:12px var(--mono);color:var(--muted);margin-bottom:3px}
+.dec{align-self:flex-start;font:12.5px var(--mono);color:var(--ok);margin:-6px 0 0 4px}
+.dec.u{color:var(--bad)}
+.typing i{display:inline-block;width:6px;height:6px;margin-right:3px;border-radius:50%;background:var(--muted);animation:b 1s infinite}.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.3}30%{opacity:1}}
+form.in{display:flex;gap:8px;padding:12px;border-top:1px solid var(--rule)}
+form.in input{flex:1;min-width:0;background:var(--page);border:1px solid var(--rule);border-radius:999px;padding:10px 16px;font:inherit;font-size:15px;color:var(--ink);outline:none}
+form.in input:focus{border-color:var(--muted)}
+form.in button{background:var(--ink);color:var(--page);border-radius:999px;padding:0 18px;font-weight:500;font-size:14px}
+.own{margin-top:12px}
+footer{margin-top:80px;padding-top:18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font:13px var(--mono);color:var(--muted)}
+footer button{text-decoration:underline;text-underline-offset:3px;font:inherit;color:inherit}
+.back{font:13px var(--mono);color:var(--muted);text-decoration:none;display:inline-block;margin-bottom:22px}.back:hover{color:var(--ink)}
+.err{color:var(--muted)}
+/* Tom modal, light-aware */
+body #tomm{background:rgba(10,10,15,.45)}
+body #tomm .card{background:var(--surface);color:var(--ink);border:1px solid var(--rule);font-family:var(--sans)}
+body #tomm p,body #tomm div{color:var(--muted)}
+body #tomm input{background:var(--page);border:1px solid var(--rule);color:var(--ink)}
+body #tomm .slots button,body #tomm .x{border:1px solid var(--rule);color:var(--ink)}
+body #tomm .slots button.on{border-color:var(--acc)}
+body #tomm .tomb{background:var(--ink);color:var(--page);border-radius:999px;padding:10px 18px;font-weight:500}
+@media (max-width:560px){.wrap{padding:20px 16px 48px}header{margin-bottom:44px}.row{grid-template-columns:34px minmax(0,1fr) auto;padding:13px 6px}h2{margin-top:48px}.ghost{display:flex;margin:4px 0 0;padding-left:0}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head>
+<body>
+<div class="wrap">
+  <header><a class="logo" href="/v2"><i></i>answered</a><button class="theme" id="theme" onclick="flip()" aria-label="Switch light or dark theme" title="Switch light or dark theme"></button></header>
+  <main id="root"></main>
+  <footer><span>Answered · UK</span><button onclick="Tom.open()">Book a call with Tom</button></footer>
+</div>
+<script src="/static/pricing.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+// rolling-digit number, mkdir-style: hover spins each digit a full turn
+function num(n){return '<span class="n" aria-label="'+n+'"><span aria-hidden="true" style="display:inline-flex">'+[...pad(n)].map(d=>`<span class="dg"><span style="transform:translateY(-${d*1.5}em)" data-d="${d}">${'01234567890123456789'.split('').map(x=>`<i>${x}</i>`).join('')}</span></span>`).join('')+'</span></span>'}
+document.addEventListener('mouseover',e=>{const r=e.target.closest('.row');if(!r||r._on)return;r._on=1;r.querySelectorAll('.dg span').forEach(s=>s.style.transform=`translateY(-${(+s.dataset.d+10)*1.5}em)`)});
+document.addEventListener('mouseout',e=>{const r=e.target.closest('.row');if(!r||r.contains(e.relatedTarget))return;r._on=0;r.querySelectorAll('.dg span').forEach(s=>s.style.transform=`translateY(-${s.dataset.d*1.5}em)`)});
+function flip(){const d=document.documentElement.classList.toggle('dark');try{localStorage.v2theme=d?'dark':'light'}catch(e){}paintTheme()}
+function paintTheme(){const d=document.documentElement.classList.contains('dark');$('#theme').innerHTML=d?'light / <b>dark</b>':'<b>light</b> / dark'}
+paintTheme();
+
+async function j(u,o){for(let k=0;k<3;k++){try{const r=await fetch(u,o);if(r.ok)return await r.json()}catch(e){}await new Promise(r=>setTimeout(r,500*(k+1)))}return null}
+const slug=(location.pathname.match(/^\/v2\/([a-z]+)/)||[])[1];
+slug?trade(slug):home();
+
+/* ---------- home ---------- */
+async function home(){
+  $('#root').innerHTML=`<h1>Never miss a job because you couldn't answer the phone.</h1>
+  <p class="lede">Answered picks up when you can't, day or night, in your voice. If it's urgent it texts you straight away. Everything else is sorted and waiting in your 7am email.</p>
+  <p class="lede">No subscription. Tom sets it up with you for free, then it's 50p a minute, only while it's talking.</p>
+  <button class="cta" onclick="Tom.open()">Book a free call with Tom</button><a class="ghost" href="#try">Try it first</a>
+  <h2 id="try"><b>Try it</b> pick your trade</h2><ol class="list" id="trades"><li class="row err">Loading…</li></ol>
+  <h2><b>Prices</b> no subscription</h2><ol class="list" id="prices"></ol>`;
+  const P=[['Setup with Tom','A 20-minute call. He does it all with you.','Free'],['Answering your calls','Only while it\'s talking. First 10 calls free.','50p a minute'],['Your own website','Built for your trade, with the receptionist in it.','£5 one-off'],['Web address and email','yourname.co.uk, at cost.','£5 a year']];
+  $('#prices').innerHTML=P.map((p,i)=>`<li><div class="row">${num(i+1)}<span class="t">${esc(p[0])}<small>${esc(p[1])}</small></span><span class="r">${esc(p[2])}</span></div></li>`).join('');
+  const d=await j('/api/industries');
+  if(!d){$('#trades').innerHTML='<li class="row err">Couldn\'t load the trades. Refresh in a moment.</li>';return}
+  $('#trades').innerHTML=d.industries.map((t,i)=>`<li><a class="row" href="/v2/${t.slug}">${num(i+1)}<span class="t">${esc(t.label)}<small>${esc(t.business)}${t.area?', '+esc(t.area):''}</small></span><span class="r ar">→</span></a></li>`).join('');
+}
+
+/* ---------- one trade ---------- */
+let SID=null,B=null;
+async function trade(slug){
+  $('#root').innerHTML='<a class="back" href="/v2">← all trades</a><p class="err">Loading…</p>';
+  B=await j('/api/console/'+slug);
+  if(!B){$('#root').innerHTML='<a class="back" href="/v2">← all trades</a><p class="err">That trade didn\'t load. Refresh in a moment.</p>';return}
+  document.title=B.business+' · Answered';
+  const sc=(B.site&&B.site.scenarios)||[];
+  $('#root').innerHTML=`<a class="back" href="/v2">← all trades</a>
+  <h1>${esc(B.business)}</h1>
+  <p class="lede">A sample business running Answered. Pretend you're one of its customers ringing at 2am, and see what it says.</p>
+  <h2><b>Be the customer</b> tap one</h2>
+  <ol class="list">${sc.map((s,i)=>`<li><button class="row" data-sc="${i}">${num(i+1)}<span class="t">${esc(s.label)}<small>“${esc(s.message)}”</small></span><span class="r ar">→</span></button></li>`).join('')}</ol>
+  <div id="chat"><div class="ch"><span class="live"></span>${esc(B.business)} · after-hours line<button onclick="resetChat()">start again</button></div><div id="msgs"></div>
+    <form class="in" onsubmit="event.preventDefault();say($('#q').value)"><input id="q" placeholder="Say what you'd say" autocomplete="off"><button>Send</button></form></div>
+  <form class="in own" id="own" style="padding:12px 0 0;border:0" onsubmit="event.preventDefault();say($('#q0').value)"><input id="q0" placeholder="Or type your own problem" autocomplete="off"><button>Send</button></form>
+  <h2><b>Their prices</b> what the receptionist quotes</h2>
+  <ol class="list">${(B.services||[]).map(([n,p],i)=>`<li><button class="row" data-sv="${esc(n)}">${num(i+1)}<span class="t">${esc(n)}</span><span class="r">${esc(p)}</span></button></li>`).join('')}</ol>
+  <h2><b>What you'd get</b> tap for detail</h2>
+  <ol class="list">${(B.package||[]).map((x,i)=>`<li><button class="row" data-pk>${num(i+1)}<span class="t">${esc(x.name)}</span><span class="r">${esc(x.price)}</span><div class="more">${esc(x.what)}${x.examples?`<ul>${x.examples.map(e=>`<li>${esc(e)}</li>`).join('')}</ul>`:''}</div></button></li>`).join('')}</ol>
+  <p style="margin-top:40px"><button class="cta" onclick="Tom.open('${esc(slug)}')">Get this for my business</button></p>`;
+  document.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>say(sc[+b.dataset.sc].message));
+  document.querySelectorAll('[data-sv]').forEach(b=>b.onclick=()=>say(`How much is ${b.dataset.sv.toLowerCase()} and when could you do it?`));
+  document.querySelectorAll('[data-pk]').forEach(b=>b.onclick=()=>b.parentElement.classList.toggle('open'));
+}
+function resetChat(){SID=null;$('#msgs').innerHTML='';$('#chat').classList.remove('on');$('#own').style.display=''}
+function add(h){$('#msgs').insertAdjacentHTML('beforeend',h);const m=$('#msgs');m.scrollTop=m.scrollHeight}
+function decision(t,txt){
+  let o;if(t&&t.output)o={...t.output};else{const a=txt||'';
+    o=/alerting|on call|999/i.test(a)?{intent:'emergency',action:'alert_owner_now'}:/sales calls/i.test(a)?{intent:'other',action:'drop_spam'}:/free slots|which suits|could do/i.test(a)?{intent:'booking',action:'offer_slots'}:/£/.test(a)?{intent:'price',action:'give_price'}:{intent:'other',action:'take_message'}}
+  if(o.action==='take_message'&&/guide price/i.test(txt||'')){o.action='give_price';o.intent='price'}
+  const A={alert_owner_now:'texts the owner straight away',offer_slots:'offers free times from the diary',check_diary:'checks the diary',give_price:'gives the guide price',reschedule:'moves the booking',take_message:'takes a message for the 7am email',drop_spam:'ignores it as spam'};
+  const I={emergency:'Emergency',booking:'Booking',price:'Price question',reschedule:'Change of booking',complaint:'Complaint',existing_job:'About a past job',other:'General enquiry',unclear:'General enquiry'};
+  return `<div class="dec${o.intent==='emergency'?' u':''}">✓ ${esc(I[o.intent]||'Enquiry')}: ${esc(A[o.action]||'handles it')}</div>`;
+}
+async function say(t){
+  t=(t||'').trim();if(!t)return;$('#q').value='';$('#q0').value='';
+  const c=$('#chat');if(!c.classList.contains('on')){c.classList.add('on');$('#own').style.display='none'}
+  add(`<div class="m u">${esc(t)}</div>`);add(`<div class="m a" id="typ"><span class="who">${esc(B.business)}</span><span class="typing"><i></i><i></i><i></i></span></div>`);
+  c.scrollIntoView({behavior:'smooth',block:'center'});
+  const r=await j('/chat',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({message:t,trade:slug,session_id:SID})});
+  $('#typ')&&$('#typ').remove();
+  const a=(r&&r.answer)||'Sorry, the line dropped. Could you say that again?';if(r)SID=r.session_id;
+  add(`<div class="m a"><span class="who">${esc(B.business)}</span>${esc(a)}</div>`+decision(r&&r.triage,a));
+  $('#q').focus({preventScroll:true});
+}
+</script>
+</body></html>
