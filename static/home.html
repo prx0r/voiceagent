@@ -123,7 +123,7 @@ body #tomm{background:rgba(10,10,15,.4)}body #tomm .card{background:#fff;color:#
 <div class="who">Answered</div><div class="st"><span id="cst">Connecting…</span> · <span id="cdur">0:00</span></div>
 <div class="orb" id="orb"></div>
 <div id="ctr"></div>
-<form id="cin"><input id="cq" placeholder="Type what you'd say…" autocomplete="off"><button class="pill sm">Send</button></form>
+<form id="cin"><input id="cq" placeholder="Or type your question…" autocomplete="off"><button class="pill sm">Send</button></form>
 <div class="cbt"><button id="cmute" onclick="cMute()">Mute</button><button class="end" onclick="endCall()">End call</button></div>
 <div class="cnote">You're talking to an AI. Allow your mic, or type if your browser can't listen.</div>
 </div></div>
@@ -148,7 +148,7 @@ function cLine(w,t){const d=document.getElementById('ctr');d.insertAdjacentHTML(
 function cState(t,o){document.getElementById('cst').textContent=t;document.getElementById('orb').className='orb'+(o?' '+o:'')}
 async function openCall(){
   C={start:Date.now(),h:[],muted:false,busy:false,rec:null};document.getElementById('ctr').innerHTML='';
-  document.getElementById('call').classList.add('on');document.getElementById('cin').classList.toggle('on',!SRc);
+  document.getElementById('call').classList.add('on');document.getElementById('cin').classList.add('on');
   C.timer=setInterval(()=>{if(!C)return;const s=Math.floor((Date.now()-C.start)/1000);document.getElementById('cdur').textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`},500);
   cState('Connecting…');let g="Hi, you're through to Answered. I'm the AI. Ask me what we do, what it costs, or how setup works.";
   try{g=(await (await fetch('/api/sales')).json()).answer||g}catch(e){}

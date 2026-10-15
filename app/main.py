@@ -45,6 +45,11 @@ def api_pricing():
     return p
 
 
+@app.get("/v3")
+def home_v3():
+    return FileResponse("static/v3.html")
+
+
 @app.get("/v2")
 def home_v2():
     return FileResponse("static/v2.html")
